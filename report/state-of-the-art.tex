@@ -1,0 +1,95 @@
+\chapter{Estado da Arte}
+
+\section{Projetos Relacionados}
+
+Esta secção visa apresentar outros projetos na mesma área e/ou com objetivos
+semelhantes ao nosso projeto, a relação destes para com o nosso projeto, e como
+estes se comparam com o nosso projeto.
+
+\subsection{3GPP OpenAPIs}\label{sec:related_work_3gpp}
+
+O \emph{3GPP} como corpo responsável pelas normas que definem o 5G, delineou
+não só a interface rádio usada para o 5G (denominada \emph{5G New Radio} e
+encurtada para \emph{5G-NR}) mas também a arquitetura do \emph{core} da rede
+dos operadores de serviço. Esta nova arquitetura é baseada em serviços
+(\emph{Service-Based Architecture}) denominados \emph{Network Functions}
+(\emph{NFs}), e consistem em aplicações que correm em hardware genérico, como o
+que é oferecido por fornecedores de infraestrutura \emph{cloud}.
+
+Estes serviços comunicam todos por \emph{APIs} definidos pelo \emph{3GPP} e
+descritas em \emph{OpenAPIs}, uma norma para documentação de \emph{APIs}. No
+entanto, estas \emph{APIs} são desenhadas para uso apenas dentro da rede
+\emph{core} do operador e não para uso por terceiros, com a exceção das
+\emph{APIs} oferecidas pelo \emph{Network Exposure Function} (\emph{NEF}).
+
+O \emph{NEF} é uma \emph{NF} especificamente desenhada para permitir que
+terceiros acedam as capacidades da rede do operador de maneira segura. As
+\emph{APIs} oferecidos pelo \emph{NEF} são designadas por \emph{Northbound
+	Interface} e os seus clientes de \emph{Application Functions} (\emph{AFs}).
+
+O \emph{NEF} têm um objetivo semelhante ao do \emph{GSMA Open Gateway} de expor
+as capacidades dos operadores da rede a terceiros. Contudo, existem vantagens
+em utilizar o \emph{GSMA Open Gateway}:
+
+\begin{itemize}
+	\item \textbf{Simplificação}, o \emph{NEF} expõe interfaces bastante
+	      complexas com vários detalhes da rede do operador, requerendo
+	      conhecimento no domínio de redes móveis e 5G, aumentando o custo da
+	      adoção destas \emph{APIs}.
+	\item \textbf{Agregação}, o \emph{NEF} expõe apenas acesso à rede do
+	      operador enquanto o \emph{GSMA Open Gateway} prevê a existência de
+	      agregadores que oferecem as \emph{APIs} para vários operadores de uma
+	      maneira unificada. Requerendo contacto apenas com um agregador invés de
+	      múltiplos operadores.
+	\item \textbf{Gestão de privacidade}, o \emph{GSMA Open Gateway}
+	      contempla mecanismos para a gestão de consentimento dos utilizadores
+	      finais que em muitos casos é necessário por motivos legais.
+\end{itemize}
+
+Isto não implica que o \emph{NEF} é uma interface inferior, este oferece uma
+maior integração com a rede dos operadores. Além disso, é possível utilizar o
+\emph{NEF} para implementar o \emph{GSMA Open Gateway}, modelando este como uma
+\emph{AF}.
+
+Concluindo, as \emph{3GPP OpenAPIs} operam somente no domínio do operador e não
+expõe as capacidades da rede do operador a terceiros, exceto o \emph{NEF} que
+têm o objetivo explícito de suportar a integração de terceiros com a rede do
+operador. O \emph{NEF} e o \emph{GSMA Open Gateway} são entre si tecnologias
+complementares. O \emph{GSMA Open Gateway} uma interface mais cómoda à maioria
+dos desenvolvedores de aplicações de terceiros sem requerer conhecimento do
+domínio de redes móveis. O \emph{NEF}, por outro lado, oferece uma maior
+integração com a rede do operador, podendo até um \emph{GSMA Open Gateway} ser
+implementado sobre o \emph{NEF}.
+
+\subsection{TMF Open Digital Architecture}
+
+O \emph{Open Digital Architecture} (\emph{ODA}) é uma \emph{framework} criada
+pelo \emph{TM Forum} (\emph{TMF}) para ajudar fornecedores de serviços a
+transacionarem para soluções abertas e interoperáveis. Esta \emph{framework} é
+transversal a várias áreas tocando não só na parte técnica mas também nos
+processos da empresa.
+
+No nosso projeto o mais relevante são os \emph{OpenAPIs} definidos nesta
+\emph{framework} que definem interfaces independentes do domínio para oferta de
+recursos e serviços. De particular interesse são as interfaces que permitem a
+obtenção de um catálogo de serviços, a compra destes serviços, e o controlo sob
+o seu ciclo de vida.
+
+As \emph{APIs TMF} são mais genéricas que as oferecidas pelo \emph{GSMA Open
+	Gateway}, oferecendo mais operações, mas também aumentando a complexidade do
+seu uso em relação as oferecidas pelo \emph{GSMA Open Gateway}. O \emph{GSMA
+	Open Gateway} tem também a vantagem de acomodar o cenário de agregação de
+vários \emph{Gateways}. Este permite que um agregador oferece acesso a
+\emph{APIs} do \emph{GSMA Open Gateway} de vários operadores de maneira
+unificada, sem que o cliente tenha que manter contacto com cada operador
+individualmente.
+
+Um caso interessante na colaboração destes dois projetos é uso das \emph{APIs
+	TMF} para permitir a oferta do \emph{GSMA Open Gateway} como um serviço pelos
+operadores e agregadores. Neste cenário, as \emph{APIs TMF} seriam utilizadas
+para oferecer ao cliente a oportunidade de comprar um serviço que
+disponibilizaria um \emph{GSMA Open Gateway}. Este seria orquestrado e feito
+disponível de maneira automatizada, reforçando a oferta do operador/agregador e
+simplificando o processo do desenvolvedor em obter acesso ao \emph{GSMA Open
+	Gateway}.
+
