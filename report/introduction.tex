@@ -1,0 +1,59 @@
+\chapter{Introdução}
+
+\section{Contexto}
+
+O desenvolvimento de redes 5G e para além do 5G introduziram capacidades
+avançadas no acesso, reconfiguração e flexibilidade das redes. Isto atrai o
+interesse de desenvolvedores em várias indústrias que pretendem oferecer
+soluções integradas aos seus clientes que fazem uso destas capacidades dos
+operadores de telecomunicações. No entanto, as interfaces oferecidas pelos
+operadores atualmente e definidas pelo \emph{3rd Generation Partnership
+	Project} (\emph{3GPP}) expõem muita da complexidade dos operadores. Esta complexidade
+dificulta o desenvolvimento das soluções integradas e necessita de conhecimento
+da área, limitando a sua adoção.
+
+O \emph{GSMA Open Gateway} é uma iniciativa da indústria para resolver este
+problema. Isto é feito por um conjunto de \emph{Application Programming
+	Interfaces} (\emph{API}) definidos pelo projeto \emph{CAMARA} que expõe várias
+interfaces simplificadas das redes dos operadores. Estas \emph{APIs} podem ser
+oferecidas pelos operadores diretamente ou por agregadores como
+\emph{Hyperscalers}.
+
+Contudo, a maioria dos operadores não oferece estas interfaces, mas espera-se
+que o façam num futuro próximo. Vistas as capacidades do \emph{Instituto de
+	Telecomunicações} (IT) em Aveiro, com acesso a uma infraestrutura 5G
+\footnote{\url{https://5gainer.eu/}}\cite{ieee:5GAIner}, existe interesse em
+integrar as \emph{APIs} do \emph{GSMA Open Gateway} na sua oferta.
+
+\section{Objetivos}
+
+Os objetivos delineados para o projeto foram os seguintes:
+
+\begin{enumerate}
+	\item Implementação das seguintes \emph{APIs} do \emph{GSMA Open Gateway}
+	      através de uma integração com o \emph{Core} comercial 5G do \emph{IT}.
+	      \begin{itemize}
+		      \item Família de \emph{APIs} para obter informação de
+		            dispositivos (\emph{Device Information}).
+		      \item Família de \emph{APIs} para obter informação sobre a
+		            \emph{Quality-of-Service} (\emph{QoS}) da rede e também para
+		            fornecer \emph{QoS-on-Demand} (\emph{QoD}).
+	      \end{itemize}
+	\item Implementação da \emph{API} do \emph{GSMA Open Gateway} para obtenção
+	      e verificação de \emph{One Time Passwords} (\emph{OTP}) por \emph{SMS}
+	      através de um \emph{SMS Centre} (\emph{SMSC}) integrado na rede 5G do
+	      IT como parte do trabalho do nosso projeto.
+	\item Implementação das \emph{APIs} do \emph{GSMA Open Gateway} para
+	      serviços de localização através do projeto \emph{NEFSim}, um emulador
+	      do \emph{Network Exposure Function} (\emph{NEF}, explicado em detalhe
+	      na secção \ref{sec:related_work_3gpp}). A utilização deste emulador é
+	      necessária, pois a rede do IT atualmente não têm este serviço na sua
+	      rede.
+	\item Integração do projeto com o
+	      \emph{OpenSlice}\footnote{\url{https://osl.etsi.org/}}, um
+	      \emph{Operation Support System} (\emph{OSS}), permitindo a modalidade
+	      de \emph{CAMARA as a Service} (\emph{CAMARAaaS}).
+	      %\item Integração do \emph{Common API Framework} (\emph{CAPIF}) com o
+	      %      projeto, através do projeto \emph{OpenCAPIF}, para controlar a
+	      %      exposição e consumo dos \emph{APIs}.
+\end{enumerate}

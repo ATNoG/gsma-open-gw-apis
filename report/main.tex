@@ -1,0 +1,55 @@
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[code,math,bibliography]{relatorio-deti}
+
+\title{GSMA Open Gateway\\[20pt]Relatório Técnico}
+\cadeira{Projeto de Informática}
+\relatorioAno{2025}
+
+\membro{Luís Godinho}{112959}
+\membro{Igor Coelho}{113532}
+\membro{João Capucho}{113713}
+\membro{Zakhar Kruptsala}{114478}
+\membro{Filipe Sousa}{114196}
+
+\addbibresource{bibliography.bib}
+
+\usepackage{lmodern}
+
+\begin{document}
+
+\maketitle
+
+% TODO
+%\chapter*{\Large\centering Agradecimentos}
+%\thispagestyle{empty}
+%
+%Gostaríamos de expressar os nossos agradecimentos aos nossos orientadores, o
+%Professor Rafael Direito e o Professor Diogo Gomes por nos terem guiado na
+%realização deste projeto ao longo do semestre, garantindo o seu sucesso.
+%
+%\clearpage
+
+\include{abstract}
+
+\tableofcontents
+
+\chapter*{Glossário}
+\addcontentsline{toc}{chapter}{Glossário}
+\thispagestyle{empty}
+
+
+
+\clearpage
+
+\include{introduction}
+
+\include{state-of-the-art}
+
+\chapter{Testes e Resultados}
+
+\chapter{Conclusão}
+
+\printbibliography[heading=bibintoc]
+
+\end{document}
