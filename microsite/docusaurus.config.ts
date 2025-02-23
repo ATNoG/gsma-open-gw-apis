@@ -1,13 +1,13 @@
-import { themes as prismThemes } from "prism-react-renderer";
-import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Config } from "@docusaurus/types";
+import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "My Site",
-  tagline: "Dinosaurs are cool",
-  favicon: "img/favicon.ico",
+  title: "GSMA Open Gateway APIs",
+  tagline: "Unlocking Connectivity",
+  favicon: "img/favicon.svg",
 
   // Set the production url of your site here
   url: "https://your-docusaurus-site.example.com",
@@ -46,14 +46,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "My Site",
-      logo: {
-        alt: "My Site Logo",
-        src: "img/logo.svg",
-      },
+      title: "GSMA Open Gateway APIs",
       items: [
         {
           type: "docSidebar",
@@ -62,7 +56,7 @@ const config: Config = {
           label: "Documentation",
         },
         {
-          href: "https://github.com/",
+          href: "https://github.com/ATNoG/gsma-open-gw-apis",
           label: "GitHub",
           position: "right",
         },
@@ -73,10 +67,15 @@ const config: Config = {
       links: [
         {
           label: "GitHub",
-          href: "https://github.com/",
+          href: "https://github.com/ATNoG/gsma-open-gw-apis/tree/main/microsite",
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `
+Projeto em Informática
+<br>
+GSMA Open Gateway APIs
+<br>
+Copyright © ${new Date().getFullYear()}. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

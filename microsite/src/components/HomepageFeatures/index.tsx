@@ -11,32 +11,35 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "Easy to Use",
-    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
+    title: "Simplified Access to Mobile Networks",
+    Svg: require("@site/static/img/undraw_modern-design_yur1.svg").default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        GSMA Open Gateway provides universal APIs that offer seamless access to
+        mobile operator networks. Developers can easily integrate network
+        capabilities without needing deep telecom expertise.
       </>
     ),
   },
   {
-    title: "Focus on What Matters",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    title: "Scalable & Future-Proof API Ecosystem",
+    Svg: require("@site/static/img/undraw_stepping-up_4q3b.svg").default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Built for ease of use and scalability with a standardized set of
+        endpoints, these APIs ensure faster deployment, interoperability, and
+        global reach for next-generation services.
       </>
     ),
   },
   {
-    title: "Powered by React",
-    Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
+    title: "Accelerate Digital Transformation",
+    Svg: require("@site/static/img/undraw_fast-loading_ae60.svg").default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        With its streamlined, standardized endpoints, it minimizes integration
+        hurdles, enabling developers to rapidly innovate and drive digital
+        transformation in today’s 5G and cloud-enabled world.
       </>
     ),
   },
