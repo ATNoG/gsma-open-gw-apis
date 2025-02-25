@@ -10,7 +10,7 @@ const config: Config = {
   favicon: "img/favicon.svg",
 
   // Set the production url of your site here
-  url: "https://your-docusaurus-site.example.com",
+  url: "https://atnog.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/gsma-open-gw-apis/",
@@ -37,6 +37,12 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
+          lastVersion: "current",
+          versions: {
+            current: {
+              label: "Current",
+            },
+          },
         },
         theme: {
           customCss: "./src/css/custom.css",
@@ -54,6 +60,10 @@ const config: Config = {
           sidebarId: "documentationSidebar",
           position: "left",
           label: "Documentation",
+        },
+        {
+          type: "docsVersionDropdown",
+          position: "left",
         },
         {
           href: "https://github.com/ATNoG/gsma-open-gw-apis",
