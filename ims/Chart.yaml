@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ims
+description: An Helm chart for deploying an IMS (IP Multimedia Subsystem) for voice calling and SMS
+version: 0.1.0
+
+type: application

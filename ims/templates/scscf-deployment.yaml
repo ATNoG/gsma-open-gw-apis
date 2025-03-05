@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ims.fullname" . }}-scscf
+  labels:
+    {{- include "ims.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.scscf.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ims.scscfSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.scscf.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ims.labels" . | nindent 8 }}
+        {{- include "ims.scscfSelectorLabels" . | nindent 8 }}
+        {{- with .Values.scscf.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ims.serviceAccountName" . }}
+      {{- with .Values.scscf.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: scscf
+          {{- with .Values.scscf.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.scscf.image.repository }}:{{ .Values.scscf.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.scscf.image.pullPolicy }}
+          ports:
+            - name: sip-udp
+              containerPort: 6060
+              protocol: UDP
+            - name: sip-tcp
+              containerPort: 6060
+              protocol: TCP
+            - name: diameter-udp
+              containerPort: 3870
+              protocol: UDP
+            - name: diameter-tcp
+              containerPort: 3870
+              protocol: TCP
+          env:
+            - name: IMS_DOMAIN
+              value: {{ .Values.mnoDomain }}
+            - name: ADVERTISE_ADDR
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: DATABASE_ADDR
+              value: {{ include "ims.databaseInstanceName" . }}
+            - name: DATABASE_USER
+              value: {{ include "ims.fullname" . }}-scscf
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ims.fullname" . }}-scscf
+                  key: password 
+            - name: DEBUG
+              value: "yes"
+          {{- with .Values.scscf.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      initContainers:
+        - name: init-myservice
+          image: "{{ .Values.dnsPatcher.image.repository }}:{{ .Values.dnsPatcher.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dnsPatcher.image.pullPolicy }}
+          env:
+            - name: RELEASE_NAME
+              value: {{ include "ims.fullname" . }}
+      # Disable the default DNS behaviour so that the nameserver can be patched
+      # to use our DNS that includes the needed IMS and E164 zones.
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 127.0.0.20 # Dummy value that will be patched in the init container
+        searches:
+          - cluster.local
+          - svc.cluster.local
+          - {{ .Release.Namespace }}.svc.cluster.local
+        options:
+          - name: ndots
+            value: "5"
+          - name: edns0
+      {{- with .Values.scscf.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scscf.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scscf.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

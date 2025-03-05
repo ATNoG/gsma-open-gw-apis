@@ -1,0 +1,9 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Database
+metadata:
+  name: {{ include "ims.fullname" . }}-pyhss
+spec:
+  mariaDbRef:
+    name: {{ include "ims.databaseInstanceName" . }}
+  name: ims_hss_db
+  cleanupPolicy: Delete

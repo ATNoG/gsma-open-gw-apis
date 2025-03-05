@@ -1,0 +1,13 @@
+IMS_DOMAIN {
+	file /opt/dns/ims_zone
+	finalize
+}
+
+e164.arpa {
+	file /opt/dns/e164.arpa
+	finalize
+}
+
+. {
+	forward . /etc/resolv.conf 
+}

@@ -1,0 +1,40 @@
+diff --git a/utils/kamctl/db_sqlite/ims_dialog-create.sql b/utils/kamctl/db_sqlite/ims_dialog-create.sql
+index 26a38134a8..09481808db 100644
+--- a/utils/kamctl/db_sqlite/ims_dialog-create.sql
++++ b/utils/kamctl/db_sqlite/ims_dialog-create.sql
+@@ -51,4 +51,4 @@ CREATE TABLE dialog_vars (
+ 
+ CREATE INDEX dialog_vars_hash_idx ON dialog_vars (hash_entry, hash_id);
+ 
+-INSERT INTO version (table_name, table_version) values ('dialog_vars','1');
++INSERT INTO version (table_name, table_version) values ('dialog_vars','7');
+diff --git a/utils/kamctl/mysql/ims_dialog-create.sql b/utils/kamctl/mysql/ims_dialog-create.sql
+index bad34aabcc..bf5355f3e1 100644
+--- a/utils/kamctl/mysql/ims_dialog-create.sql
++++ b/utils/kamctl/mysql/ims_dialog-create.sql
+@@ -51,4 +51,4 @@ CREATE TABLE `dialog_vars` (
+ 
+ CREATE INDEX hash_idx ON dialog_vars (`hash_entry`, `hash_id`);
+ 
+-INSERT INTO version (table_name, table_version) values ('dialog_vars','1');
++INSERT INTO version (table_name, table_version) values ('dialog_vars','7');
+diff --git a/utils/kamctl/oracle/ims_dialog-create.sql b/utils/kamctl/oracle/ims_dialog-create.sql
+index 877c34e77a..08f88641b3 100644
+--- a/utils/kamctl/oracle/ims_dialog-create.sql
++++ b/utils/kamctl/oracle/ims_dialog-create.sql
+@@ -75,4 +75,4 @@ BEGIN map2users('dialog_vars'); END;
+ /
+ CREATE INDEX dialog_vars_hash_idx  ON dialog_vars (hash_entry, hash_id);
+ 
+-INSERT INTO version (table_name, table_version) values ('dialog_vars','1');
++INSERT INTO version (table_name, table_version) values ('dialog_vars','7');
+diff --git a/utils/kamctl/postgres/ims_dialog-create.sql b/utils/kamctl/postgres/ims_dialog-create.sql
+index 5671185053..86da8fc0ec 100644
+--- a/utils/kamctl/postgres/ims_dialog-create.sql
++++ b/utils/kamctl/postgres/ims_dialog-create.sql
+@@ -51,4 +51,4 @@ CREATE TABLE dialog_vars (
+ 
+ CREATE INDEX dialog_vars_hash_idx ON dialog_vars (hash_entry, hash_id);
+ 
+-INSERT INTO version (table_name, table_version) values ('dialog_vars','1');
++INSERT INTO version (table_name, table_version) values ('dialog_vars','7');

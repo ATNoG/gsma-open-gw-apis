@@ -1,0 +1,15 @@
+{{- if .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "ims.serviceAccountName" . }}-rb
+  labels:
+    {{- include "ims.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ims.serviceAccountName" . }}
+roleRef:
+  kind: Role
+  name: {{ include "ims.fullname" . }}-read-svcs
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
