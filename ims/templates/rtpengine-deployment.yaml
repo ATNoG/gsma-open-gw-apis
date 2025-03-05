@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ims.fullname" . }}-rtpengine
+  labels:
+    {{- include "ims.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.rtpengine.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ims.rtpengineSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.rtpengine.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ims.labels" . | nindent 8 }}
+        {{- include "ims.rtpengineSelectorLabels" . | nindent 8 }}
+        {{- with .Values.rtpengine.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ims.serviceAccountName" . }}
+      {{- with .Values.rtpengine.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostNetwork: true
+      containers:
+        - name: rtpengine
+          {{- with .Values.rtpengine.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.rtpengine.image.repository }}:{{ .Values.rtpengine.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.rtpengine.image.pullPolicy }}
+          ports:
+            - name: ng-udp
+              containerPort: 2223
+              protocol: UDP
+          env:
+            - name: DISABLE_KERNEL_FORWARDING
+              value: "yes"
+            - name: INTERFACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: ADVERTISE_ADDR
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          {{- with .Values.rtpengine.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.rtpengine.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rtpengine.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rtpengine.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

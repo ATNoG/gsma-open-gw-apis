@@ -1,0 +1,14 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: User
+metadata:
+  name: {{ include "ims.fullname" . }}-pcscf
+spec:
+  mariaDbRef:
+    name: {{ include "ims.databaseInstanceName" . }}
+  passwordSecretKeyRef:
+    # kubectl create secret generic ims-pcscf \
+    #     --from-literal=password='pcscf-password'
+    name: {{ include "ims.fullname" . }}-pcscf
+    key: password
+  maxUserConnections: 0
+  cleanupPolicy: Delete

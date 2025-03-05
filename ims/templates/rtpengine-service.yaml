@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ims.fullname" . }}-rtpengine
+spec:
+  type: ClusterIP
+  clusterIP: "None"
+  selector:
+    {{- include "ims.rtpengineSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: ng-udp
+      protocol: UDP
+      port: 2223
+      targetPort: 2223

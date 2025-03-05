@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ims.fullname" . }}-pcscf
+spec:
+  # TODO
+  # type: LoadBalancer
+  # # Needed in order to preserve the client IP. This is mandatory because IMS
+  # # stores client addresses to contact them later.
+  # externalTrafficPolicy: Local
+  type: ClusterIP
+  clusterIP: "None"
+  selector:
+    {{- include "ims.pcscfSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: sip-udp
+      protocol: UDP
+      port: {{ .Values.pcscf.publicNodePort }}
+      targetPort: 5060
+    - name: sip-tcp
+      protocol: TCP
+      port: {{ .Values.pcscf.publicNodePort }}
+      targetPort: 5060

@@ -26,6 +26,9 @@
           pkgs.uv
           pkgs.ruff
           pkgs.pyright
+
+          pkgs.kubectl
+          pkgs.kubernetes-helm
         ];
       };
     });
