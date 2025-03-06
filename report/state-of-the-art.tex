@@ -27,9 +27,17 @@ terceiros acedam as capacidades da rede do operador de maneira segura. As
 \emph{APIs} oferecidos pelo \emph{NEF} são designadas por \emph{Northbound
 	Interface} e os seus clientes de \emph{Application Functions} (\emph{AFs}).
 
-O \emph{NEF} têm um objetivo semelhante ao do \emph{GSMA Open Gateway} de expor
-as capacidades dos operadores da rede a terceiros. Contudo, existem vantagens
-em utilizar o \emph{GSMA Open Gateway}:
+
+Concluindo, as \emph{3GPP OpenAPIs} operam somente no domínio do operador e não
+expõe as capacidades da rede do operador a terceiros, exceto o \emph{NEF} que
+têm o objetivo explícito de suportar a integração de terceiros com a rede do
+operador. 
+
+\subsection{GSMA Open Gateway}
+
+De modo semelhante ao \emph{NEF}, o \emph{GSMA Open Gateway} tem por objetivo
+expor as diversas capacidades dos operadores de rede a terceiros. 
+Contudo, existem vantagens em utilizar o \emph{GSMA Open Gateway}:
 
 \begin{itemize}
 	\item \textbf{Simplificação}, o \emph{NEF} expõe interfaces bastante
@@ -49,17 +57,17 @@ em utilizar o \emph{GSMA Open Gateway}:
 Isto não implica que o \emph{NEF} é uma interface inferior, este oferece uma
 maior integração com a rede dos operadores. Além disso, é possível utilizar o
 \emph{NEF} para implementar o \emph{GSMA Open Gateway}, modelando este como uma
-\emph{AF}.
+\emph{AF}. Na realidade, o \emph{NEF} e o \emph{GSMA Open Gateway} são entre si tecnologias
+complementares. 
 
-Concluindo, as \emph{3GPP OpenAPIs} operam somente no domínio do operador e não
-expõe as capacidades da rede do operador a terceiros, exceto o \emph{NEF} que
-têm o objetivo explícito de suportar a integração de terceiros com a rede do
-operador. O \emph{NEF} e o \emph{GSMA Open Gateway} são entre si tecnologias
-complementares. O \emph{GSMA Open Gateway} uma interface mais cómoda à maioria
-dos desenvolvedores de aplicações de terceiros sem requerer conhecimento do
-domínio de redes móveis. O \emph{NEF}, por outro lado, oferece uma maior
-integração com a rede do operador, podendo até um \emph{GSMA Open Gateway} ser
-implementado sobre o \emph{NEF}.
+Ainda assim é importante realçar que o \emph{GSMA Open Gateway} é uma interface mais cómoda à maioria
+dos desenvolvedores de aplicações de terceiros, pois ao contrário da interação
+diretamente com o \emph{NEF}, esta não requer conhecimento do
+domínio de redes móveis. 
+
+O \emph{NEF}, acaba por ter também a sua importância, por um lado por oferecer uma maior
+integração com a rede do operador, mas por outro por ser capaz até de um \emph{GSMA Open Gateway} ser
+implementado sobre o este.
 
 \subsection{TMF Open Digital Architecture}
 
