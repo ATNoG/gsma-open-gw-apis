@@ -5,7 +5,7 @@ Estes atores que interagem diretamente com o sistema possuem requisitos que o si
 o sistema tem que possuir de modo a poder responder às suas necessidades. Como tal, é necessário um levantamento destes requisitos, de modo
 a melhor desenvolver o sistema para responder às necessidades dos seus utilizadores.
 
-Deste modo, neste capítulo iremos não só apresentar os autores que irão interagir com o sistema, mas também os diversos usos que estes
+Deste modo, neste capítulo iremos não só apresentar os atores que irão interagir com o sistema, mas também os diversos usos que estes
 utilizadores darão ao sistema, bem como os diversos requisitos que o mesmo tem de cumprir.
 
 \section{Atores}
@@ -14,11 +14,11 @@ Como já foi referido, a criação de \emph{APIs GSMA Open Gateway} visa facilit
 funcionalidades que a rede \emph{5G} consegue oferecer. Deste modo, o sistema possui 2 atores distintos.
 \begin{itemize}
   \item \textbf{Operador de rede} - O primeiro ator a interagir com o sistema é o operador de rede,
-    que fornece as APIs a diversos outros negócios para que estes possam interagir com a rede programáticamente. No entanto, tendo em
+    que fornece as APIs a diversos outros negócios para que estes possam interagir com a rede programaticamente. No entanto, tendo em
     consideração que as APIs desenhadas pelo \emph{GSMA Open Gateway} são consideravelmente mais simples que as definidas pelo \emph{3GPP},
     um operador de rede pode também utilizar estas APIs para gerir a própria rede.
 
-  \item \textbf{Negócios clientes/Parceiros} - O segundo ator a interagir com o sistema é na realidade o seu público alvo. Diversos negócios
+  \item \textbf{\emph{Vertical Clients}}\footnote{\url{https://5g-ppp.eu/verticals/}} - O segundo ator a interagir com o sistema é na realidade o seu público alvo. Diversos negócios
     que desenvolvem um conjunto de produtos que interagem com a rede. Estes negócios utilizaram as APIs definidas pelo \emph{GSMA Open Gateway}
     para não só oferecerem um maior leque de funcionalidades aos seus utilizadores, como também para fazer um conjunto de verificações, de modo
     a garantir a correta utilização e desempenho dos seus produtos.
@@ -90,7 +90,8 @@ requisitos:
   \item \textbf{Serviços de Localização:}
     \begin{itemize}
 
-      \item O sistema deve permitir a criação de assinaturas para que dispositivos recebam notificações ao entrar ou sair de uma área definida
+      \item O sistema deve permitir a criação de subscrição a enventos para que os clientes da \emph{API CAMARA} recebam notificações 
+        ao entrar ou sair de uma área definida
       \item O sistema deve permitir a obtenção da localização de um dispositivo, sendo esta descrita por um círculo (coordenadas do centro e raio) ou um polígono simples (lista de coordenadas)
       \item O sistema deve permitir verificar se um dispositivo se encontra em uma certa área. Se esta área se encontra fora da área coberta pelo operador ou se esta área for válida, entre outros, deve retornar os erros corretos.
       \item O sistema deve permitir obter a estimativa da densidade populacional numa área especificada
