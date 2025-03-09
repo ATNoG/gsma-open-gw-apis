@@ -12,7 +12,7 @@ sidebar_position: 3
 
 # Use Case Diagram
 
-![Use Case Diagram](../../static/img/favicon.svg)
+![Use Case Diagram](../../static/img/use_case_english.png)
 
 ### Network Operator
 
