@@ -1,37 +1,31 @@
-# BSD 2-Clause License
+ARG ALPINE_VERSION=3.21
+ARG GO_VERSION=1.24
+ARG COREDNS_VERSION=1.12.0
 
-# Copyright (c) 2020, Supreeth Herle
-# All rights reserved.
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+ARG COREDNS_VERSION
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
+WORKDIR /src
+RUN apk add --no-cache git make && \
+		git clone https://github.com/coredns/coredns.git . && \
+		git checkout v${COREDNS_VERSION}
 
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
+COPY plugin.cfg plugin.cfg
 
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+RUN go get github.com/tmeckel/coredns-finalizer && \
+	go generate && \
+	go get && \
+	make
 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+FROM alpine:${ALPINE_VERSION} AS runtime
 
-FROM ubuntu:focal
+RUN apk add --no-cache ca-certificates curl jq bash && \
+    update-ca-certificates
 
-ENV DEBIAN_FRONTEND=noninteractive
+COPY --from=builder /src/coredns /coredns
 
-# Install updates and dependencies
-RUN apt-get update && \
-	apt-get -y install tcpdump screen tmux ntp ntpdate iproute2 net-tools \
-					iputils-ping bind9
+COPY . /opt/dns
 
-CMD /mnt/dns/dns_init.sh && \
-	/usr/sbin/named -c /etc/bind/named.conf -g -u bind
+WORKDIR /opt/dns
+EXPOSE 53 53/udp
+ENTRYPOINT ["/opt/dns/entrypoint.sh"]

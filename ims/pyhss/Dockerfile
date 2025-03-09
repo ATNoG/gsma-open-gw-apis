@@ -24,41 +24,47 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM ubuntu:focal
+FROM python:3.10.12-alpine AS builder
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Install updates and dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        python3-pip \
+RUN apk update && \
+    apk add --no-cache \
         python3-dev \
-        python3-setuptools \
-        python3-wheel \
+        build-base \
+        pkgconfig \
+        libffi-dev \
+        openssl-dev \
         git \
-        pkg-config \
-        libsystemd-dev \
-        libmysqlclient-dev \
-        libsctp-dev \
         gcc \
-        mysql-server \
-        lsb-release \
-        curl \
-        gpg
+        g++ \
+        musl-dev \
+        linux-headers \
+        libxml2-dev \
+        libxslt-dev \
+        py3-yaml && \
+    apk add bash mariadb-dev lksctp-tools-dev redis && \
+    pip install --upgrade pip setuptools wheel
 
-
-RUN curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends redis
 
 # Get pyhss code and install
-RUN git clone https://github.com/nickvsnetworking/pyhss && \
-    cd pyhss && git checkout tags/1.0.2
-RUN cd pyhss && pip3 install -r requirements.txt
+RUN git clone https://github.com/nickvsnetworking/pyhss /pyhss && \
+    cd /pyhss && git checkout tags/1.0.2 && \
+	sed -i 's|PyYAML==6.0|PyYAML==6.0.1|g' /pyhss/requirements.txt && \
+	python3 -m venv /venv && \
+	PATH=/venv/bin:$PATH pip install --no-cache-dir -r /pyhss/requirements.txt
 
-RUN mkdir -p /pyhss/log/
+FROM python:3.10.12-alpine AS runtime
 
-WORKDIR pyhss
+COPY --from=builder /venv /venv
+COPY --from=builder /pyhss /pyhss
+ENV PATH=/venv/bin:$PATH
 
-CMD /mnt/pyhss/pyhss_init.sh
+RUN apk add bash mariadb-dev mariadb-client lksctp-tools-dev redis
+
+COPY . /pyhss
+
+WORKDIR /pyhss
+
+ENTRYPOINT ["/pyhss/entrypoint.sh"]

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Code adapted from: https://github.com/herlesupreeth/docker_open5gs/blob/c3c907f5554b37fbbecc7a170280a9ae05e3c4c3/ims_base/rtpengine_init.sh
+
 # BSD 2-Clause License
 
 # Copyright (c) 2020, Supreeth Herle
@@ -26,35 +28,39 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-sed -i "s/127.0.0.1/0.0.0.0/g" /etc/mysql/mysql.conf.d/mysqld.cnf
-sed -i "s/# max_connections        = 151/max_connections        = 250/g" /etc/mysql/mysql.conf.d/mysqld.cnf
-cat > ~/.my.cnf <<EOF
-[mysql]
-user=root
-password=ims
-EOF
+set -eux -o pipefail
 
-usermod -d /var/lib/mysql/ mysql
+: "${DISABLE_KERNEL_FORWARDING:=no}"
 
-echo 'Waiting for MySQL to start.'
-/etc/init.d/mysql restart
-while true; do
-	echo 'quit' | mysql --connect-timeout=1 && break
-done
-
-# Sync docker time
-#ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Grant privileges and set max connections
-ROOT_USER_EXISTS=`mysql -u root -s -N -e "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE User = 'root' AND Host = '%')"`
-if [[ "$ROOT_USER_EXISTS" == 0 ]]
-then
-	mysql -u root -e "CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'ims'";
-	mysql -u root -e "GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION";
-	mysql -u root -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY ''"
-	mysql -u root -e "FLUSH PRIVILEGES;"
+if [ -z "${TABLE+x}" ]; then
+	if [ "$DISABLE_KERNEL_FORWARDING" = "yes" ]; then
+		TABLE="-1"
+	else
+		TABLE="0" # TODO: Allocate based on free tables
+	fi
+elif [ "$DISABLE_KERNEL_FORWARDING" = "yes" ]; then
+	>&2 echo "DISABLE_KERNEL_FORWARDING and TABLE can't be set at the same time"
+	exit 1
 fi
 
-pkill -9 mysqld
-sleep 5
-mysqld_safe
+# Populate options of the rtpengine cli command
+[ -z "${INTERFACE+x}" ] && INTERFACE="$(awk 'END{print $1}' /etc/hosts)"
+
+OPTIONS="--listen-ng=${LISTEN_NG_PORT:-2223} --port-min=${PORT_MIN:-30000} --port-max=${PORT_MAX:-40000} --table=$TABLE --tos=${TOS:-184} --foreground"
+
+if [ -z "${ADVERTISE_ADDR+x}" ]; then
+	OPTIONS="$OPTIONS --interface=$INTERFACE"
+else
+	OPTIONS="$OPTIONS --interface=$INTERFACE!$ADVERTISE_ADDR"
+fi
+
+if [ "${NO_FALLBACK:-no}" = "yes" ]; then
+	if [ "$DISABLE_KERNEL_FORWARDING" = "yes" ]; then
+		>&2 echo "DISABLE_KERNEL_FORWARDING and NO_FALLBACK can't be set at the same time"
+		exit 1
+	fi
+
+	OPTIONS="$OPTIONS --no-fallback"
+fi
+
+exec rtpengine $OPTIONS

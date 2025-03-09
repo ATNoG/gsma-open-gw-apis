@@ -1,0 +1,13 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: {{ include "ims.fullname" . }}-pyhss
+spec:
+  mariaDbRef:
+    name: {{ include "ims.databaseInstanceName" . }}
+  privileges:
+    - "ALL PRIVILEGES"
+  database: "ims_hss_db"
+  table: "*"
+  username: {{ include "ims.fullname" . }}-pyhss
+  cleanupPolicy: Delete

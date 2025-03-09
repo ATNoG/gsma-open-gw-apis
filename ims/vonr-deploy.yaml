@@ -26,18 +26,20 @@ services:
     cap_add:
       - NET_ADMIN
     environment:
-      - TABLE=0
-      - INTERFACE=${RTPENGINE_IP}
-      - LISTEN_NG=${RTPENGINE_IP}:2223
-      - PIDFILE=/run/ngcp-rtpengine-daemon.pid
-      - PORT_MAX=50000
-      - PORT_MIN=49000
-      - NO_FALLBACK=no
-      - TOS=184
+      # - TABLE=0
+      # - INTERFACE=${RTPENGINE_IP}
+      # - LISTEN_NG=${RTPENGINE_IP}:2223
+      # - PIDFILE=/run/ngcp-rtpengine-daemon.pid
+      - PORT_MAX=49000
+      - PORT_MIN=48000
+      # - NO_FALLBACK=no
+      # - TOS=184
+      - ADVERTISE_ADDR=${RTPENGINE_IP}
+      - DISABLE_KERNEL_FORWARDING=yes
     expose:
       - "2223/udp"
     ports:
-      - "49000-50000:49000-50000/udp"
+      - "48000-49000:48000-49000/udp"
     networks:
       default:
         ipv4_address: ${RTPENGINE_IP}
@@ -81,7 +83,8 @@ services:
       default:
         ipv4_address: ${PYHSS_IP}
   icscf:
-    image: docker_kamailio
+    build: ./icscf
+    image: icscf
     container_name: icscf
     dns: ${DNS_IP}
     volumes:
@@ -105,7 +108,8 @@ services:
       default:
         ipv4_address: ${ICSCF_IP}
   scscf:
-    image: docker_kamailio
+    build: ./scscf
+    image: scscf
     container_name: scscf
     dns: ${DNS_IP}
     volumes:
@@ -129,7 +133,8 @@ services:
       default:
         ipv4_address: ${SCSCF_IP}
   pcscf:
-    image: docker_kamailio
+    build: ./pcscf
+    image: pcscf
     container_name: pcscf
     dns: ${DNS_IP}
     privileged: true
@@ -147,7 +152,7 @@ services:
     depends_on:
       - dns
       - mysql
-      # - rtpengine
+      - rtpengine
       - icscf
       - scscf
     expose:
@@ -157,14 +162,17 @@ services:
       - "5100-5120/udp"
       - "6100-6120/tcp"
       - "6100-6120/udp"
-    ports:
-      - "5060:5060/tcp"
-      - "5060:5060/udp"
+      - "5060/tcp"
+      - "5060/udp"
+    # ports:
+    #   - "5060:5060/tcp"
+    #   - "5060:5060/udp"
     networks:
       default:
         ipv4_address: ${PCSCF_IP}
   smsc:
-    image: docker_kamailio
+    build: ./smsc
+    image: smsc
     container_name: smsc
     dns: ${DNS_IP}
     volumes:

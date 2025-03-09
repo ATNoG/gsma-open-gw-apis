@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ims.fullname" . }}-smsc
+spec:
+  type: ClusterIP
+  clusterIP: "None"
+  selector:
+    {{- include "ims.smscSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: sip-udp
+      protocol: UDP
+      port: 7090
+      targetPort: 7090
+    - name: sip-tcp
+      protocol: TCP
+      port: 7090
+      targetPort: 7090
