@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ims.fullname" . }}-dns
+spec:
+  # ClusterIP is used but no IP is assigned so that an address that doesn't
+  # collide with existing services is allocated. The assigned IP is then later
+  # discovered by the pods.
+  type: ClusterIP
+  selector:
+    {{- include "ims.dnsSelectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: UDP
+      port: 53
+      targetPort: 53

@@ -24,30 +24,33 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FROM ubuntu:focal
+FROM debian:12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install updates and dependencies
 RUN apt-get update && \
-	apt-get -y install mysql-server tcpdump screen tmux ntp ntpdate git-core dkms \
-					gcc flex bison libmysqlclient-dev make libssl-dev libcurl4-openssl-dev \
+	apt-get -y install tcpdump screen tmux ntp ntpdate git-core dkms \
+					gcc flex bison default-libmysqlclient-dev mariadb-client make libssl-dev libcurl4-openssl-dev \
 					libxml2-dev libpcre2-dev bash-completion g++ autoconf libmnl-dev \
 					libsctp-dev libradcli-dev libradcli4 libjson-c-dev pkg-config iproute2 net-tools \
 					iputils-ping libgcrypt20-dev libjansson-dev libevent-dev libnghttp2-dev uuid-dev
 
 # Fetch Kamailio code
 RUN mkdir -p /usr/local/src/ && cd /usr/local/src/ && \
-	git clone https://github.com/kamailio/kamailio && \
-	cd kamailio && git checkout 0da3eb3f94c087b272ebbe19c42fd933146482f8
+	git clone https://github.com/kamailio/kamailio
+
+COPY dbg.patch /usr/local/src/kamailio/dbg.patch
+
+RUN cd /usr/local/src/kamailio && \
+    git checkout 0da3eb3f94c087b272ebbe19c42fd933146482f8 && \
+	git apply dbg.patch
 
 # Build and Install Kamailio
 RUN cd /usr/local/src/kamailio && make cfg
-COPY modules.lst /usr/local/src/kamailio/src
-RUN cd /usr/local/src/kamailio && \
-	make -j`nproc` Q=0 all | tee make_all.txt && \
-	make install | tee make_install.txt && \
-	ldconfig
 
-COPY kamailio_init.sh /
-CMD ["/kamailio_init.sh"]
+COPY modules.lst /usr/local/src/kamailio/src
+
+RUN cd /usr/local/src/kamailio && \
+	make -j`nproc` Q=0 all && \
+	make install

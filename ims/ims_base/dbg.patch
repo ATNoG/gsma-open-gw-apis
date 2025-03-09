@@ -1,0 +1,20 @@
+diff --git a/src/modules/pua_reginfo/notify.c b/src/modules/pua_reginfo/notify.c
+index b7b6fb3fd8..9f505ff385 100644
+--- a/src/modules/pua_reginfo/notify.c
++++ b/src/modules/pua_reginfo/notify.c
+@@ -297,10 +297,13 @@ int process_body(str notify_body, udomain_t *domain)
+ 
+ 		if(reginfo_use_domain) {
+ 			aor_key.s = uri;
++			aor_key.len = strlen(uri);
+ 		} else {
+-			aor_key.s = parsed_aor.user.s;
++			aor_key = parsed_aor.user;
+ 		}
+-		aor_key.len = strlen(aor_key.s);
++
++		LM_DBG("AOR KEY %.*s\n", aor_key.len, aor_key.s);
++
+ 		/* Now let's lock that domain for this AOR: */
+ 		ul.lock_udomain(domain, &aor_key);
+ 		/* and retrieve the user-record for this user: */

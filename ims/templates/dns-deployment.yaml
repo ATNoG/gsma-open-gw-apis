@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ims.fullname" . }}-dns
+  labels:
+    {{- include "ims.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.dns.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ims.dnsSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.dns.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ims.labels" . | nindent 8 }}
+        {{- include "ims.dnsSelectorLabels" . | nindent 8 }}
+        {{- with .Values.dns.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ims.serviceAccountName" . }}
+      {{- with .Values.dns.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: dns
+          {{- with .Values.dns.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.dns.image.repository }}:{{ .Values.dns.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.dns.image.pullPolicy }}
+          ports:
+            - name: dns
+              containerPort: 53
+              protocol: UDP
+          env:
+            - name: IMS_DOMAIN
+              value: {{ .Values.mnoDomain }}
+            - name: RELEASE_NAME
+              value: {{ include "ims.fullname" . }}
+          {{- with .Values.dns.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.dns.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dns.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dns.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

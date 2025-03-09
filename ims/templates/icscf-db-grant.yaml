@@ -1,0 +1,13 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: {{ include "ims.fullname" . }}-icscf
+spec:
+  mariaDbRef:
+    name: {{ include "ims.databaseInstanceName" . }}
+  privileges:
+    - "ALL PRIVILEGES"
+  database: "icscf"
+  table: "*"
+  username: {{ include "ims.fullname" . }}-icscf
+  cleanupPolicy: Delete

@@ -1,0 +1,16 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: {{ include "ims.databaseInstanceName" . }}
+  labels:
+    {{- include "ims.labels" . | nindent 4 }}
+  {{- with .Values.database.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  storage:
+    size: {{ .Values.database.storage.size }} 
+    {{- if .Values.database.storage.storageClassName }}
+    storageClassName: {{ .Values.database.storage.storageClassName }} 
+    {{- end }}
