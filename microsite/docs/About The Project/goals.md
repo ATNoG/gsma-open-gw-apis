@@ -1,3 +1,9 @@
+---
+title: Project Goals
+description: Main goals of the project
+sidebar_position: 2
+---
+
 # Project Goals
 
 1. Implementation of the following GSMA Open Gateway APIs through integration with IT's commercial 5G Core:
