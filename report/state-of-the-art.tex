@@ -24,14 +24,40 @@ entanto, estas \emph{APIs} são desenhadas para uso apenas dentro da rede
 
 O \emph{NEF} é uma \emph{NF} especificamente desenhada para permitir que
 terceiros acedam as capacidades da rede do operador de maneira segura. As
-\emph{APIs} oferecidos pelo \emph{NEF} são designadas por \emph{Northbound
+\emph{APIs} oferecidas pelo \emph{NEF} são designadas por \emph{Northbound
 	Interface} e os seus clientes de \emph{Application Functions} (\emph{AFs}).
 
 
 Concluindo, as \emph{3GPP OpenAPIs} operam somente no domínio do operador e não
 expõe as capacidades da rede do operador a terceiros, exceto o \emph{NEF}, que
 tem o objetivo explícito de suportar a integração de terceiros com a rede do
-operador.
+operador. Mesmo que um operador de rede decida expor diretamente as \emph{APIs}
+definidas pelo \emph{3GPP}, os desenvolvedores de software não seriam capazes de
+as utilizar, uma vez que estas se limitam ao escopo da rede, pelo que para as utilizar
+seria necessário bastante conhecimento específico ao domínio da rede.
+
+\subsection{CAMARA}
+
+O \emph{CAMARA} é uma iniciativa que tem como principal objetivo a definição,
+desenvolvimento e validação de \emph{APIs} de \emph{Network-as-a-Service}
+(\emph{NaaS})\cite{10.1145/3538401.3546825}. Estas \emph{APIs} estão a ser
+desenvolvidas com um foco na sua implementação rápida para alcançar um dos
+grandes objetivos do \emph{CAMARA}, isto é, a sua adoção pelos operadores de
+modo a garantir que haja uma interface unificada, que não dependa dos seus
+fornecedores, e que consiga dar a terceiros a oportunidade de conseguir
+interagir com os serviços 5G sem a necessidade de contactar os operadores.
+Outro grande objetivo do \emph{CAMARA} é a acessibilidade das suas \emph{APIs}
+para desenvolvedores sem experiência na área do 5G e das telecomunicações, isto
+é, garantir que os desenvolvedores consigam utilizar os serviços de forma
+simples e sem a necessidade de interagir diretamente com os fornecedores ou
+aprender detalhes de telecomunicações para conseguir utilizar as \emph{APIs} do
+\emph{3GPP}.
+
+Esta iniciativa está fortemente relacionada com o \emph{GSMA Open Gateway} que iremos referir
+de seguida, uma vez que as \emph{APIs} serão publicadas através do projeto
+\emph{CAMARA}\cite{5gamericas}. Além disto, o \emph{GSMA Open Gateway}, o
+\emph{CAMARA} e o \emph{TMF} estão alinhados para conseguir trazer ao mercado
+as capacidades do 5G de um modo mais acessível e estandardizado.
 
 \subsection{GSMA Open Gateway}
 
@@ -80,7 +106,7 @@ processos da empresa.
 No nosso projeto o mais relevante são os \emph{OpenAPIs} definidos nesta
 \emph{framework} que definem interfaces independentes do domínio para oferta de
 recursos e serviços. De particular interesse são as interfaces que permitem a
-obtenção de um catálogo de serviços, a compra destes serviços e o controlo sob
+obtenção de um catálogo de serviços, a aquisição destes serviços e o controlo sob
 o seu ciclo de vida.
 
 As \emph{APIs TMF} são mais genéricas que as oferecidas pelo \emph{GSMA Open
@@ -95,34 +121,12 @@ individualmente.
 Um caso interessante na colaboração destes dois projetos é uso das \emph{APIs
 	TMF} para permitir a oferta do \emph{GSMA Open Gateway} como um serviço pelos
 operadores e agregadores. Neste cenário, as \emph{APIs TMF} seriam utilizadas
-para oferecer ao cliente a oportunidade de comprar um serviço que
-disponibilizaria um \emph{GSMA Open Gateway}. Este seria orquestrado e feito
-disponível de maneira automatizada, reforçando a oferta do operador/agregador e
+para oferecer ao cliente a oportunidade de adquirir um serviço que
+disponibilizaria um \emph{GSMA Open Gateway}. Este seria orquestrado e 
+disponibilizado de maneira automatizada, reforçando a oferta do operador/agregador e
 simplificando o processo do desenvolvedor em obter acesso ao \emph{GSMA Open
 	Gateway}.
 
-\subsection{CAMARA}
-
-O \emph{CAMARA} é uma iniciativa que tem como principal objetivo a definição,
-desenvolvimento e validação de \emph{APIs} de \emph{Network-as-a-Service}
-(\emph{NaaS})\cite{10.1145/3538401.3546825}. Estas \emph{APIs} estão a ser
-desenvolvidas com um foco na sua implementação rápida para alcançar um dos
-grandes objetivos do \emph{CAMARA}, isto é, a sua adoção pelos operadores de
-modo a garantir que haja uma interface unificada, que não dependa dos seus
-fornecedores, e que consiga dar a terceiros a oportunidade de conseguir
-interagir com os serviços 5G sem a necessidade de contactar os operadores.
-Outro grande objetivo do \emph{CAMARA} é a acessibilidade das suas \emph{APIs}
-para desenvolvedores sem experiência na área do 5G e das telecomunicações, isto
-é, garantir que os desenvolvedores consigam utilizar os serviços de forma
-simples e sem a necessidade de interagir diretamente com os fornecedores ou
-aprender detalhes de telecomunicações para conseguir utilizar as \emph{APIs} do
-\emph{3GPP}.
-
-Esta iniciativa está fortemente relacionada com o \emph{GSMA Open Gateway}, uma
-vez que as \emph{APIs} serão publicadas através do projeto
-\emph{CAMARA}\cite{5gamericas}. Além disto, o \emph{GSMA Open Gateway}, o
-\emph{CAMARA} e o \emph{TMF} estão alinhados para conseguir trazer ao mercado
-as capacidades do 5G de um modo mais acessível e estandardizado.
 
 
 \section{Adoção das \emph{APIs}}
