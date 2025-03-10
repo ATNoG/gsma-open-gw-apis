@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # Documents
 
 - [Calendar for the project](/documents/calendar.pdf)
