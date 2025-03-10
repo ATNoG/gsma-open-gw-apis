@@ -18,7 +18,7 @@ const config: Config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "pi", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  projectName: "gsma-open-gw-apis", // Usually your repo name.
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
@@ -56,15 +56,16 @@ const config: Config = {
       title: "GSMA Open Gateway APIs",
       items: [
         {
+          type: "docsVersionDropdown",
+          position: "left",
+        },
+        {
           type: "docSidebar",
           sidebarId: "documentationSidebar",
           position: "left",
           label: "Documentation",
         },
-        {
-          type: "docsVersionDropdown",
-          position: "left",
-        },
+        { to: "/documents", label: "Documents", position: "left" },
         {
           href: "https://github.com/ATNoG/gsma-open-gw-apis",
           label: "GitHub",
