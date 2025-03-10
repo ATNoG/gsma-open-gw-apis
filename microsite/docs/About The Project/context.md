@@ -1,3 +1,9 @@
+---
+title: Project Context
+description: Simple overview of the project
+sidebar_position: 1
+---
+
 # Context
 
 The evolution of 5G and beyond has introduced advanced network capabilities, enabling greater access, reconfiguration, and flexibility. This opens new opportunities for developers across industries to create integrated solutions using telecom operators' services. However, current interfaces defined by 3GPP are complex, requiring deep technical knowledge, which limits adoption.
