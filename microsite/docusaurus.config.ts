@@ -78,6 +78,7 @@ const config: Config = {
         {
           label: "GitHub",
           href: "https://github.com/ATNoG/gsma-open-gw-apis/tree/main/microsite",
+          className: "margin--horiz-auto",
         },
       ],
       copyright: `
