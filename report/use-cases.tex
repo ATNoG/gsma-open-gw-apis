@@ -11,7 +11,8 @@ darão ao sistema.
 Como já foi referido, a criação de \emph{APIs GSMA Open Gateway} visa facilitar
 a utilização programática dos diversos recursos e funcionalidades que a rede
 \emph{5G} consegue oferecer. Deste modo, o sistema possui 2 atores distintos.
-\begin{itemize} \item \textbf{Operador de rede} - O primeiro ator a interagir
+\begin{itemize}
+	\item \textbf{Operador de rede} - O primeiro ator a interagir
 	      com o sistema é o operador de rede, que fornece as APIs a diversos outros
 	      negócios para que estes possam interagir com a rede programaticamente. No
 	      entanto, tendo em consideração que as APIs desenhadas pelo \emph{GSMA Open
@@ -50,21 +51,29 @@ Estes são apresentados no diagrama seguinte.
 	      produtos/serviços aos seus clientes, ou para manipular uma rede interna
 	      para melhor se adaptar às suas necessidades. Utilizando as APIs definidas
 	      pelo \emph{GSMA Open Gateway}, os diversos negócios podem:
-	      \begin{enumerate} \item Enviar/Validar One Time Passwords (OTPs), para (por
-		            exemplo) verificar a validade de um número de telefone via SMS \item
-		            Consultar ou subscrever o estado do roaming, de modo a ser possível
-		            verificar se um dispositivo se encontra em outro país. \item Consultar
-		            e/ou subscrever a qualidade da rede para um determinado dispositivo, de
-		            modo a saber se os requisitos de rede para a aplicação podem ser
-		            alcançados, caso seja subscrito, sempre que exista uma alteração na
-		            qualidade será enviada uma notificação.
-
-		      \item Obter a localização de um dado dispositivo \item Verificar a
-		            presença de um dispositivo, isto é, verificar se um determinado
-		            dispositivo se encontra dentro da área definida. \item Verificar a
-		            densidade populacional numa dada zona \item Pedir uma alteração de QoS,
-		            temporário ou não, devido à necessidade de uma largura de banda maior.
-		      \item Receber notificações sobre o estado da rede \item Receber
-		            notificações relativas à entrada ou saída de um dispositivo de uma dada
-		            área \item Subscrever/Consultar a disponibilidade de um dispositivo
+	      \begin{enumerate}
+		      \item Enviar/Validar One Time Passwords (OTPs), para (por exemplo)
+		            verificar a validade de um número de telefone via SMS
+		      \item Consultar ou subscrever o estado do roaming, de modo a ser
+		            possível verificar se um dispositivo se encontra em outro país.
+		      \item Consultar e/ou subscrever a qualidade da rede para um
+		            determinado dispositivo, de modo a saber se os requisitos de rede
+		            para a aplicação podem ser alcançados, caso seja subscrito, sempre
+		            que exista uma alteração na qualidade será enviada uma notificação.
+		      \item Obter a localização de um dado dispositivo
+		      \item Verificar a presença de um dispositivo, isto é, verificar se um
+		            determinado dispositivo se encontra dentro da área definida.
+		      \item Verificar a densidade populacional numa dada zona
+		      \item Ajustar dinamicamente a qualidade do vídeo e o desempenho da
+		            rede, através de geofencing e monitorização de qualidade, para
+		            garantir operações remotas seguras de embarcações em zonas
+		            portuárias congestionadas \cite{10620807}
+		      \item Pedir uma alteração de QoS, temporário ou não, devido à
+		            necessidade de uma largura de banda maior.
+		      \item Receber notificações sobre o estado da rede
+		      \item Receber notificações relativas à entrada ou saída de um
+		            dispositivo de uma dada área
+		      \item Subscrever/Consultar a disponibilidade de um dispositivo
+		      \item Alocar dinamicamente recursos da rede 5G para dar prioridade a
+		            comunicações em casos de emergência \cite{ccam5g}
 	      \end{enumerate} \end{itemize}
