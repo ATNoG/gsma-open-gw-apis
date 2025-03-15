@@ -1,59 +1,72 @@
-\chapter{Introdução}
+\chapter{Introduction}
 
-\section{Contexto}
+\section{Context}
 
-O desenvolvimento de redes 5G e para além do 5G introduziram capacidades
-avançadas no acesso, reconfiguração e flexibilidade das redes. Isto atrai o
-interesse de desenvolvedores em várias indústrias que pretendem oferecer
-soluções integradas aos seus clientes que fazem uso destas capacidades dos
-operadores de telecomunicações. No entanto, as interfaces oferecidas pelos
-operadores atualmente e definidas pelo \emph{3rd Generation Partnership
-	Project} (\emph{3GPP}) expõem muita da complexidade dos operadores. Esta complexidade
-dificulta o desenvolvimento das soluções integradas e necessita de conhecimento
-da área, limitando a sua adoção.
+The development of 5G networks and beyond 5G have introduced
+advanced capabilities in the access, reconfiguration and
+flexibility of these networks. This attracts the interest of
+software developers in several industries, aiming to offer
+integrated solutions to their clients that leverage these
+capabilities of the network and their operators. However, the
+existing interfaces currently defined by the \emph{3rd Generation
+Partnership Project} (\emph{3GPP}) expose much of the complexity
+related to the networks and the operators. This complexity
+hinders the development of integrated solutions and requires
+extensive knowledge on the topic of networks and how to operate
+them, limiting the adoption.
 
-O \emph{GSMA Open Gateway} é uma iniciativa da indústria para resolver este
-problema. Isto é feito por um conjunto de \emph{Application Programming
-	Interfaces} (\emph{API}) definidos pelo projeto \emph{CAMARA} que expõe várias
-interfaces simplificadas das redes dos operadores. Estas \emph{APIs} podem ser
-oferecidas pelos operadores diretamente ou por agregadores como
-\emph{Hyperscalers}.
+The \emph{GSMA Open Gateway} is an industry initiative to solve
+this problem. This is done by a set of Application Programming
+Interfaces (API) defined by the \emph{CAMARA} project, that
+exposes various simplified interfaces of the operator networks.
+These APIs can then be offered either through the MNOs directly
+or by aggregators, such as \emph{Hyperscalers}.
 
-Contudo, a maioria dos operadores não oferece estas interfaces, mas espera-se
-que o façam num futuro próximo. Vistas as capacidades do \emph{Instituto de
-	Telecomunicações} (IT) em Aveiro, com acesso a uma infraestrutura 5G
-\footnote{\url{https://5gainer.eu/}}\cite{ieee:5GAIner}, existe interesse em
-integrar as \emph{APIs} do \emph{GSMA Open Gateway} na sua oferta.
+However, most operatiors do not offer said interfaces, but it is
+to be expected that they will do so in the near future. Given the
+capabilities of \emph{Instituto de Telecomunicações} (IT) in
+Aveiro, with access to a 5G infrastructure
+\footnote{\url{https://5gainer.eu/}}\cite{ieee:5GAIner}, there is 
+interest in integrating \emph{GSMA Open Gateway} APIs in their
+offer.
 
-\section{Objetivos}
+\section{Goals}
 
-Os objetivos delineados para o projeto foram os seguintes:
+The objectives outlined for the project were as follows:
 
-\begin{enumerate}
-	\item Implementação das seguintes \emph{APIs} do \emph{GSMA Open Gateway}
-	      através de uma integração com o \emph{Core} comercial 5G do \emph{IT}.
-	      \begin{itemize}
-		      \item Família de \emph{APIs} para obter informação de
-		            dispositivos (\emph{Device Information}).
-		      \item Família de \emph{APIs} para obter informação sobre a
-		            \emph{Quality-of-Service} (\emph{QoS}) da rede e também para
-		            fornecer \emph{QoS-on-Demand} (\emph{QoD}).
-	      \end{itemize}
-	\item Implementação da \emph{API} do \emph{GSMA Open Gateway} para obtenção
-	      e verificação de \emph{One Time Passwords} (\emph{OTP}) por \emph{SMS}
-	      através de um \emph{SMS Centre} (\emph{SMSC}) integrado na rede 5G do
-	      IT como parte do trabalho do nosso projeto.
-	\item Implementação das \emph{APIs} do \emph{GSMA Open Gateway} para
-	      serviços de localização através do projeto \emph{NEFSim}, um emulador
-	      do \emph{Network Exposure Function} (\emph{NEF}, explicado em detalhe
-	      na secção \ref{sec:related_work_3gpp}). A utilização deste emulador é
-	      necessária, pois a rede do IT atualmente não têm este serviço na sua
-	      rede.
-	\item Integração do projeto com o
-	      \emph{OpenSlice}\footnote{\url{https://osl.etsi.org/}}, um
-	      \emph{Operation Support System} (\emph{OSS}), permitindo a modalidade
-	      de \emph{CAMARA as a Service} (\emph{CAMARAaaS}).
-	      %\item Integração do \emph{Common API Framework} (\emph{CAPIF}) com o
-	      %      projeto, através do projeto \emph{OpenCAPIF}, para controlar a
-	      %      exposição e consumo dos \emph{APIs}.
+\begin{enumerate} 
+  \item Implemetation of the following \emph{GSMA
+      Open Gateway} \emph{APIs} through integration with
+      \emph{IT's} 5G Core. 
+    \begin{itemize}
+      \item \emph{API} family to obtain \emph{Device Information}
+      \item \emph{API} family to obtain information on the
+        network's \emph{Quality-of-Service} (\emph{QoS}) and to
+        offer \emph{QoS-on-Demand} (\emph{QoD}).
+    \end{itemize}
+
+  \item Implementation of the \emph{GSMA
+    Open Gateway} \emph{API} to obtain and verify \emph{One Time
+    Passwords} (\emph{OTP}) through \emph{SMS}, utilizing an 
+    \emph{SMS Centre} (\emph{SMSC}) integrated in \emph{IT's} 5G
+    Network as a part of our project.
+
+  \item Implementation of the \emph{GSMA Open Gateway APIs} to
+    offer location through the \emph{NEFSim} project, an emulator
+    of the \emph{Network Exposure Function} (\emph{NEF},
+    explained in more detail in section
+    \ref{sec:related_work_3gpp}) The utilization of this emulator
+    is required, since \emph{IT's} network currently does not have
+    such a service in its infrastructure.
+
+  \item Integration of our project with the 
+    \emph{OpenSlice}\footnote{\url{https://osl.etsi.org/}}, an
+    \emph{Operation Support System} (\emph{OSS}), allowing for
+    the usage of a \emph{CAMARA as a Service} (\emph{CAMARAaaS})
+    business model.
+
+  % \item Integration of the \emph{Common API Framework}
+  %   (\emph{CAPIF}) with our project, through \emph{OpenCAPIF}, to
+  %   control the exposure and consumption of our \emph{APIs}
+
 \end{enumerate}
