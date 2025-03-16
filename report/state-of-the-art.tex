@@ -1,63 +1,70 @@
-\chapter{Estado da Arte}
+\chapter{State of Art}
 
-\section{Projetos Relacionados}
+\section{Related Work}
 
-Esta secção visa apresentar outros projetos na mesma área e/ou com objetivos
-semelhantes ao nosso projeto, a relação destes para com o nosso projeto, e como
-estes se comparam com o nosso projeto.
+This section aims to present projects in the same field of work,
+or at least with similar objectives to our own, the relationship
+between these other projects and ours, and how they compare.
 
 \subsection{3GPP OpenAPIs}\label{sec:related_work_3gpp}
 
-O \emph{3GPP}, como corpo responsável pelas normas que definem o 5G, delineou
-não só a interface rádio usada para o 5G (denominada \emph{5G New Radio} e
-encurtada para \emph{5G-NR}) mas também a arquitetura do \emph{core} da rede
-dos operadores de serviço. Esta nova arquitetura é baseada em serviços
-(\emph{Service-Based Architecture}) denominados \emph{Network Functions}
-(\emph{NFs}), e consistem em aplicações que correm em hardware genérico, como o
-que é oferecido por fornecedores de infraestrutura \emph{cloud}.
+\emph{3GPP}, the body responsible for the norms that define the
+5G protocol, designed not only the radio interface to be used by
+5G Networks (designated \emph{5G New Radio}, shortened as
+\emph{5G-NR}), but also the architecture of the network's
+\emph{Core}. This new architecture is a \emph{Service-Based
+Architecture}, with each service denominated as \emph{Network
+Functions} (\emph{NFs}). These consist of applications that run
+on generic hardware, such as the one offered by Cloud
+Infrastructure.
 
-Estes serviços comunicam todos por \emph{APIs} definidos pelo \emph{3GPP} e
-descritas em \emph{OpenAPIs}, uma norma para documentação de \emph{APIs}. No
-entanto, estas \emph{APIs} são desenhadas para uso apenas dentro da rede
-\emph{core} do operador e não para uso por terceiros, com a exceção das
-\emph{APIs} oferecidas pelo \emph{Network Exposure Function} (\emph{NEF}).
+These services communicate between them by \emph{APIs} defined by
+\emph{3GPP} and described in \emph{OpenAPIs}, a documentation
+standard. However, these \emph{APIs} are designed for use only
+inside the MNO's network \emph{core}, and not to be used by third
+parties, exception being made to the \emph{Network Exposure
+Function} (\emph{NEF}). The latter, is an \emph{NF} specifically
+designed to allow thrid-party access to the MNO's network
+capabilities securely. The \emph{APIs} that are
+offered are designated as \emph{Northbound Interfaces}, and their
+clients are denominated of \emph{Application Functions}
+(\emph{AFs}).
 
-O \emph{NEF} é uma \emph{NF} especificamente desenhada para permitir que
-terceiros acedam as capacidades da rede do operador de maneira segura. As
-\emph{APIs} oferecidas pelo \emph{NEF} são designadas por \emph{Northbound
-	Interface} e os seus clientes de \emph{Application Functions} (\emph{AFs}).
-
-
-Concluindo, as \emph{3GPP OpenAPIs} operam somente no domínio do operador e não
-expõe as capacidades da rede do operador a terceiros, exceto o \emph{NEF}, que
-tem o objetivo explícito de suportar a integração de terceiros com a rede do
-operador. Mesmo que um operador de rede decida expor diretamente as \emph{APIs}
-definidas pelo \emph{3GPP}, os desenvolvedores de software não seriam capazes de
-as utilizar, uma vez que estas se limitam ao escopo da rede, pelo que para as utilizar
-seria necessário bastante conhecimento específico ao domínio da rede.
+In conclusion, 3GPP OpenAPIs operate only in the operator's
+domain and do not expose the operator's network capabilities to
+third parties, exception being made to the \emph{NEF}, whose
+purpose is to explicitly support network integration by
+third-parties with MNO's. Even if a MNO decides to directly
+expose the \emph{3GPP} designed APIs, software developers would
+not be capable of using them, since these are limited to the
+scope of the network, therefore using them requires extensive
+domain-specific knowledge.
 
 \subsection{CAMARA}
 
-O \emph{CAMARA} é uma iniciativa que tem como principal objetivo a definição,
-desenvolvimento e validação de \emph{APIs} de \emph{Network-as-a-Service}
-(\emph{NaaS})\cite{10.1145/3538401.3546825}. Estas \emph{APIs} estão a ser
-desenvolvidas com um foco na sua implementação rápida para alcançar um dos
-grandes objetivos do \emph{CAMARA}, isto é, a sua adoção pelos operadores de
-modo a garantir que haja uma interface unificada, que não dependa dos seus
-fornecedores, e que consiga dar a terceiros a oportunidade de conseguir
-interagir com os serviços 5G sem a necessidade de contactar os operadores.
-Outro grande objetivo do \emph{CAMARA} é a acessibilidade das suas \emph{APIs}
-para desenvolvedores sem experiência na área do 5G e das telecomunicações, isto
-é, garantir que os desenvolvedores consigam utilizar os serviços de forma
-simples e sem a necessidade de interagir diretamente com os fornecedores ou
-aprender detalhes de telecomunicações para conseguir utilizar as \emph{APIs} do
-\emph{3GPP}.
+The \emph{CAMARA} initiative's main objectives are the
+definition, development and validation of
+\emph{Network-as-a-Service} (\emph{NaaS}) \emph{APIs}. These are
+being developed with focus on rapid implementation, in order to
+achieve one of \emph{CAMARA}'s big objectives, which is MNO
+adoption, as a way to ensure a unified interface that is not
+supplier dependant and that is able to give third-parties the
+opportunity to interact with 5G services without the need to
+contact the MNO.
 
-Esta iniciativa está fortemente relacionada com o \emph{GSMA Open Gateway} que iremos referir
-de seguida, uma vez que as \emph{APIs} serão publicadas através do projeto
-\emph{CAMARA}\cite{5gamericas}. Além disto, o \emph{GSMA Open Gateway}, o
-\emph{CAMARA} e o \emph{TMF} estão alinhados para conseguir trazer ao mercado
-as capacidades do 5G de um modo mais acessível e estandardizado.
+Another of \emph{CAMARA}'s big objectives is the accessability of
+all its APIs to software developers without any experience in the
+5G/Telecom domain, that is, to ensure that the developers are able to
+utilize these services simply and without the need to interact
+directly with network operators or learn the details of
+telecommunications to be able to use these \emph{APIs} 
+
+This initiative is heavily related with \emph{GSMA Open Gateway},
+which we will talk about in the next section, since it is these
+\emph{APIs} that will be published through \emph{CAMARA}.
+In addition, the GSMA Open Gateway, CAMARA and TMF are aligned
+to bring 5G capabilities to the market in a more accessible and standardized way.
+
 
 \subsection{GSMA Open Gateway}
 
