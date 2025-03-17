@@ -1,0 +1,42 @@
+name: Gateway lint
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "microsite/**"
+      - ".github/workflows/lint-gateway.yml"
+  pull_request:
+    paths:
+      - "microsite/**"
+      - ".github/workflows/lint-gateway.yml"
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gateway
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Check formatting
+        run: uv run ruff format --check
+
+      - name: Lint
+        run: uv run ruff check
+        if: always()
+
+      - name: Type Checking
+        run: uv run mypy app
+        if: always()
