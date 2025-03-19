@@ -25,6 +25,7 @@
 
           pkgs.uv
           pkgs.ruff
+          pkgs.pyright
         ];
       };
     });
