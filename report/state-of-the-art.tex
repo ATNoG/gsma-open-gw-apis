@@ -1,4 +1,4 @@
-\chapter{State of Art}
+\chapter{State of the Art}
 
 \section{Related Work}
 
@@ -24,11 +24,10 @@ standard. However, these \emph{APIs} are designed for use only
 inside the MNO's network \emph{core}, and not to be used by third
 parties, exception being made to the \emph{Network Exposure
 Function} (\emph{NEF}). The latter, is an \emph{NF} specifically
-designed to allow thrid-party access to the MNO's network
-capabilities securely. The \emph{APIs} that are
-offered are designated as \emph{Northbound Interfaces}, and their
-clients are denominated of \emph{Application Functions}
-(\emph{AFs}).
+designed to allow third-party access to the MNO's network
+capabilities securely. The \emph{APIs} that are offered are
+designated as \emph{Northbound Interfaces}, and their clients are
+denominated of \emph{Application Functions} (\emph{AFs}).
 
 In conclusion, 3GPP OpenAPIs operate only in the operator's
 domain and do not expose the operator's network capabilities to
@@ -48,132 +47,130 @@ definition, development and validation of
 being developed with focus on rapid implementation, in order to
 achieve one of \emph{CAMARA}'s big objectives, which is MNO
 adoption, as a way to ensure a unified interface that is not
-supplier dependant and that is able to give third-parties the
+supplier dependent and that is able to give third-parties the
 opportunity to interact with 5G services without the need to
 contact the MNO.
 
-Another of \emph{CAMARA}'s big objectives is the accessability of
+Another of \emph{CAMARA}'s big objectives is the accessibility of
 all its APIs to software developers without any experience in the
-5G/Telecom domain, that is, to ensure that the developers are able to
-utilize these services simply and without the need to interact
-directly with network operators or learn the details of
+5G/Telecom domain, that is, to ensure that the developers are
+able to utilize these services simply and without the need to
+interact directly with network operators or learn the details of
 telecommunications to be able to use these \emph{APIs} 
 
 This initiative is heavily related with \emph{GSMA Open Gateway},
 which we will talk about in the next section, since it is these
-\emph{APIs} that will be published through \emph{CAMARA}.
-In addition, the GSMA Open Gateway, CAMARA and TMF are aligned
-to bring 5G capabilities to the market in a more accessible and standardized way.
+\emph{APIs} that will be published through \emph{CAMARA}. In
+addition, the GSMA Open Gateway, CAMARA and TMF are aligned to
+bring 5G capabilities to the market in a more accessible and
+standardized way.
 
 
 \subsection{GSMA Open Gateway}
 
-De modo semelhante ao \emph{NEF}, o \emph{GSMA Open Gateway} tem por objetivo
-expor as diversas capacidades dos operadores de rede a terceiros.
-Contudo, existem vantagens em utilizar o \emph{GSMA Open Gateway}:
+Similarly to the \emph{NEF}, the \emph{GSMA Open Gateway} aims to
+expose the various capabilities of network operators to third
+parties. However, there are advantages to using the \emph{GSMA
+Open Gateway}:
 
-\begin{itemize}
-	\item \textbf{Simplificação}, o \emph{NEF} expõe interfaces bastante
-	      complexas com vários detalhes da rede do operador, requerendo
-	      conhecimento no domínio de redes móveis e 5G, aumentando o custo da
-	      adoção destas \emph{APIs}.
-	\item \textbf{Agregação}, o \emph{NEF} expõe apenas acesso à rede do
-	      operador, enquanto o \emph{GSMA Open Gateway} prevê a existência de
-	      agregadores que oferecem as \emph{APIs} para vários operadores de uma
-	      maneira unificada, requerendo contacto apenas com um agregador invés de
-	      múltiplos operadores.
-	\item \textbf{Gestão de privacidade}, o \emph{GSMA Open Gateway}
-	      contempla mecanismos para a gestão de consentimento dos utilizadores
-	      finais que em muitos casos é necessário por motivos legais.
-\end{itemize}
+\begin{itemize} \item \textbf{Simplification}, the NEF exposes
+      quite complex interfaces with various details of the
+      operator's  of the operator's network, requiring knowledge
+      of mobile networks and 5G, increasing the cost of adopting
+      these APIs.
 
-Isto não implica que o \emph{NEF} é uma interface inferior, este oferece uma
-maior integração com a rede dos operadores. Além disso, é possível utilizar o
-\emph{NEF} para implementar o \emph{GSMA Open Gateway}, modelando este como uma
-\emph{AF}. Na realidade, o \emph{NEF} e o \emph{GSMA Open Gateway} são entre si
-tecnologias complementares.
+    \item \textbf{Aggregation}, the NEF only exposes access to
+      the operator's network, while the GSMA Open Gateway
+      provides for the existence of aggregators that offer the
+      APIs to various operators in a unified manner, requiring
+      contact with only one aggregator rather than multiple
+      operators.
 
-Ainda assim, é importante realçar que o \emph{GSMA Open Gateway} é uma
-interface mais cómoda à maioria dos desenvolvedores de aplicações de terceiros,
-pois, ao contrário da interação direta com o \emph{NEF}, esta não requer
-conhecimento do domínio de redes móveis.
+\item \textbf{Privacy management}, the GSMA Open Gateway includes
+mechanisms for the end-user consent, which in many cases is
+necessary for legal reasons. for legal reasons \end{itemize}
 
-O \emph{NEF} acaba por ter também a sua importância, por um lado por oferecer
-uma maior integração com a rede do operador, mas por outro por ser possível de
-implementar sobre este um \emph{GSMA Open Gateway}.
+This does not imply that \emph{NEF} is an inferior interface; it
+offers greater integration with operators' networks. In reality,
+\emph{NEF} and \emph{GSMA Open Gateway} are complementary
+technologies. Still, it's important to note that \emph{GSMA Open
+Gateway} is a more convenient interface for most third-party
+application developers because, unlike direct interaction with
+\emph{NEF},  it does not require knowledge of mobile networks.
+The \emph{NEF} is also important, on the one hand because it
+offers greater integration with the operator's network, but also
+because it is possible to implement a \emph{GSMA Open Gateway}
+over it, modelling it as an \emph{AF}
 
 \subsection{TMF Open Digital Architecture}
 
-O \emph{Open Digital Architecture} (\emph{ODA}) é uma \emph{framework} criada
-pelo \emph{TM Forum} (\emph{TMF}) para ajudar fornecedores de serviços a
-transacionarem para soluções abertas e interoperáveis. Esta \emph{framework} é
-transversal a várias áreas tocando não só na parte técnica mas também nos
-processos da empresa.
+The \emph{Open Digital Architecture} (\emph{ODA}) is a framework
+created by the \emph{TM Forum} (\emph{TMF}) to help service
+providers transition to open and interoperable solutions. This
+framework spans several areas, touching not only on the technical
+side but also on the company's processes. In our project, the
+most relevant are the \emph{OpenAPIs} defined in this framework,
+which define domain-independent interfaces for offering resources
+and services. Of particular interest are the interfaces that make
+it possible to obtain a service catalog, acquire these services
+and control their life cycle.
 
-No nosso projeto o mais relevante são os \emph{OpenAPIs} definidos nesta
-\emph{framework} que definem interfaces independentes do domínio para oferta de
-recursos e serviços. De particular interesse são as interfaces que permitem a
-obtenção de um catálogo de serviços, a aquisição destes serviços e o controlo sob
-o seu ciclo de vida.
-
-As \emph{APIs TMF} são mais genéricas que as oferecidas pelo \emph{GSMA Open
-	Gateway}, oferecendo mais operações, mas também aumentando a complexidade do
-seu uso em relação às oferecidas pelo \emph{GSMA Open Gateway}. O \emph{GSMA
-	Open Gateway} tem também a vantagem de acomodar o cenário de agregação de
-vários \emph{Gateways}. Este permite que um agregador ofereça acesso a
-\emph{APIs} do \emph{GSMA Open Gateway} de vários operadores de maneira
-unificada, sem que o cliente tenha que manter contacto com cada operador
-individualmente.
-
-Um caso interessante na colaboração destes dois projetos é uso das \emph{APIs
-	TMF} para permitir a oferta do \emph{GSMA Open Gateway} como um serviço pelos
-operadores e agregadores. Neste cenário, as \emph{APIs TMF} seriam utilizadas
-para oferecer ao cliente a oportunidade de adquirir um serviço que
-disponibilizaria um \emph{GSMA Open Gateway}. Este seria orquestrado e 
-disponibilizado de maneira automatizada, reforçando a oferta do operador/agregador e
-simplificando o processo do desenvolvedor em obter acesso ao \emph{GSMA Open
-	Gateway}.
-
+The \emph{TMF APIs} are more generic than those offered by the
+\emph{GSMA Open Gateway}, offering more operations, but also
+increasing the complexity of their use compared to those offered
+by the \emph{GSMA Open Gateway}. The \emph{GSMA Open Gateway}
+also has the advantage of accommodating the multiple gateway
+aggregation scenario, allowing an aggregator to offer access to
+\emph{GSMA Open Gateway APIs} from several operators in a unified
+way, without the customer having to maintain contact with each
+operator individually. An interesting case in the collaboration
+of these two projects is the use of \emph{TMF APIs} to allow
+operators and aggregators to offer \emph{GSMA Open Gateway} as a
+service. In this scenario, the \emph{TMF APIs} would be used to
+offer the customer the opportunity to purchase a service that
+would provide a \emph{GSMA Open Gateway}. This would be
+orchestrated and made available in an automated way, reinforcing
+the operator/aggregator's offer and simplifying the developer's
+process of gaining access to the \emph{GSMA Open Gateway}.
 
 
-\section{Adoção das \emph{APIs}}
+\section{\emph{API} Adoption} Although these initiatives are
+relatively new, there are already operators implementing the
+\emph{APIs} defined by \emph{CAMARA} and the \emph{GSMA Open
+Gateway}.
 
-Apesar de estas iniciativas serem relativamente novas, já existem operadores a
-implementar as \emph{APIs} definidas pelo \emph{CAMARA} e pelo \emph{GSMA Open
-	Gateway}.
-
-A \emph{Ericsson}, enquanto empresa multinacional de telecomunicações, começou
-a implementar as \emph{APIs} definidas pelo projeto \emph{CAMARA}
+\emph{Ericsson}, a multinational telecommunications company, has
+started to implement the \emph{APIs} defined by the \emph{CAMARA}
 \footnote{\url{https://www.fierce-network.com/wireless/ericsson-leads-top-operators-new-global-api-venture}}.
-Em conjunto com outras empresas como \emph{Google Cloud}, \emph{Deutsche
-	Telekom}, \emph{Reliance Jio} e \emph{T-Mobile}
-\footnote{\url{https://adunaglobal.com/\#mission}}, a \emph{Ericsson} participa
-então agora de uma iniciativa denominada de \emph{Aduna}, estando estes a
-desenvolver e adotar um conjunto de \emph{APIs} \emph{CAMARA}. As primeiras
-\emph{APIs} a serem suportadas serão focadas maioritariamente em prevenção de
-fraude, tendo por objetivo a verificação de números atribuídos a clientes e uma
-\emph{API} que visa facilitar o processo de \emph{SIM Swapping}
-\footnote{\url{https://www.fierce-network.com/wireless/what-will-aduna-ericssons-massive-api-venture-release-first}}.
+project, along with companies such as \emph{Google Cloud},
+\emph{Deutsche Telekom}, \emph{Reliance Jio} and
+\emph{T-Mobile}\footnote{\url{https://adunaglobal.com/\#mission}},
+participating in an initiative called \emph{Aduna}, which is
+developing and adopting a set of CAMARA APIs. The first APIs to
+be supported will be focused mainly on fraud prevention, with the
+aim of verifying numbers assigned to customers and an API that
+aims to facilitate the SIM Swapping
+process\footnote{\url{https://www.fierce-network.com/wireless/what-will-aduna-ericssons-massive-api-venture-release-first}}.
 
-De igual modo, na região do Médio Oriente e Norte de África, também uma
-operadora, a \emph{Ooredoo}, implementou recentemente as \emph{APIs} de
-\emph{CAMARA}, de modo a conseguir oferecer novas oportunidades a negócios
-(clientes).
-\footnote{\url{https://www.ooredoo.com/en/media/news_view/ooredoo-group-leads-mena-with-gsma-camara-api-implementation/}}
+Similarly, in the Middle East and North Africa region, an
+operator, \emph{Ooredoo}, recently implemented \emph{CAMARA
+APIs}, allowing the offer of new opportunities to businesses
+(customers)\footnote{\url{https://www.ooredoo.com/en/media/news_view/ooredoo-group-leads-mena-with-gsma-camara-api-implementation/}}.
 
-Isto reafirma o compromisso que as diversas operadoras fizeram para com o
-\emph{GSMA Open Gateway} e com a iniciativa \emph{CAMARA}.
+This reaffirms the commitment that the various operators have
+made to the \emph{GSMA Open Gateway} and the \emph{CAMARA}
+initiative.
 
-Tal como \emph{Aduna}, também a \emph{Ooredoo} começou por oferecer \emph{SIM
-	Swapping} programático, oferecendo também o necessário para a implementação de
-\emph{One Time Password} (\emph{OTP}) via \emph{SMS}.
-
-Por fim, os quatro principais operadores móveis de França (\emph{Bouygues
-	Telecom}, \emph{Free}, \emph{Orange} e \emph{SFR}) anunciaram uma parceria para
-lançar \emph{APIs} de rede que ajudam a combater fraudes online e proteger
-identidades digitais. Como parte da iniciativa global \emph{GSMA Open Gateway},
-estas disponibilizarão três \emph{APIs} no mercado francês, sendo estas
-\emph{Know Your Customer} (\emph{KYC}) \emph{Match}, \emph{SIM Swapping} e
-\emph{Number Verification}. Estas foram testadas com bancos e empresas na
-França e devem ser lançadas comercialmente no 1.º semestre de 2025.
-\footnote{\url{https://www.gsma.com/newsroom/press-release/french-mobile-industry-accelerates-deployment-of-network-apis-through-gsma-open-gateway-initiative/}}
+Like \emph{Aduna}, \emph{Ooredoo} has also started to offer
+programmatic \emph{SIM Swapping}, as well as providing the
+necessary support for implementing One Time Password (OTP) via
+SMS. Finally, the four main mobile operators in France
+(\emph{Bouygues Telecom}, \emph{Free}, \emph{Orange} and
+\emph{SFR}) announced a partnership to launch network \emph{APIs}
+to help fight online fraud and protect digital identities. As
+part of the \emph{GSMA Open Gateway} global initiative, they will
+make three APIs available on the French market, namely \emph{Know
+Your Customer (KYC) Match}, \emph{SIM Swapping} and \emph{Number
+Verification}. These have been tested with banks and companies in
+France and should be launched commercially in the first half of
+2025\footnote{\url{https://www.gsma.com/newsroom/press-release/french-mobile-industry-accelerates-deployment-of-network-apis-through-gsma-open-gateway-initiative/}}.
