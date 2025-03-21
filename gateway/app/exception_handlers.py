@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 
+from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
 from app.schemas import ErrorInfo
 from app.interfaces.otp import (
     OTPExpiredCodeError,
@@ -53,3 +54,12 @@ def install_exception_handlers(app: FastAPI) -> None:
             message="The authenticationId is no longer valid",
         )
         return JSONResponse(status_code=400, content=jsonable_encoder(body))
+
+    @app.exception_handler(GeofencingSubscriptionNotFound)
+    async def geofencing_subscription_not_found(request: Request, exc: Exception):
+        body = ErrorInfo(
+            status=404,
+            code="NOT_FOUND",
+            message="The specified resource is not found.",
+        )
+        return JSONResponse(status_code=404, content=jsonable_encoder(body))

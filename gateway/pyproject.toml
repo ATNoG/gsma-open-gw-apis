@@ -9,6 +9,7 @@ dependencies = [
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
     "redis[hiredis]>=5.2.1",
+    "geopy>=2.4.1",
 ]
 
 [tool.mypy]

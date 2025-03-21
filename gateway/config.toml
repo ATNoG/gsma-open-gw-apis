@@ -3,3 +3,6 @@ sms_backend = "mock"
 otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
+
+[geofencing]
+monitoring_url = "http://localhost:8888/nef/api/v1/3gpp-monitoring-event/v1/camara"

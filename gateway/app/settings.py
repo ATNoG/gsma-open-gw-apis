@@ -35,6 +35,10 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class GeofencingSettings(BaseModel):
+    monitoring_url: AnyHttpUrl
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -42,6 +46,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     sms_otp: SMSOTPSettings
+    geofencing: GeofencingSettings
 
     @classmethod
     def settings_customise_sources(
