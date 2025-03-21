@@ -1,7 +1,10 @@
 from typing import Union, Any
 from fastapi import FastAPI
+from app.geofencing_subscriptions import subscriptions
 
 app = FastAPI()
+
+app.include_router(subscriptions.router)
 
 
 @app.get("/")
