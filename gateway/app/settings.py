@@ -46,6 +46,10 @@ class NEFEmulatorSettings(BaseModel):
     location_backend: LocationBackend
 
 
+class GeofencingSettings(BaseModel):
+    monitoring_url: AnyHttpUrl
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -56,6 +60,7 @@ class Settings(BaseSettings):
     afId: str = "myNetApp"
 
     emulator: NEFEmulatorSettings
+    geofencing: GeofencingSettings
 
     @classmethod
     def settings_customise_sources(

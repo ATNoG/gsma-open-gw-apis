@@ -7,3 +7,5 @@ sender_id = "1234"
 [emulator]
 emulator_url = "http://localhost:8888"
 location_backend = "emulator"
+[geofencing]
+monitoring_url = "http://localhost:8888/nef/api/v1/3gpp-monitoring-event/v1/camara"
