@@ -65,7 +65,7 @@ const config: Config = {
           position: "left",
           label: "Documentation",
         },
-        { to: "/documents", label: "Documents", position: "left" },
+        { to: "/milestones", label: "Milestones", position: "left" },
         {
           href: "https://github.com/ATNoG/gsma-open-gw-apis",
           label: "GitHub",
