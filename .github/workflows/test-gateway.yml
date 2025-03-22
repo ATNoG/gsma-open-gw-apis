@@ -1,0 +1,34 @@
+name: Gateway test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "microsite/**"
+      - ".github/workflows/test-gateway.yml"
+  pull_request:
+    paths:
+      - "microsite/**"
+      - ".github/workflows/test-gateway.yml"
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gateway
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Test
+        run: uv run pytest
