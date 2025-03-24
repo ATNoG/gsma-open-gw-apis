@@ -2,10 +2,9 @@ from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 import uuid
 import re
-from twilio.rest import Client
 import redis
 from app.main import app
-
+import requests
 app = FastAPI()
 
 # Conectar ao Redis (por enquanto local)
@@ -24,20 +23,30 @@ def create_exception(status_code: int, code: str, message: str):
 def validate_phone_number(phone_number: str) -> bool:
     return bool(re.match(r'^\+(\d{10,15})$', phone_number))
 
-# Função para enviar o SMS via Twilio
-def send_sms(phone_number: str, message: str):
-    # Credenciais Twilio
-    account_sid = 'your_account_sid'
-    auth_token = 'your_auth_token'
-    from_number = '+351932619013'
 
-    client = Client(account_sid, auth_token)
-    message = client.messages.create(
-        body=message,
-        from_=from_number,
-        to=phone_number
-    )
-    return message.sid
+def send_sms_via_gateway(phone_number: str, message: str):
+    api_url = "http://localhost:9091/one-time-password-sms/v1.1.0-rc.1"
+    api_key = "Não" #eu tenho a api mas não vou expor :)
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "to": phone_number,
+        "message": message,
+        "sender": "+351932619013" #e o eu numero de telemovel para mais informações liguem-me
+    }
+
+    response = requests.post(api_url, json=payload, headers=headers)
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to send message. Status code: {response.status_code}, Error: {response.text}")
+
+    return response.json()
+
+def send_sms(phone_number: str, message: str):
+    return send_sms_via_gateway(phone_number, message)
 
 #Redis armazenar e obter
 def store_code(phone_number: str, code: str):
