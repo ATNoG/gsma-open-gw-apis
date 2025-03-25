@@ -1,14 +1,22 @@
-from fastapi import FastAPI, HTTPException, Header
-from pydantic import BaseModel
-import uuid
 import re
-import redis
-from app.main import app
+import uuid
 import requests
-app = FastAPI()
+from fastapi import APIRouter, HTTPException, Header
+from http import HTTPStatus
+from pydantic import BaseModel
 
-# Conectar ao Redis (por enquanto local)
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+router = APIRouter(prefix="/one-time-password-sms/v1.1.0-rc.1")
+
+# Simulação de armazenamento do código temporário (substituir por Redis ou banco de dados)
+code_storage = {}
+
+def store_code(phone_number: str, code: str):
+    code_storage[phone_number] = code
+
+def get_code(phone_number: str):
+    return code_storage.get(phone_number)
+
+api_key = "SUA_CHAVE_DE_API" #por agora não implementado
 
 def create_exception(status_code: int, code: str, message: str):
     return HTTPException(
@@ -21,12 +29,9 @@ def create_exception(status_code: int, code: str, message: str):
     )
 
 def validate_phone_number(phone_number: str) -> bool:
-    return bool(re.match(r'^\+(\d{10,15})$', phone_number))
-
+    return bool(re.match(r'^\+\d{10,15}$', phone_number))
 
 def send_sms_via_gateway(phone_number: str, message: str):
-    api_url = "http://localhost:9091/one-time-password-sms/v1.1.0-rc.1"
-    api_key = "Não" #eu tenho a api mas não vou expor :)
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
@@ -35,31 +40,27 @@ def send_sms_via_gateway(phone_number: str, message: str):
     payload = {
         "to": phone_number,
         "message": message,
-        "sender": "+351932619013" #e o eu numero de telemovel para mais informações liguem-me
+        "sender": "+351932619013"
     }
 
-    response = requests.post(api_url, json=payload, headers=headers)
+    # Substituir pela URL correta da API de envio de SMS
+    sms_gateway_url = "https://api.sms-gateway.com/send"
+
+    response = requests.post(sms_gateway_url, json=payload, headers=headers)
 
     if response.status_code != 200:
-        raise Exception(f"Failed to send message. Status code: {response.status_code}, Error: {response.text}")
+        raise Exception(f"Falha ao enviar mensagem. Status code: {response.status_code}, Erro: {response.text}")
 
     return response.json()
 
 def send_sms(phone_number: str, message: str):
     return send_sms_via_gateway(phone_number, message)
 
-#Redis armazenar e obter
-def store_code(phone_number: str, code: str):
-    redis_client.setex(phone_number, 300, code)  # expira em 5 minutos
-
-def get_code(phone_number: str) -> str:
-    return redis_client.get(phone_number)
-
 class PhoneNumberRequest(BaseModel):
     phoneNumber: str
     message: str
 
-@app.post('/send-code')
+@router.post('/send-code')
 def send_code(request: PhoneNumberRequest, x_correlator: str = Header(None)):
     phone_number = request.phoneNumber
 
@@ -67,30 +68,27 @@ def send_code(request: PhoneNumberRequest, x_correlator: str = Header(None)):
         raise create_exception(
             400,
             "INVALID_ARGUMENT",
-            "Client specified an invalid argument. Ensure the phone number is valid, starting with '+' and followed by 10-15 digits."
+            "Número de telefone inválido. Deve começar com '+' seguido de 10 a 15 dígitos."
         )
-    
-    # Verifica se a mensagem contém '{{code}}'
+
     if '{{code}}' not in request.message:
         raise create_exception(
             400,
             "INVALID_ARGUMENT",
-            "Message must include '{{code}}'."
+            "A mensagem deve conter '{{code}}'."
         )
-    
-    # Gerador de um código aleatório
+
     code = str(uuid.uuid4().hex[:6].upper())
-    message = request.message.replace("{{code}}", code) 
+    message = request.message.replace("{{code}}", code)
 
     send_sms(phone_number, message)
-
-    store_code(phone_number, code) #5 min de armazenamento
+    store_code(phone_number, code)
 
     authentication_id = str(uuid.uuid4())
     return {
         "authenticationId": authentication_id,
         "x-correlator": x_correlator,
-        "message": "Code sent successfully."
+        "message": "Código enviado com sucesso."
     }
 
 class ValidateCodeBody(BaseModel):
@@ -98,13 +96,13 @@ class ValidateCodeBody(BaseModel):
     code: str
     phoneNumber: str
 
-@app.post('/validate-code')
+@router.post('/validate-code')
 def validate_code(request: ValidateCodeBody, x_correlator: str = Header(None)):
     if not request.authenticationId or not request.code or not request.phoneNumber:
         raise create_exception(
             400,
             "INVALID_ARGUMENT",
-            "Client specified an invalid range. Authentication ID, code, and phone number are required."
+            "Authentication ID, código e número de telefone são obrigatórios."
         )
 
     stored_code = get_code(request.phoneNumber)
@@ -113,17 +111,17 @@ def validate_code(request: ValidateCodeBody, x_correlator: str = Header(None)):
         raise create_exception(
             400,
             "EXPIRED_CODE",
-            "The code has expired or does not exist."
+            "O código expirou ou não existe."
         )
-    
-    if stored_code.decode("utf-8") != request.code:
+
+    if stored_code != request.code:
         raise create_exception(
             400,
             "INVALID_CODE",
-            "The code provided is incorrect."
+            "O código fornecido está incorreto."
         )
 
     return {
-        "message": "Code validated successfully.",
+        "message": "Código validado com sucesso.",
         "x-correlator": x_correlator
     }
