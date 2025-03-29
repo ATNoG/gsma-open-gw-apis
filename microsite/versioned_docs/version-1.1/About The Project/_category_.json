@@ -1,0 +1,8 @@
+{
+  "label": "About the project",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "This sections provides the information about the project's context."
+  }
+}
