@@ -5,7 +5,17 @@ from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, Field, RootModel, confloat, conint, constr
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    Field,
+    RootModel,
+    ConfigDict,
+    PositiveInt,
+    confloat,
+    conint,
+    constr,
+)
 
 
 class ErrorInfo(BaseModel):
@@ -389,7 +399,7 @@ class Subscription(BaseModel):
         examples=["https://endpoint.example.com/sink"],
     )
     sinkCredential: Optional[SinkCredential] = None
-    types: List[str] = Field(
+    types: List[SubscriptionEventType] = Field(
         ...,
         description="Camara Event types eligible to be delivered by this subscription.\n",
     )
@@ -467,3 +477,147 @@ class ApacheKafkaSubscriptionRequest(SubscriptionRequest):
 
 class NATSSubscriptionRequest(SubscriptionRequest):
     protocolSettings: Optional[NATSSettings] = None
+
+
+#######
+# Nef #
+#######
+
+
+class MonitoringType(Enum):
+    LOCATION_REPORTING = "LOCATION_REPORTING"
+    LOSS_OF_CONNECTIVITY = "LOSS_OF_CONNECTIVITY"
+    UE_REACHABILITY = "UE_REACHABILITY"
+
+
+class ReachabilityType(Enum):
+    SMS = "SMS"
+    DATA = "DATA"
+
+
+class MonitoringEventSubscriptionCreate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    externalId: Optional[str] = Field(
+        default=None,
+        description="Globally unique identifier containing a Domain Identifier and a Local Identifier. \\<Local Identifier\\>@\\<Domain Identifier\\>",
+        title="Externalid",
+    )
+    notificationDestination: Optional[AnyUrl] = Field(
+        default=None,
+        description="Reference resource (URL) identifying service consumer's endpoint, in order to receive the asynchronous notification.",
+        title="Notificationdestination",
+    )
+    monitoringType: MonitoringType
+    maximumNumberOfReports: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Identifies the maximum number of event reports to be generated. Value 1 makes the Monitoring Request a One-time Request",
+        title="Maximumnumberofreports",
+    )
+    monitorExpireTime: Optional[datetime] = Field(
+        default=None,
+        description="Identifies the absolute time at which the related monitoring event request is considered to expire",
+        title="Monitorexpiretime",
+    )
+    maximumDetectionTime: Optional[PositiveInt] = Field(
+        default=None,
+        description='If monitoringType is "LOSS_OF_CONNECTIVITY", this parameter may be included to identify the maximum period of time after which the UE is considered to be unreachable.',
+        title="Maximumdetectiontime",
+    )
+    reachabilityType: Optional[ReachabilityType] = Field(
+        default=None,
+        description='If monitoringType is "UE_REACHABILITY", this parameter shall be included to identify whether the request is for "Reachability for SMS" or "Reachability for Data"',
+    )
+
+
+class MonitoringEventSubscription(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    externalId: Optional[str] = Field(
+        default=None,
+        description="Globally unique identifier containing a Domain Identifier and a Local Identifier. \\<Local Identifier\\>@\\<Domain Identifier\\>",
+        title="Externalid",
+    )
+    notificationDestination: Optional[AnyUrl] = Field(
+        default=None,
+        description="Reference resource (URL) identifying service consumer's endpoint, in order to receive the asynchronous notification.",
+        title="Notificationdestination",
+    )
+    monitoringType: MonitoringType
+    maximumNumberOfReports: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Identifies the maximum number of event reports to be generated. Value 1 makes the Monitoring Request a One-time Request",
+        title="Maximumnumberofreports",
+    )
+    monitorExpireTime: Optional[datetime] = Field(
+        None,
+        description="Identifies the absolute time at which the related monitoring event request is considered to expire",
+        title="Monitorexpiretime",
+    )
+    maximumDetectionTime: Optional[PositiveInt] = Field(
+        default=None,
+        description='If monitoringType is "LOSS_OF_CONNECTIVITY", this parameter may be included to identify the maximum period of time after which the UE is considered to be unreachable.',
+        title="Maximumdetectiontime",
+    )
+    reachabilityType: Optional[ReachabilityType] = Field(
+        default=None,
+        description='If monitoringType is "UE_REACHABILITY", this parameter shall be included to identify whether the request is for "Reachability for SMS" or "Reachability for Data"',
+    )
+    link: Optional[AnyUrl] = Field(
+        default=None,
+        description="String identifying a referenced resource. This is also returned as a location header in 201 Created Response",
+        title="Link",
+    )
+    ipv4Addr: Optional[str] = Field(
+        default=None, description="String identifying an Ipv4 address", title="Ipv4Addr"
+    )
+
+
+class SupportedGADShapes(Enum):
+    POINT = "POINT"
+
+
+class GeographicalCoordinates(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    lon: float = Field(..., ge=-180.0, le=180.0, title="Lon")
+    lat: float = Field(..., ge=-90.0, le=90.0, title="Lat")
+
+
+class GeoPoint(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    shape: SupportedGADShapes
+    point: GeographicalCoordinates
+
+
+class GeographicArea(RootModel[GeoPoint]):
+    root: GeoPoint = Field(
+        ...,
+        description="Geographic area specified by different shape.",
+        title="GeographicArea",
+    )
+
+
+class LocationInfo(BaseModel):
+    geographicArea: Optional[GeographicArea] = None
+
+
+class MonitoringEventReport(BaseModel):
+    locationInfo: Optional[LocationInfo] = None
+    monitoringType: MonitoringType
+
+
+class MonitoringNotification(BaseModel):
+    monitoringEventReports: Optional[List[MonitoringEventReport]] = Field(
+        None,
+        description="Monitoring event reports.",
+        min_length=1,
+        title="Monitoringeventreports",
+    )
