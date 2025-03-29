@@ -314,11 +314,11 @@ class CloudEvent(BaseModel):
     source: Source
     type: NotificationEventType
     specversion: Specversion = Field(
-        ...,
+        default=Specversion.field_1_0,
         description="Version of the specification to which this event conforms (must be 1.0 if it conforms to cloudevents 1.0.2 version).",
     )
     datacontenttype: Optional[Datacontenttype] = Field(
-        None,
+        default=Datacontenttype.application_json,
         description='media-type that describes the event payload encoding, must be "application/json" for CAMARA APIs',
     )
     data: Dict[str, Any] = Field(
@@ -609,12 +609,22 @@ class LocationInfo(BaseModel):
     geographicArea: Optional[GeographicArea] = None
 
 
+class ExternalId(RootModel[str]):
+    root: str = Field(
+        ...,
+        description='string containing a local identifier followed by "@" and a domain identifier. Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters. See Clause 4.6.2 of 3GPP TS 23.682 for more information.',
+        title="ExternalId",
+    )
+
+
 class MonitoringEventReport(BaseModel):
+    externalId: Optional[ExternalId] = None
     locationInfo: Optional[LocationInfo] = None
     monitoringType: MonitoringType
 
 
 class MonitoringNotification(BaseModel):
+    subscription: AnyUrl = Field(..., title="Subscription")
     monitoringEventReports: Optional[List[MonitoringEventReport]] = Field(
         None,
         description="Monitoring event reports.",

@@ -1,6 +1,5 @@
 from datetime import datetime
-from re import sub
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException
 from http import HTTPStatus
 from pydantic import AnyUrl
 import requests
@@ -12,12 +11,23 @@ r = Redis()
 
 
 from app.geofencing_subscriptions.schemas import (
+    Area,
+    AreaLeft,
+    AreaType,
+    CloudEvent,
+    DateTime,
+    Device,
     MonitoringEventSubscription,
     MonitoringEventSubscriptionCreate,
+    MonitoringNotification,
     MonitoringType,
+    NetworkAccessIdentifier,
+    NotificationEventType,
     Protocol,
+    Source,
     Status,
     Subscription,
+    SubscriptionId,
     SubscriptionRequest,
 )
 
@@ -28,9 +38,38 @@ router = APIRouter(prefix="/geofencing-subscriptions/v0.4rc1")
 
 
 @router.post("/subscription-webhook")
-async def webhook(req: Request):
-    print(await req.body())
-    r.get()
+def webhook(notification: MonitoringNotification):
+    if notification.subscription is None or notification.subscription.path is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_IMPLEMENTED, detail="hi")
+
+    subscription_path = notification.subscription.path
+    sub_id = subscription_path.rsplit("/")[-1]
+
+    sink = r.get(f"geofencing_sub:{sub_id}")
+    if not isinstance(sink, bytes):
+        return
+    if (
+        notification.monitoringEventReports is None
+        or notification.monitoringEventReports[0].externalId is None
+    ):
+        return
+    event = CloudEvent(
+        id="ola",
+        type=NotificationEventType.org_camaraproject_geofencing_subscriptions_v0_area_entered,
+        time=DateTime(datetime.now()),
+        data=AreaLeft(
+            device=Device(
+                networkAccessIdentifier=NetworkAccessIdentifier(
+                    notification.monitoringEventReports[0].externalId.root
+                )
+            ),
+            area=Area(areaType=AreaType.CIRCLE),
+            subscriptionId=SubscriptionId("ola"),
+        ).model_dump(),
+        source=Source("test"),
+    )
+
+    requests.post(sink, data=event.model_dump_json())
 
 
 @router.get("/subscriptions")
@@ -64,6 +103,10 @@ def post_subscriptions(req: SubscriptionRequest) -> Subscription:
         data=body.model_dump_json(),
         headers={"Authorization": tempAuth},
     )
+    if res.status_code != HTTPStatus.CREATED.value:
+        raise HTTPException(status_code=res.status_code, detail=res.content)
+
+    print(res.content)
     subscription = MonitoringEventSubscription.model_validate_json(res.content)
 
     content = {
