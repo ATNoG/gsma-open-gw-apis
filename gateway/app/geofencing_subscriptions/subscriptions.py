@@ -7,8 +7,7 @@ import geopy
 import logging
 from redis import Redis
 
-r = Redis()
-
+from app.geofencing_subscriptions import router
 
 from app.geofencing_subscriptions.schemas import (
     Area,
@@ -17,24 +16,15 @@ from app.geofencing_subscriptions.schemas import (
     CloudEvent,
     DateTime,
     Device,
-    MonitoringEventSubscription,
-    MonitoringEventSubscriptionCreate,
     MonitoringNotification,
-    MonitoringType,
     NetworkAccessIdentifier,
     NotificationEventType,
-    Protocol,
     Source,
-    Status,
-    Subscription,
     SubscriptionId,
-    SubscriptionRequest,
 )
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.DEBUG)
-
-router = APIRouter(prefix="/geofencing-subscriptions/v0.4rc1")
 
 
 @router.post("/subscription-webhook")
@@ -80,58 +70,6 @@ def get_subscritpions() -> None:
         "message": "Endpoint not implemented",
     }
     raise HTTPException(status_code=HTTPStatus.NOT_IMPLEMENTED, detail=content)
-
-
-tempAuth = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1MjU5MDAsInN1YiI6IjEifQ.5MUBdijHFsKCqHnS5FyGNWBJTLx4-v1OKqorya--Fh8"
-path = "/nef/api/v1/3gpp-monitoring-event/v1/camara/subscriptions"
-baseUrl = "http://localhost:8888"
-
-
-@router.post("/subscriptions")
-def post_subscriptions(req: SubscriptionRequest) -> Subscription:
-    body = MonitoringEventSubscriptionCreate(
-        externalId="69001@domain.com",
-        notificationDestination=AnyUrl(
-            "http://host.docker.internal:8000/geofencing-subscriptions/v0.4rc1/subscription-webhook"
-        ),
-        monitoringType=MonitoringType.LOCATION_REPORTING,
-        maximumNumberOfReports=30,
-        monitorExpireTime=datetime.fromtimestamp(2_000_000_000),
-    )
-    res = requests.post(
-        f"{baseUrl}{path}",
-        data=body.model_dump_json(),
-        headers={"Authorization": tempAuth},
-    )
-    if res.status_code != HTTPStatus.CREATED.value:
-        raise HTTPException(status_code=res.status_code, detail=res.content)
-
-    print(res.content)
-    subscription = MonitoringEventSubscription.model_validate_json(res.content)
-
-    content = {
-        "status": HTTPStatus.NOT_IMPLEMENTED,
-        "code": "NOT_IMPLEMENTED",
-        "message": "Endpoint not implemented",
-    }
-    if subscription.link is None or subscription.link.path is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_IMPLEMENTED, detail=content)
-
-    subscription_path = subscription.link.path
-    sub_id = subscription_path.rsplit("/")[-1]
-
-    r.set(f"geofencing_sub:{sub_id}", req.sink)
-
-    return Subscription(
-        protocol=Protocol.HTTP,
-        sink=req.sink,
-        types=req.types,
-        config=req.config,
-        startsAt=datetime.now(),
-        id=sub_id,
-        expiresAt=subscription.monitorExpireTime,
-        status=Status.ACTIVE,
-    )
 
 
 @router.get("/subscriptions/{subscription_id}")

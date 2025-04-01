@@ -500,7 +500,7 @@ class MonitoringEventSubscriptionCreate(BaseModel):
         extra="forbid",
     )
     externalId: Optional[str] = Field(
-        default=None,
+        None,
         description="Globally unique identifier containing a Domain Identifier and a Local Identifier. \\<Local Identifier\\>@\\<Domain Identifier\\>",
         title="Externalid",
     )

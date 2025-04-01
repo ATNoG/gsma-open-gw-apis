@@ -1,17 +1,33 @@
-from typing import Union, Any
+from http import HTTPStatus
 from fastapi import FastAPI
-from app.geofencing_subscriptions import subscriptions
+from fastapi.responses import JSONResponse
+from app import geofencing_subscriptions
+from app.exceptions import ApiException
+
 
 app = FastAPI()
-
-app.include_router(subscriptions.router)
-
-
-@app.get("/")
-def read_root() -> dict[str, str]:
-    return {"Hello": "World"}
+app.include_router(geofencing_subscriptions.router)
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None) -> dict[str, Any]:
-    return {"item_id": item_id, "q": q}
+@app.exception_handler(ApiException)
+def generic_exception(_req, e: ApiException):
+    return JSONResponse(
+        status_code=e.status,
+        content={
+            "status": e.status,
+            "code": e.code,
+            "message": e.message,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+def unknown_exception(_req, _e):
+    return JSONResponse(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+        content={
+            "status": HTTPStatus.INTERNAL_SERVER_ERROR,
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "An unknown error has occured.",
+        },
+    )
