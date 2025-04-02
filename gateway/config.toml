@@ -1,0 +1,4 @@
+[sms_otp]
+backend = "smsc"
+otp_code_size = 4
+smsc_url = "http://localhost:7090"
