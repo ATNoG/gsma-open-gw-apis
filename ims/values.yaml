@@ -9,7 +9,7 @@ fullnameOverride: ""
 
 mnc: 003
 mcc: 999
-mnoDomain: ims.mnc003.mcc999.3gppnetwork.org
+# mnoDomain: ims.mnc013.mcc999.3gppnetwork.org
 
 database:
   name: ""

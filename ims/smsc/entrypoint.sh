@@ -14,6 +14,10 @@ mysql --defaults-extra-file=/client.password -u "$DATABASE_USER" -h "$DATABASE_A
 mysql --defaults-extra-file=/client.password -u "$DATABASE_USER" -h "$DATABASE_ADDR" smsc < /usr/local/src/kamailio/utils/kamctl/mysql/usrloc-create.sql || true
 mysql --defaults-extra-file=/client.password -u "$DATABASE_USER" -h "$DATABASE_ADDR" smsc < /usr/local/src/kamailio/utils/kamctl/mysql/domain-create.sql || true
 
+if [[ "${DEBUG:-no}" == "yes" ]]; then
+	sed -i 's|##!define WITH_DEBUG\b|#!define WITH_DEBUG|g' /etc/kamailio_smsc/smsc.cfg
+fi
+
 sed -i 's|IMS_DOMAIN|'$IMS_DOMAIN'|g' /etc/kamailio_smsc/smsc.cfg
 sed -i 's|ADVERTISE_ADDR|'$ADVERTISE_ADDR'|g' /etc/kamailio_smsc/smsc.cfg
 sed -i 's|DATABASE_ADDR|'$DATABASE_ADDR'|g' /etc/kamailio_smsc/smsc.cfg

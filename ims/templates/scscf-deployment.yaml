@@ -54,7 +54,7 @@ spec:
               protocol: TCP
           env:
             - name: IMS_DOMAIN
-              value: {{ .Values.mnoDomain }}
+              value: {{ include "ims.mnoDomain" . }}
             - name: ADVERTISE_ADDR
               valueFrom:
                 fieldRef:
@@ -68,8 +68,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "ims.fullname" . }}-scscf
                   key: password 
-            - name: DEBUG
-              value: "yes"
           {{- with .Values.scscf.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

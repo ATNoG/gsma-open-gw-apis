@@ -6,6 +6,9 @@ metadata:
     {{- include "ims.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.pcscf.replicaCount }}
+  # Recreate the pods to prevent problems with port allocation
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "ims.pcscfSelectorLabels" . | nindent 6 }}
@@ -53,7 +56,7 @@ spec:
             - name: RELEASE_NAME
               value: {{ include "ims.fullname" . }}
             - name: IMS_DOMAIN
-              value: {{ .Values.mnoDomain }}
+              value: {{ include "ims.mnoDomain" . }}
             - name: DATABASE_ADDR
               value: {{ include "ims.databaseInstanceName" . }}
             - name: DATABASE_USER
@@ -71,8 +74,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: DEBUG
-              value: "yes"
           {{- with .Values.pcscf.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

@@ -51,7 +51,7 @@ spec:
               protocol: TCP
           env:
             - name: IMS_DOMAIN
-              value: {{ .Values.mnoDomain }}
+              value: {{ include "ims.mnoDomain" . }}
             - name: MCC
               value: "{{ .Values.mcc }}"
             - name: MNC

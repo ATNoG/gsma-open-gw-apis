@@ -45,7 +45,7 @@ spec:
               protocol: UDP
           env:
             - name: IMS_DOMAIN
-              value: {{ .Values.mnoDomain }}
+              value: {{ include "ims.mnoDomain" . }}
             - name: RELEASE_NAME
               value: {{ include "ims.fullname" . }}
           {{- with .Values.dns.resources }}

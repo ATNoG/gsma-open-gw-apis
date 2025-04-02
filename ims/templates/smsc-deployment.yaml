@@ -48,7 +48,7 @@ spec:
               protocol: TCP
           env:
             - name: IMS_DOMAIN
-              value: {{ .Values.mnoDomain }}
+              value: {{ include "ims.mnoDomain" . }}
             - name: ADVERTISE_ADDR
               valueFrom:
                 fieldRef:
