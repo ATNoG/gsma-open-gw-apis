@@ -6,6 +6,9 @@ metadata:
     {{- include "ims.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.rtpengine.replicaCount }}
+  # Recreate the pods to prevent problems with port allocation
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "ims.rtpengineSelectorLabels" . | nindent 6 }}

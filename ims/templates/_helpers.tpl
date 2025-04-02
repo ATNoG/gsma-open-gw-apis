@@ -100,3 +100,12 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/name: {{ include "ims.name" . }}-rtpengine
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/* The MNO domain */}}
+{{- define "ims.mnoDomain" -}}
+{{- if .Values.mnoDomain }}
+{{- .Values.mnoDomain }}
+{{- else }}
+{{- printf "ims.mnc%03d.mcc%03d.3gppnetwork.org" (.Values.mnc | int) (.Values.mcc | int) }}
+{{- end }}
+{{- end }}
