@@ -1,6 +1,8 @@
+import logging
 from enum import Enum
+from typing import Annotated, Literal
 
-from pydantic import AnyHttpUrl, BaseModel, PositiveInt
+from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -8,23 +10,36 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
+LogLevel = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
+
 
 class SMSBackend(str, Enum):
     Mock = "mock"
     SMSC = "smsc"
 
 
+class OTPBackend(str, Enum):
+    Memory = "memory"
+    Redis = "redis"
+
+
 class SMSOTPSettings(BaseModel):
-    backend: SMSBackend
+    sms_backend: SMSBackend
+    otp_backend: OTPBackend
 
     otp_code_size: PositiveInt = 6
-    max_checks: PositiveInt = 5
+    max_attempts: PositiveInt = 5
+    otp_expiry_secs: PositiveInt = 1800
 
     smsc_url: AnyHttpUrl
+    sender_id: Annotated[str, Field(max_length=11)]
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
+
+    log_level: LogLevel = "INFO"
+    redis_url: str = "redis://localhost:6379"
 
     sms_otp: SMSOTPSettings
 
@@ -41,3 +56,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+logging.basicConfig(level=settings.log_level)
