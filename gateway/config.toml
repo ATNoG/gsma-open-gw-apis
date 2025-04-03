@@ -1,4 +1,5 @@
 [sms_otp]
-backend = "smsc"
-otp_code_size = 4
+sms_backend = "mock"
+otp_backend = "redis"
 smsc_url = "http://localhost:7090"
+sender_id = "1234"
