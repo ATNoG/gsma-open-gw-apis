@@ -26,9 +26,8 @@
 % Add `showframe` to display geometry guides
 \RequirePackage[headheight=20mm,headsep=5mm]{geometry}
 
-% Add support for portuguese writing rules
-\RequirePackage[portuguese]{babel}
-\babelprovide[transforms = hyphen.repeat]{portuguese}
+% Add support for english writing rules
+\RequirePackage[english]{babel}
 
 % Allows setting custom padding
 \RequirePackage{setspace}
