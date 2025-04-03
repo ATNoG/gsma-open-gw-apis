@@ -9,7 +9,7 @@ from .mock import MockSMSInterface
 from .smsc import SMSCSMSInterface
 
 sms_interface: SMSInterface
-match settings.sms_otp.backend:
+match settings.sms_otp.sms_backend:
     case SMSBackend.Mock:
         sms_interface = MockSMSInterface()
     case SMSBackend.SMSC:
