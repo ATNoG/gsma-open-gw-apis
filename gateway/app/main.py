@@ -1,15 +1,26 @@
 from fastapi import FastAPI
 from fastapi.requests import Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
+from fastapi.exceptions import RequestValidationError
 
 from typing import Any
 from collections.abc import Awaitable, Callable
 
 from app import endpoints
+from app.schemas import ErrorInfo
 
 app = FastAPI()
 app.include_router(endpoints.router)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> Response:
+    body = ErrorInfo(status=400, code="INVALID_ARGUMENT", message=str(exc))
+    return JSONResponse(status_code=400, content=jsonable_encoder(body))
 
 
 @app.middleware("http")
