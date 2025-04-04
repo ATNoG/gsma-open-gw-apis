@@ -1,26 +1,18 @@
 from fastapi import FastAPI
 from fastapi.requests import Request
-from fastapi.encoders import jsonable_encoder
+from fastapi.responses import Response
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse, Response
-from fastapi.exceptions import RequestValidationError
 
 from typing import Any
 from collections.abc import Awaitable, Callable
 
 from app import endpoints
-from app.schemas import ErrorInfo
+from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
 app.include_router(endpoints.router)
 
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> Response:
-    body = ErrorInfo(status=400, code="INVALID_ARGUMENT", message=str(exc))
-    return JSONResponse(status_code=400, content=jsonable_encoder(body))
+install_exception_handlers(app)
 
 
 @app.middleware("http")
@@ -78,6 +70,10 @@ def custom_openapi() -> dict[str, Any]:
             parameters.append({"$ref": "#/components/parameters/x-correlator"})
 
             responses = operation.setdefault("responses", {})
+
+            if responses.get("422") is not None:
+                del responses["422"]
+
             for _, response in responses.items():
                 headers = response.setdefault("headers", {})
                 headers["x-correlator"] = {"$ref": "#/components/headers/x-correlator"}
