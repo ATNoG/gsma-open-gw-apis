@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "microsite/**"
+      - "gateway/**"
       - ".github/workflows/test-gateway.yml"
   pull_request:
     paths:
-      - "microsite/**"
+      - "gateway/**"
       - ".github/workflows/test-gateway.yml"
 
 jobs:
