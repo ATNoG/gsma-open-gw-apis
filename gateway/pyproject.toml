@@ -17,9 +17,9 @@ plugins = ['pydantic.mypy']
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "mypy>=1.15.0",
     "pytest>=8.3.5",
+    "pytest-mock>=3.14.0",
     "ruff>=0.11.0",
 ]
 
