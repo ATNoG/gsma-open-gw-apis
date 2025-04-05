@@ -1,6 +1,7 @@
 from datetime import datetime
 import httpx
 from pydantic import AnyHttpUrl
+from urllib.parse import urlencode
 from fastapi import HTTPException
 
 from app.settings import settings
@@ -49,7 +50,7 @@ class NEFEmulatorDriver(LocationInterface):
         doc = doc.json()
 
         print(doc)
-        area = doc["locationArea"]["geographicAreas"][0]
+        area = doc["ueMobilityInfos"][0]["locInfo"][0]["loc"]["geographicAreas"][0]
 
         if area["shape"] == "POINT":
             point = area["point"]
