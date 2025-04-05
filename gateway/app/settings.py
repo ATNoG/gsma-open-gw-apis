@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
+from typing import Literal
+
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -39,6 +41,16 @@ class GeofencingSettings(BaseModel):
     monitoring_url: AnyHttpUrl
 
 
+class LocationBackend(str, Enum):
+    Mock = "mock"
+    NefEmulator = "emulator"
+
+
+class NEFEmulatorSettings(BaseModel):
+    emulator_url: AnyHttpUrl
+    location_backend: LocationBackend
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -47,6 +59,9 @@ class Settings(BaseSettings):
 
     sms_otp: SMSOTPSettings
     geofencing: GeofencingSettings
+    afId: str = "myNetApp"
+
+    emulator: NEFEmulatorSettings
 
     @classmethod
     def settings_customise_sources(
