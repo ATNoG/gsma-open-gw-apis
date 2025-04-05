@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
+
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -41,6 +42,11 @@ class QoSProfilesBackend(Enum):
 
 class QoSProfilesSettings(BaseModel):
     backend: QoSProfilesBackend
+
+
+class LocationBackend(str, Enum):
+    Mock = "mock"
+    NefEmulator = "emulator"
 
 
 class Settings(BaseSettings):
