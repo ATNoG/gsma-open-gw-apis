@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Annotated, override, Optional
+from typing import Annotated, override
 from pydantic import BaseModel, Field, SerializeAsAny
 from datetime import datetime
 
