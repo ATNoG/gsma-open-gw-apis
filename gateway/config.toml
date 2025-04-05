@@ -3,3 +3,7 @@ sms_backend = "mock"
 otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
+
+[emulator]
+emulator_url = "http://localhost:8888"
+location_backend = "emulator"
