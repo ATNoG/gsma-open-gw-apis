@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
+
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -35,6 +36,16 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class LocationBackend(str, Enum):
+    Mock = "mock"
+    NefEmulator = "emulator"
+
+
+class NEFEmulatorSettings(BaseModel):
+    emulator_url: AnyHttpUrl
+    location_backend: LocationBackend
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -42,6 +53,9 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     sms_otp: SMSOTPSettings
+    afId: str = "myNetApp"
+
+    emulator: NEFEmulatorSettings
 
     @classmethod
     def settings_customise_sources(
