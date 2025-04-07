@@ -6,6 +6,12 @@ sidebar-position: 5
 
 # Architecture
 
+<!--toc:start-->
+- [Architecture](#architecture)
+  - [Ideal Architecture](#ideal-architecture)
+  - [Real Architecture](#real-architecture)
+<!--toc:end-->
+
 In this section, our project's architecture will be presented as well as a
 brief explanation on the decisions made and the current landscape that lead to
 those decisions.
@@ -60,17 +66,9 @@ To address these problems, the following architecture was devised.
 
 ![](../../static/img/RealArchitecture.png)
 
-Now, instead of the gateway implementing its APIs based on the standard 3GPP
-APIs, it implements everything against a 5G core abstraction. This abstraction
-is backed by multiple implementations that each address a different core. One
-could interface standards compliant cores, others could support proprietary
-APIs exposed by the cores (as seen in the case of CumuCore), and finally there
-could be implementations that talk to middlewares that wrap the interfaces of
-cores that don't have APIs (as is the case for the Huawei implementation).
+Now, a NEF Emulator will be deployed to emulate functionality that isn't provided by the cores currently available at IT Aveiro, mainly location APIs. Furthermore, it will also be used to communicate with the different cores through different drivers, each for their respective core. One could interface standards compliant cores, others could support proprietary APIs exposed by the cores (as seen in the case of CumuCore), and finally there could be implementations that talk to middlewares that wrap the interfaces of cores that don't have APIs (as is the case for the Huawei implementation).
 
-Furthermore, a NEF Emulator will be deployed to emulate functionality that
-isn't provided by the cores currently available at IT Aveiro, mainly location
-APIs.
+Moreover, instead of the gateway communicating directly to the core, it would comunicate with 3GPP compliant interfaces presented by the NEF Emulator.
 
 Finally, to provide telephony services an IP Multimedia Subsystem (IMS) will be
 deployed. This set of components allows the user equipment (mobile phones) to
