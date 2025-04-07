@@ -1,0 +1,19 @@
+[project]
+name = "webhook-to-websocket"
+version = "0.1.0"
+description = "Sends webhook callbacks into a webhook"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.0",
+    "Flask-SocketIO>=5.5.1"
+]
+
+[tool.mypy]
+strict = true
+plugins = ['pydantic.mypy']
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0",
+]
+
