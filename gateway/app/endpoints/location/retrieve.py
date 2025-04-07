@@ -5,11 +5,11 @@ from app.schemas.location import (
 )
 from app.drivers.location import LocationInterfaceDep
 
-router = APIRouter()
+router = APIRouter(prefix="/location-retrieval/v1")
 
 
 @router.post("/retrieve")
-async def send_code(
+async def retrieve_location(
     body: RetrievalLocationRequest, location_interface: LocationInterfaceDep
 ) -> Location:
     device = body.device

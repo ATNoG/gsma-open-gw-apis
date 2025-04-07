@@ -29,7 +29,7 @@ class NEFEmulatorDriver(LocationInterface):
             "notificationDestination": "https://0.0.0.0",
             "maximumNumberOfReports": 1,
         }
-        url = f"{self.emulator_url}nef/api/v1/3gpp-monitoring-event/v1/myNetApp/subscriptions"
+        url = f"{self.emulator_url}nef/api/v1/3gpp-monitoring-event/v1/{settings.afId}/subscriptions"
 
         print("Querying the NEF Emulator at", url, "with data", data)
 

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Annotated, override
+from typing import Annotated, override, Optional
 from pydantic import BaseModel, Field, SerializeAsAny
 from datetime import datetime
 
@@ -73,5 +73,44 @@ class RetrievalLocationRequest(BaseModel):
         Field(
             ge=1,
             description='Maximum surface in square meters which is accepted by the client for the location retrieval. Absence of maxSurface means "any surface size".',
+        ),
+    ]
+
+
+class VerifyLocationRequest(BaseModel):
+    device: Device
+    area: Circle
+    maxAge: Annotated[
+        int,
+        Field(
+            description='The maximum age (in seconds) for the location known by the implementation, which is accepted for the verification. Absence of maxAge means "any age" and maxAge=0 means a fresh calculation.',
+            ge=0,
+        ),
+    ]
+
+
+class VerificationResult(str, Enum):
+    TRUE = ("True",)
+    FALSE = ("False",)
+    PARTIAL = ("Partial",)
+    UNKNOWN = "Unknown"
+
+
+class VerifyLocationResponse(BaseModel):
+    lastLocationTime: Annotated[
+        datetime,
+        Field(
+            description="Last date and time when the device was localized. It must follow RFC 3339 and must have time zone. Recommended format is yyyy-MM-dd'T'HH:mm:ss.SSSZ (i.e. which allows 2023-07-03T14:27:08.312+02:00 or 2023-07-03T12:27:08.312Z)"
+        ),
+    ]
+
+    verificationResult: VerificationResult
+    matchRate: Annotated[
+        int,
+        Field(
+            None,
+            description="Estimation of the match rate between the area in the request (R), and area where the network locates the device (N), calculated as the percent value of the intersection of both areas divided by the network area, that is (R ∩ N) / N * 100. Included only if VerificationResult is PARTIAL.",
+            ge=1,
+            le=99,
         ),
     ]

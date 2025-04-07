@@ -13,6 +13,7 @@
   in {
     devShells = forAllSystems (system: let
       pkgs = nixpkgsFor.${system};
+      python = pkgs.python3;
     in {
       default = pkgs.mkShell {
         packages = [
@@ -21,6 +22,8 @@
           pkgs.prettierd
           pkgs.vscode-langservers-extracted
           pkgs.nodePackages.typescript-language-server
+          pkgs.tailwindcss-language-server
+          pkgs.stdenv.cc.cc.lib
 
           pkgs.uv
           pkgs.ruff
