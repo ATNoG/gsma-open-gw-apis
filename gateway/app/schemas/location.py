@@ -49,7 +49,9 @@ class Circle(Area):
     ]
 
     def __init__(self, **data) -> None:
-        super().__init__(**data, areaType=AreaType.CIRCLE)
+        super().__init__(
+            center=data["center"], radius=data["radius"], areaType=AreaType.CIRCLE
+        )
 
 
 class Location(BaseModel):
