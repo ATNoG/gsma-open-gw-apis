@@ -1,20 +1,15 @@
 from fastapi import FastAPI
 from fastapi.requests import Request
-<<<<<<< HEAD
 from fastapi.responses import Response
 from fastapi.openapi.utils import get_openapi
-=======
 from fastapi.encoders import jsonable_encoder
-from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
->>>>>>> 3bb2cb6 (gateway: implemented location retrieval)
 
 from typing import Any
 from collections.abc import Awaitable, Callable
 
 from app import endpoints
-<<<<<<< HEAD
 from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
@@ -37,36 +32,6 @@ async def add_correlation_header(
     return response
 
 
-=======
-from app.schemas import ErrorInfo
-
-app = FastAPI()
-app.include_router(endpoints.router)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> Response:
-    body = ErrorInfo(status=400, code="INVALID_ARGUMENT", message=str(exc))
-    return JSONResponse(status_code=400, content=jsonable_encoder(body))
-
-
-@app.middleware("http")
-async def add_correlation_header(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    x_correlator = request.headers.get("x-correlator")
-
-    response = await call_next(request)
-
-    if x_correlator is not None:
-        response.headers["x-correlator"] = x_correlator
-
-    return response
-
-
->>>>>>> 3bb2cb6 (gateway: implemented location retrieval)
 # Add the x-correlator header to all operations and responses
 def custom_openapi() -> dict[str, Any]:
     if app.openapi_schema:
@@ -108,13 +73,9 @@ def custom_openapi() -> dict[str, Any]:
             parameters.append({"$ref": "#/components/parameters/x-correlator"})
 
             responses = operation.setdefault("responses", {})
-<<<<<<< HEAD
-
             if responses.get("422") is not None:
                 del responses["422"]
 
-=======
->>>>>>> 3bb2cb6 (gateway: implemented location retrieval)
             for _, response in responses.items():
                 headers = response.setdefault("headers", {})
                 headers["x-correlator"] = {"$ref": "#/components/headers/x-correlator"}

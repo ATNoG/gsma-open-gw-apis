@@ -37,6 +37,9 @@ class NEFEmulatorDriver(LocationInterface):
         doc = self.httpx_client.post(
             f"{self.emulator_url}nef/api/v1/3gpp-analyticsexposure/v1/{settings.afId}/fetch",
             json=data,
+            headers={
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ1MDE2MTksInN1YiI6IjEifQ.XCmuB0bcQmrafhuzLUHVkLSe0JXJaaKBjFrqQRNrdos"
+            },
         )
 
         doc = await doc
