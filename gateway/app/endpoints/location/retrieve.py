@@ -5,7 +5,7 @@ from app.schemas.location import (
 )
 from app.drivers.location import LocationInterfaceDep
 
-router = APIRouter()
+router = APIRouter(prefix="/location-retrieval/v0.4")
 
 
 @router.post("/retrieve")
