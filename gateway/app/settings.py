@@ -35,6 +35,12 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class ProvisioningSettings(BaseModel):
+    nef_url: AnyHttpUrl
+    gateway_url: AnyHttpUrl
+    as_id: int
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -42,6 +48,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     sms_otp: SMSOTPSettings
+    provisioning: ProvisioningSettings
 
     @classmethod
     def settings_customise_sources(
