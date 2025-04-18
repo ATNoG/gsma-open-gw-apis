@@ -52,6 +52,11 @@ class LocationBackend(str, Enum):
 class LocationSettings(BaseModel):
     backend: LocationBackend
 
+class ProvisioningSettings(BaseModel):
+    nef_url: AnyHttpUrl
+    gateway_url: AnyHttpUrl
+    as_id: int
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
@@ -66,6 +71,7 @@ class Settings(BaseSettings):
     sms_otp: SMSOTPSettings
     qos_profiles: QoSProfilesSettings
     location: LocationSettings
+    provisioning: ProvisioningSettings
 
     @classmethod
     def settings_customise_sources(

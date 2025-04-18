@@ -6,8 +6,14 @@ otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
 
+<<<<<<< HEAD
 [qos_profiles]
 backend = "nef"
 
 [location]
 backend = "nef"
+
+[provisioning]
+nef_url = "http://localhost:8888/nef/api/3gpp-as-session-with-qos/v1/"
+gateway_url = "http://host.docker.internal:8000/callbacks/v1"
+as_id = 1
