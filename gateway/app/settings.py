@@ -3,12 +3,8 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
-from pydantic_settings import (
-    BaseSettings,
-    PydanticBaseSettingsSource,
-    SettingsConfigDict,
-    TomlConfigSettingsSource,
-)
+from pydantic_settings import (BaseSettings, PydanticBaseSettingsSource,
+                               SettingsConfigDict, TomlConfigSettingsSource)
 
 LogLevel = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
@@ -35,8 +31,13 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class NefSettigns(BaseModel):
+    auth: str
+
+
 class GeofencingSettings(BaseModel):
     monitoring_url: AnyHttpUrl
+    nef_webhook: AnyHttpUrl
 
 
 class Settings(BaseSettings):
@@ -47,6 +48,7 @@ class Settings(BaseSettings):
 
     sms_otp: SMSOTPSettings
     geofencing: GeofencingSettings
+    nef: NefSettigns
 
     @classmethod
     def settings_customise_sources(

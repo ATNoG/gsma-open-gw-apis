@@ -4,5 +4,10 @@ otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
 
+[nef]
+auth = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU1OTk5MjksInN1YiI6IjEifQ.ND10aDhO-FoGLyMhZU8sGOjLG-PvKPHBzd_Jr8zcHyY"
+
 [geofencing]
 monitoring_url = "http://localhost:8888/nef/api/v1/3gpp-monitoring-event/v1/camara"
+nef_webhook = "http://host.docker.internal:8000/geofencing/webhook"
+

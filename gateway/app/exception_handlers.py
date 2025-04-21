@@ -1,16 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, Response
 
-from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
+from app.interfaces.geofencing_subscriptions import \
+    GeofencingSubscriptionNotFound
+from app.interfaces.otp import (OTPExpiredCodeError, OTPInvalidCodeError,
+                                OTPNotFoundError, OTPTooManyAttemptsError)
 from app.schemas import ErrorInfo
-from app.interfaces.otp import (
-    OTPExpiredCodeError,
-    OTPInvalidCodeError,
-    OTPNotFoundError,
-    OTPTooManyAttemptsError,
-)
 
 
 def install_exception_handlers(app: FastAPI) -> None:

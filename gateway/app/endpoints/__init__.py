@@ -1,11 +1,11 @@
-from fastapi import APIRouter
-
 from typing import Any, Union
+
+from fastapi import APIRouter
 
 from app.endpoints import geofencing_webhook
 from app.schemas import ErrorInfo
 
-from . import smsotp, geofencing_subscriptions
+from . import geofencing_subscriptions, smsotp
 
 responses: dict[Union[int, str], dict[str, Any]] = {
     400: {

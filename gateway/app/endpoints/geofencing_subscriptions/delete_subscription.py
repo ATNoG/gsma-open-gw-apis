@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Response
 from http import HTTPStatus
 
-from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
+from fastapi import APIRouter, Response
 
+from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
 
 router = APIRouter()
 
 
-@router.delete("/subscriptions/{subscriptionId}")
+@router.delete("/subscriptions/{subscriptionId}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_subscriptions_by_id(
     subscriptionId: str,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
-) -> Response:
+) -> None:
+    await geofencing_subscription_interface.clear_expired_subscriptions()
     await geofencing_subscription_interface.delete_subscription(subscriptionId)
-    return Response(status_code=HTTPStatus.NO_CONTENT.value)

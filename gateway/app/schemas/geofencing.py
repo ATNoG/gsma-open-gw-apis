@@ -5,17 +5,8 @@ from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import (
-    AnyUrl,
-    BaseModel,
-    Field,
-    RootModel,
-    ConfigDict,
-    PositiveInt,
-    confloat,
-    conint,
-    constr,
-)
+from pydantic import (AnyUrl, BaseModel, ConfigDict, Field, PositiveInt,
+                      RootModel, conint)
 
 
 class Protocol(Enum):
@@ -91,22 +82,22 @@ class RefreshTokenCredential(SinkCredential):
 
 
 class SubscriptionEventType(Enum):
-    org_camaraproject_geofencing_subscriptions_v0_area_entered = (
+    v0_area_entered = (
         "org.camaraproject.geofencing-subscriptions.v0.area-entered"
     )
-    org_camaraproject_geofencing_subscriptions_v0_area_left = (
+    v0_area_left = (
         "org.camaraproject.geofencing-subscriptions.v0.area-left"
     )
 
 
 class NotificationEventType(Enum):
-    org_camaraproject_geofencing_subscriptions_v0_area_entered = (
+    v0_area_entered = (
         "org.camaraproject.geofencing-subscriptions.v0.area-entered"
     )
-    org_camaraproject_geofencing_subscriptions_v0_area_left = (
+    v0_area_left = (
         "org.camaraproject.geofencing-subscriptions.v0.area-left"
     )
-    org_camaraproject_geofencing_subscriptions_v0_subscription_ends = (
+    v0_subscription_ends = (
         "org.camaraproject.geofencing-subscriptions.v0.subscription-ends"
     )
 
@@ -170,24 +161,26 @@ class AreaType(str, Enum):
     CIRCLE = "CIRCLE"
 
 
-class Latitude(RootModel[confloat(ge=-90.0, le=90.0)]):
-    root: float = Field(
-        ...,
+Latitude = Annotated[
+    float,
+    Field(
         ge=-90.0,
         le=90.0,
         description="Latitude component of a location.",
         examples=[50.735851],
-    )
+    ),
+]
 
-
-class Longitude(RootModel[confloat(ge=-180.0, le=180.0)]):
-    root: float = Field(
+Longitude = Annotated[
+    float,
+    Field(
         ...,
         ge=-180.0,
         le=180.0,
         description="Longitude component of location.",
         examples=[7.10066],
-    )
+    ),
+]
 
 
 class Specversion(Enum):
@@ -497,18 +490,16 @@ class NATSSubscriptionResponse(Subscription):
 
 class SubscriptionRequest(BaseModel):
     protocol: Protocol
-    sink: str = Field(
-        ...,
+    sink: Annotated[str , Field(
         description="The address to which events shall be delivered using the selected protocol.",
         examples=["https://endpoint.example.com/sink"],
-    )
+    )]
     sinkCredential: Optional[SinkCredential] = None
-    types: List[SubscriptionEventType] = Field(
-        ...,
+    types: Annotated[List[SubscriptionEventType], Field(
         description="Camara Event types which are eligible to be delivered by this subscription.\nNote: As of now we enforce to have only event type per subscription.\n",
         max_length=1,
         min_length=1,
-    )
+    )]
     config: Config
 
 

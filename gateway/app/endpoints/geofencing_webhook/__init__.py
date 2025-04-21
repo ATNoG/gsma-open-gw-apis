@@ -1,17 +1,17 @@
 import logging
+
 from fastapi import APIRouter
 from pydantic import AnyUrl
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
 from app.schemas.geofencing import MonitoringNotification
 
-
 router = APIRouter()
 
 LOG = logging.getLogger(__name__)
 
 
-def _get_subscription_id_from_subscription_url(url: AnyUrl | None) -> str:
+def _get_nef_sub_from_subscription_url(url: AnyUrl | None) -> str:
     if url is None or url.path is None:
         raise Exception("Invalid url")
 
@@ -23,10 +23,9 @@ async def webhook(
     notification: MonitoringNotification,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
 ) -> None:
-    print(notification)
-    id = _get_subscription_id_from_subscription_url(notification.subscription)
-
-    subscription = await geofencing_subscription_interface.get_subscription(id)
+    LOG.debug(notification)
+    nef_sub = _get_nef_sub_from_subscription_url(notification.subscription)
+    await geofencing_subscription_interface.clear_expired_subscriptions()
 
     if (
         notification.monitoringEventReports is None
@@ -37,4 +36,5 @@ async def webhook(
         return
 
     point = notification.monitoringEventReports[0].locationInfo.geographicArea.point
+    subscription = await geofencing_subscription_interface.get_subscription(nef_sub)
     await geofencing_subscription_interface.notify_location(subscription, point)

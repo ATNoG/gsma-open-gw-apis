@@ -2,8 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from app.interfaces.geofencing_subscriptions import \
+    GeofencingSubscriptionInterface
+
 from .subscriptions import RedisGeofencingSubscriptionInterface
-from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionInterface
 
 geofencing_subscription_interface: GeofencingSubscriptionInterface = (
     RedisGeofencingSubscriptionInterface()

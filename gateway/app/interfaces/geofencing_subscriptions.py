@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-import geopy
-
 from app.schemas.geofencing import (
     GeographicalCoordinates,
     Subscription,
@@ -41,4 +39,8 @@ class GeofencingSubscriptionInterface(ABC):
     async def notify_location(
         self, subscription: Subscription, location: GeographicalCoordinates
     ) -> None:
+        pass
+
+    @abstractmethod
+    async def clear_expired_subscriptions(self) -> None:
         pass
