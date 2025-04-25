@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.schemas.commonData import UserPlaneNotificationData
+from app.schemas.afSessionWithQos import UserPlaneNotificationData
 from app.schemas.qodProvisioning import (
     CreateProvisioning,
     ProvisioningInfo,
