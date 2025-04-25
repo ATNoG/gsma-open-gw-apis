@@ -1,7 +1,7 @@
+from app.schemas.afSessionWithQos import UserPlaneNotificationData
 from fastapi import APIRouter
 
 from app.drivers.qodProvisioning.provisioning import RedisQoDProvisioningInterface
-from app.schemas.qodProvisioning import UserPlaneNotificationData
 
 router = APIRouter()
 
