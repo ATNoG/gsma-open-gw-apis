@@ -37,6 +37,7 @@ class SMSOTPSettings(BaseModel):
 
 class ProvisioningSettings(BaseModel):
     nef_url: AnyHttpUrl
+    gateway_url_callback: AnyHttpUrl
     gateway_url: AnyHttpUrl
     as_id: int
 
