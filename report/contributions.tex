@@ -4,5 +4,17 @@ In order to facilitate developers’ interaction with the network, our project i
 
 \section{NEF Emulator Updates}
 
+Many of these contributions were made on the NEF Emulator, a tool used by Intituto de Telecomunicações, with the goal of simulating the NEF present on 5G Cores, however, for our project many of the functionality we needed was not present or was
+not following the required standarts, defiined by 3GPP.
 
+\subsection{Monitoring Event APIs}
 
+For the Location API (WARN: not sure if location) we needed the response of these APIs, however the response provided was mostly incomplete, and did not follow the most recent release of 3GPP, which  should not happen. In order to be able to use it for our project, we were tasked to complete the response, keeping in mind it had to follow the standarts defined in the latest release, this release being 18.
+
+\subsection{Location Notifications}
+
+TODO: Make sure what changed here
+
+\subsection{Importing Scenarios}
+
+To improve both setup efficiency and test reliability, we replaced the manual configuration process, where each tower, user equipment (UE), and path had to be set up individually through the emulator’s interface, with an import system. This new mechanism enables automatic population of the emulator’s database using predefined use-case files. By doing so, we’ve eliminated the repetitive manual steps and ensured consistency across different test executions.
