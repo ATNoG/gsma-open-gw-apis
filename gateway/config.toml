@@ -1,5 +1,10 @@
+nef_url = "http://localhost:8888/"
+
 [sms_otp]
 sms_backend = "mock"
 otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
+
+[qos_profiles]
+backend = "nef"

@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from app.schemas import ErrorInfo
 
-from . import smsotp
+from . import smsotp, qos_profiles
 
 responses: dict[Union[int, str], dict[str, Any]] = {
     400: {
@@ -14,4 +14,5 @@ responses: dict[Union[int, str], dict[str, Any]] = {
 }
 
 router = APIRouter(responses=responses)
-router.include_router(smsotp.router)
+router.include_router(smsotp.router, tags=["SMS OTP"])
+router.include_router(qos_profiles.router, tags=["QoS Profiles"])
