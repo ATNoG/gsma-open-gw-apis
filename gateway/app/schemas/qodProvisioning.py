@@ -3,14 +3,52 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Any, Dict, Optional, Union
+from typing import Annotated, Any, Dict, Optional
 from uuid import UUID
 
-from pydantic import AnyUrl, BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field, model_validator
 
 
-class ProvisioningId(BaseModel):
-    __root__: UUID = Field(description="Provisioning Identifier in UUID format")
+ProvisioningId = Annotated[
+    UUID, Field(description="Provisioning Identifier in UUID format")
+]
+
+QosProfileName = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-zA-Z0-9_.-]+$",
+        description="A unique name for identifying a specific QoS profile.\nThis may follow different formats depending on the service providers implementation.\nSome options addresses:\n  - A UUID style string\n  - Support for predefined profiles QOS_S, QOS_M, QOS_L, and QOS_E\n  - A searchable descriptive name\nThe set of QoS Profiles that an operator is offering can be retrieved by means of the [QoS Profile API](link TBC).\n",
+        max_length=256,
+        min_length=3,
+    ),
+]
+
+Port = Annotated[int, Field(ge=0, le=65535, description="TCP or UDP port number.")]
+
+NetworkAccessIdentifier = Annotated[
+    str,
+    Field(
+        description="A public identifier addressing a subscription in a mobile network. In 3GPP terminology, it corresponds to the GPSI formatted with the External Identifier ({Local Identifier}@{Domain Identifier}). Unlike the telephone number, the network access identifier is not subjected to portability ruling in force, and is individually managed by each operator.",
+        examples=["123456789@domain.com"],
+    ),
+]
+
+PhoneNumber = Annotated[
+    str,
+    Field(
+        pattern=r"^\+[1-9][0-9]{4,14}$",
+        description="A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
+        examples=["+123456789"],
+    ),
+]
+
+DeviceIpv6Address = Annotated[
+    IPv6Address,
+    Field(
+        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
+        examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
+    ),
+]
 
 
 class CredentialType(Enum):
@@ -64,19 +102,6 @@ class RefreshTokenCredential(SinkCredential):
     )
 
 
-class Port(BaseModel):
-    __root__: int = Field(ge=0, le=65535, description="TCP or UDP port number.")
-
-
-class QosProfileName(BaseModel):
-    __root__: str = Field(
-        pattern=r"^[a-zA-Z0-9_.-]+$",
-        description="A unique name for identifying a specific QoS profile.\nThis may follow different formats depending on the service providers implementation.\nSome options addresses:\n  - A UUID style string\n  - Support for predefined profiles QOS_S, QOS_M, QOS_L, and QOS_E\n  - A searchable descriptive name\nThe set of QoS Profiles that an operator is offering can be retrieved by means of the [QoS Profile API](link TBC).\n",
-        max_length=256,
-        min_length=3,
-    )
-
-
 class Type(Enum):
     org_camaraproject_qod_provisioning_v0_status_changed = (
         "org.camaraproject.qod-provisioning.v0.status-changed"
@@ -120,35 +145,6 @@ class StatusInfo(Enum):
     DELETE_REQUESTED = "DELETE_REQUESTED"
 
 
-class NetworkAccessIdentifier(BaseModel):
-    __root__: str = Field(
-        description="A public identifier addressing a subscription in a mobile network. In 3GPP terminology, it corresponds to the GPSI formatted with the External Identifier ({Local Identifier}@{Domain Identifier}). Unlike the telephone number, the network access identifier is not subjected to portability ruling in force, and is individually managed by each operator.",
-        examples=["123456789@domain.com"],
-    )
-
-
-class PhoneNumber(BaseModel):
-    __root__: str = Field(
-        pattern=r"^\+[1-9][0-9]{4,14}$",
-        description="A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
-        examples=["+123456789"],
-    )
-
-
-class SingleIpv4Addr(BaseModel):
-    __root__: IPv4Address = Field(
-        description="A single IPv4 address with no subnet mask",
-        examples=["203.0.113.0"],
-    )
-
-
-class DeviceIpv6Address(BaseModel):
-    __root__: IPv6Address = Field(
-        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
-        examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
-    )
-
-
 class Status(Enum):
     REQUESTED = "REQUESTED"
     AVAILABLE = "AVAILABLE"
@@ -170,23 +166,18 @@ class EventStatusChanged(CloudEvent):
     eventData: Data = Field(description="Event details depending on the event type")
 
 
-class DeviceIpv4Addr1(BaseModel):
-    publicAddress: SingleIpv4Addr
-    privateAddress: SingleIpv4Addr
+class DeviceIpv4Addr(BaseModel):
+    publicAddress: IPv4Address
+    privateAddress: Optional[IPv4Address]
     publicPort: Optional[Port] = None
 
-
-class DeviceIpv4Addr2(BaseModel):
-    publicAddress: SingleIpv4Addr
-    privateAddress: Optional[SingleIpv4Addr] = None
-    publicPort: Port
-
-
-class DeviceIpv4Addr(BaseModel):
-    __root__: Union[DeviceIpv4Addr1, DeviceIpv4Addr2] = Field(
-        description="The device should be identified by either the public (observed) IP address and port as seen by the application server, or the private (local) and any public (observed) IP addresses in use by the device (this information can be obtained by various means, for example from some DNS servers).\n\nIf the allocated and observed IP addresses are the same (i.e. NAT is not in use) then  the same address should be specified for both publicAddress and privateAddress.\n\nIf NAT64 is in use, the device should be identified by its publicAddress and publicPort, or separately by its allocated IPv6 address (field ipv6Address of the Device object)\n\nIn all cases, publicAddress must be specified, along with at least one of either privateAddress or publicPort, dependent upon which is known. In general, mobile devices cannot be identified by their public IPv4 address alone.\n",
-        examples=[{"publicAddress": "203.0.113.0", "publicPort": 59765}],
-    )
+    @model_validator(mode="after")
+    def any_of(cls, v: Any) -> Any:
+        if not v.privateAddress and not (v.publicAddress and v.publicPort):
+            raise ValueError(
+                "Either the private address or the public address and public port should be set."
+            )
+        return v
 
 
 class Device(BaseModel):
