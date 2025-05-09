@@ -6,7 +6,7 @@ import httpx
 from pydantic import AnyUrl
 
 from app.interfaces.qodProvisioning import (
-    QoDProvisioningAbstractInterface,
+    QoDProvisioningInterface,
     ResourceNotFound,
 )
 from app.redis import get_redis
@@ -23,9 +23,7 @@ from app.schemas.qodProvisioning import (
     CloudEvent,
     CreateProvisioning,
     Datacontenttype,
-    ProvisioningId,
     ProvisioningInfo,
-    QosProfileName,
     RetrieveProvisioningByDevice,
     Specversion,
     Status,
@@ -33,6 +31,7 @@ from app.schemas.qodProvisioning import (
     Type,
 )
 from app.settings import settings
+import hashlib
 
 _prefix_info = "qodprovisioninginfo"
 _prefix_gateway_nef = "qodprovisioningnef"
@@ -40,20 +39,19 @@ _prefix_device = "qodDevice"
 LOG = logging.getLogger(__name__)
 
 
-class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
+class NEFQoDProvisioningInterface(QoDProvisioningInterface):
     def __init__(self) -> None:
         super().__init__()
         self.httpx_client = httpx.AsyncClient()
         self.redis = get_redis()
 
-    # TODO: check if the provisioning already has been made if yes then just patch
-    async def crate_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
+    async def create_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
         provisioning_id = uuid.uuid4()
 
         payload = AsSessionWithQoSSubscription(
-            supportedFeatures="",
+            supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.provisioning.gateway_url_callback}/{provisioning_id}"
+                f"{settings.qod_provisioning.gateway_url_callback}/{provisioning_id}"
             ),
             flowInfo=[
                 FlowInfo(
@@ -64,22 +62,22 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
                     ],
                 )
             ],
-            qosReference=req.qosProfile.__root__,
+            qosReference=req.qosProfile,
         )
 
         if req.device:
-            payload.ueIpv4Addr = req.device.ipv4Address.__root__.publicAddress.__root__
-            payload.ueIpv6Addr = req.device.ipv6Address.__root__
+            payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
+            payload.ueIpv6Addr = req.device.ipv6Address
             payload.gpsi = (
                 f"msisdn-{req.device.phoneNumber}" if req.device.phoneNumber else None
             )
 
         res = await self.httpx_client.post(
-            f"{settings.provisioning.nef_url}/{settings.provisioning.as_id}/subcriptions",
+            f"{settings.qod_provisioning.nef_url}/{settings.qod_provisioning.af_id}/subcriptions",
             content=payload.model_dump_json(),
         )
 
-        if res.status_code != 404:
+        if res.status_code == 404:
             raise ResourceNotFound()
 
         subcription_result = AsSessionWithQoSSubscription.model_validate_json(
@@ -95,7 +93,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
             qosProfile=req.qosProfile,
             status=Status.REQUESTED,
             sink=req.sink,
-            provisioningId=ProvisioningId(__root__=provisioning_id),
+            provisioningId=provisioning_id,
             startedAt=datetime.datetime.now(),
         )
 
@@ -106,7 +104,11 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         self.redis.set(key, nef_sub_id)
 
         if req.device:
-            key = f"{_prefix_device}:{req.device.phoneNumber}"
+            device_hash = hashlib.sha256(
+                req.device.model_dump_json().encode("UTF-8")
+            ).hexdigest()
+
+            key = f"{_prefix_device}:{device_hash}"
             self.redis.set(key, str(provisioning_id))
 
         return response
@@ -116,7 +118,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         nef_id = await self.redis.get(key)
 
         res = await self.httpx_client.get(
-            f"{settings.provisioning.nef_url}/{settings.provisioning.as_id}/subcriptions/{nef_id}",
+            f"{settings.qod_provisioning.nef_url}/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
         )
 
         if res.status_code != 404:
@@ -136,7 +138,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
             raise ResourceNotFound()
 
         provisioning_info = ProvisioningInfo(
-            qosProfile=QosProfileName(__root__=subcription_result.qosReference),
+            qosProfile=subcription_result.qosReference,
             sink=sub_info.sink,
             sinkCredential=sub_info.sinkCredential,
             device=sub_info.device,
@@ -155,7 +157,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         nef_id = await self.redis.get(key)
 
         res = await self.httpx_client.delete(
-            f"{settings.provisioning.nef_url}/{settings.provisioning.as_id}/subcriptions/{nef_id}",
+            f"{settings.qod_provisioning.nef_url}/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
         )
 
         if res.status_code != 404:
@@ -171,19 +173,23 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         return sub_info
 
     async def get_qod_information_device(
-        self, device: RetrieveProvisioningByDevice
+        self, device_req: RetrieveProvisioningByDevice
     ) -> ProvisioningInfo:
-        if device.device is None:
+        if device_req.device is None:
             raise ResourceNotFound()
 
-        key = f"{_prefix_device}:{device.device.phoneNumber}"
+        device_hash = hashlib.sha256(
+            device_req.device.model_dump_json().encode("UTF-8")
+        ).hexdigest()
+
+        key = f"{_prefix_device}:{device_hash}"
         id = await self.redis.get(key)
 
         key = f"{_prefix_gateway_nef}:{id}"
         nef_id = await self.redis.get(key)
 
         res = await self.httpx_client.get(
-            f"{settings.provisioning.nef_url}/{settings.provisioning.as_id}/subcriptions/{nef_id}",
+            f"{settings.qod_provisioning.nef_url}/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
         )
 
         if res.status_code != 404:
@@ -203,7 +209,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
             raise ResourceNotFound()
 
         provisioning_info = ProvisioningInfo(
-            qosProfile=QosProfileName(__root__=subcription_result.qosReference),
+            qosProfile=subcription_result.qosReference,
             sink=sub_info.sink,
             sinkCredential=sub_info.sinkCredential,
             device=sub_info.device,
@@ -231,7 +237,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         # TODO: change this to cloud event
         cloud_event = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.provisioning.gateway_url}/device-qos/{id}",
+            source=f"{settings.qod_provisioning.gateway_url}/device-qos/{id}",
             type=Type.org_camaraproject_qod_provisioning_v0_status_changed,
             specversion=Specversion.field_1_0,
             datacontenttype=Datacontenttype.application_json,
@@ -249,7 +255,7 @@ class RedisQoDProvisioningInterface(QoDProvisioningAbstractInterface):
         if url is None or url.path is None:
             raise Exception("Invalid url")
 
-        return url.path.rsplit("/")[-1]
+        return url.path.rsplit("/", maxsplit=1)[-1]
 
     def _get_phone_number(self, gpsi: str | None) -> str | None:
         if gpsi is None:
