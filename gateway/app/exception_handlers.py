@@ -10,6 +10,7 @@ from app.interfaces.otp import (
     OTPNotFoundError,
     OTPTooManyAttemptsError,
 )
+from app.interfaces.qos_profiles import QoSProfileNotFound
 
 
 def install_exception_handlers(app: FastAPI) -> None:
@@ -53,3 +54,14 @@ def install_exception_handlers(app: FastAPI) -> None:
             message="The authenticationId is no longer valid",
         )
         return JSONResponse(status_code=400, content=jsonable_encoder(body))
+
+    @app.exception_handler(QoSProfileNotFound)
+    async def qos_profile_not_found_exception_handler(
+        request: Request, exc: QoSProfileNotFound
+    ) -> Response:
+        body = ErrorInfo(
+            status=404,
+            code="NOT_FOUND",
+            message="The QoS profile could not be found",
+        )
+        return JSONResponse(status_code=404, content=jsonable_encoder(body))

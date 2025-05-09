@@ -13,12 +13,12 @@ from pydantic_settings import (
 LogLevel = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
 
-class SMSBackend(str, Enum):
+class SMSBackend(Enum):
     Mock = "mock"
     SMSC = "smsc"
 
 
-class OTPBackend(str, Enum):
+class OTPBackend(Enum):
     Memory = "memory"
     Redis = "redis"
 
@@ -35,13 +35,26 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class QoSProfilesBackend(Enum):
+    NEF = "nef"
+
+
+class QoSProfilesSettings(BaseModel):
+    backend: QoSProfilesBackend
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
     log_level: LogLevel = "INFO"
     redis_url: str = "redis://localhost:6379"
 
+    nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
+    nef_username: str = "admin@my-email.com"
+    nef_password: str = "pass"
+
     sms_otp: SMSOTPSettings
+    qos_profiles: QoSProfilesSettings
 
     @classmethod
     def settings_customise_sources(
