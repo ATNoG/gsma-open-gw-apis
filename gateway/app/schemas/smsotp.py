@@ -1,14 +1,7 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 
-PhoneNumber = Annotated[
-    str,
-    Field(
-        pattern=r"^\+[1-9][0-9]{4,14}$",
-        description="A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
-        examples=["+346661113334"],
-    ),
-]
+from .common import PhoneNumber
 
 Message = Annotated[
     str,
