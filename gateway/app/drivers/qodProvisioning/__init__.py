@@ -2,18 +2,16 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from .provisioning import RedisQoDProvisioningInterface
-from app.interfaces.qodProvisioning import QoDProvisioningAbstractInterface
+from .nef import NEFQoDProvisioningInterface
+from app.interfaces.qodProvisioning import QoDProvisioningInterface
 
-qodProvisioning_interface: QoDProvisioningAbstractInterface = (
-    RedisQoDProvisioningInterface()
-)
+qodProvisioning_interface: QoDProvisioningInterface = NEFQoDProvisioningInterface()
 
 
-def get_qodProvisioning_interface() -> QoDProvisioningAbstractInterface:
+def get_qodProvisioning_interface() -> QoDProvisioningInterface:
     return qodProvisioning_interface
 
 
 qodProvisioningInterfaceDep = Annotated[
-    QoDProvisioningAbstractInterface, Depends(get_qodProvisioning_interface)
+    QoDProvisioningInterface, Depends(get_qodProvisioning_interface)
 ]

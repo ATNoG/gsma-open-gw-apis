@@ -3,9 +3,7 @@ from typing import Any, Optional, List, Annotated
 from typing_extensions import TypeAlias
 from datetime import datetime
 from ipaddress import IPv4Address, IPv6Address, IPv6Network
-from pydantic import Field, AnyHttpUrl, model_validator
-
-from .utils import ExtraBaseModel
+from pydantic import BaseModel, Field, AnyHttpUrl, model_validator
 
 
 # Defined with other classes, without making a new class type
@@ -35,19 +33,19 @@ Msisdn: TypeAlias = Annotated[
 # PacketLossRate - int = Field(None, description="Expressed in tenth of percent.", ge=0, le=1000)
 # GlobalRanNodeId
 # Tai
-# EutraCellId - constr(regex=r'^[A-Fa-f0-9]{7}$')
-# Nid - constr(regex=r'^[A-Fa-f0-9]{11}$')
-# NrCellId - constr(regex=r'^[A-Fa-f0-9]{9}$')
-# N3IwfId - constr(regex=r'^[A-Fa-f0-9]+$')
-# NgeNbId - constr(regex=r'^(MacroNGeNB-[A-Fa-f0-9]{5}|LMacroNGeNB-[A-Fa-f0-9]{6}|SMacroNGeNB-[A-Fa-f0-9]{5})$')
-# WAgfId - constr(regex=r'^[A-Fa-f0-9]+$')
-# TngfId - constr(regex=r'^[A-Fa-f0-9]+$')
-# ENbId - constr(regex=r'^(MacroeNB-[A-Fa-f0-9]{5}|LMacroeNB-[A-Fa-f0-9]{6}|SMacroeNB-[A-Fa-f0-9]{5}|HomeeNB-[A-Fa-f0-9]{7})$')
-# Tac - constr(regex=r'(^[A-Fa-f0-9]{4}$)|(^[A-Fa-f0-9]{6}$)')
+# EutraCellId - constr(pattern=r'^[A-Fa-f0-9]{7}$')
+# Nid - constr(pattern=r'^[A-Fa-f0-9]{11}$')
+# NrCellId - constr(pattern=r'^[A-Fa-f0-9]{9}$')
+# N3IwfId - constr(pattern=r'^[A-Fa-f0-9]+$')
+# NgeNbId - constr(pattern=r'^(MacroNGeNB-[A-Fa-f0-9]{5}|LMacroNGeNB-[A-Fa-f0-9]{6}|SMacroNGeNB-[A-Fa-f0-9]{5})$')
+# WAgfId - constr(pattern=r'^[A-Fa-f0-9]+$')
+# TngfId - constr(pattern=r'^[A-Fa-f0-9]+$')
+# ENbId - constr(pattern=r'^(MacroeNB-[A-Fa-f0-9]{5}|LMacroeNB-[A-Fa-f0-9]{6}|SMacroeNB-[A-Fa-f0-9]{5}|HomeeNB-[A-Fa-f0-9]{7})$')
+# Tac - constr(pattern=r'(^[A-Fa-f0-9]{4}$)|(^[A-Fa-f0-9]{6}$)')
 # PduSessionId - int -> ge = 0, le = 255
 # UserLocation
-# Supi - constr(regex=r'^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+|.+)$')
-# Bytes - constr(regex=r'^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$')
+# Supi - constr(pattern=r'^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+|.+)$')
+# Bytes - constr(pattern=r'^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$')
 # HfcNodeId ---> str = Field(None, description="REpresents the HFC Node Identifer received over NGAP.", max_digits=6)
 # Gli - Bytes
 # Gci: str = Field(None, description="Global Cable Identifier uniquely identifying the connection between the 5G-CRG or FN-CRG to the 5GS. See clause 28.15.4 of 3GPP TS 23.003. This shall be encoded as a string per clause 28.15.4 of 3GPP TS 23.003, and compliant with the syntax specified in clause 2.2 of IETF RFC 7542 for the username part of a NAI. The GCI value is specified in CableLabs WR-TR-5WWC-ARCH.")
@@ -87,7 +85,7 @@ DurationSec: TypeAlias = Annotated[
 
 
 # TS 29.571
-class IpAddr(ExtraBaseModel):
+class IpAddr(BaseModel):
     ipv4Addr: Optional[IPv4Address] = None
     ipv6Addr: Optional[IPv6Address] = None
     ipv6Prefix: Optional[IPv6Network] = None
@@ -125,7 +123,7 @@ Uint32: TypeAlias = Annotated[
 SupportedFeatures: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^[A-Fa-f0-9]*$",
+        pattern=r"^[A-Fa-f0-9]*$",
         description='A string used to indicate the features supported by an API that is used as defined in clause  6.6 in 3GPP TS 29.500. The string shall contain a bitmask indicating supported features in  hexadecimal representation Each character in the string shall take a value of "0" to "9",  "a" to "f" or "A" to "F" and shall represent the support of 4 features as described in  table\xa05.2.2-3. The most significant character representing the highest-numbered features shall  appear first in the string, and the character representing features 1 to 4 shall appear last  in the string. The list of features and their numbering (starting with 1) are defined  separately for each API. If the string contains a lower number of characters than there are  defined features for an API, all features that would be represented by characters that are not  present in the string are not supported.',
     ),
 ]
@@ -141,7 +139,7 @@ Dnn: TypeAlias = Annotated[
 
 
 # TS 29.571
-class Snssai(ExtraBaseModel):
+class Snssai(BaseModel):
     sst: Annotated[
         int,
         Field(
@@ -153,7 +151,7 @@ class Snssai(ExtraBaseModel):
     sd: Annotated[
         Optional[str],
         Field(
-            regex=r"^[A-Fa-f0-9]{6}$",
+            pattern=r"^[A-Fa-f0-9]{6}$",
             description='3-octet string, representing the Slice Differentiator, in hexadecimal representation. Each character in the string shall take a value of "0" to "9", "a" to "f" or "A" to "F" and shall represent 4 bits. The most significant character representing the 4 most significant bits of the SD shall appear first in the string, and the character representing the 4 least significant bit of the SD shall appear last in the string. This is an optional parameter that complements the Slice/Service type(s) to allow to  differentiate amongst multiple Network Slices of the same Slice/Service type. This IE shall be absent if no SD value is associated with the SST.',
         ),
     ] = None
@@ -172,7 +170,7 @@ Uinteger: TypeAlias = Annotated[
 BitRate: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^\d+(\.\d+)? (bps|Kbps|Mbps|Gbps|Tbps)$",
+        pattern=r"^\d+(\.\d+)? (bps|Kbps|Mbps|Gbps|Tbps)$",
         description='String representing a bit rate; the prefixes follow the standard symbols from The International System of Units, and represent x1000 multipliers, with the exception that prefix "K" is used to represent the standard symbol "k".',
     ),
 ]
@@ -192,7 +190,7 @@ PacketDelBudget: TypeAlias = Annotated[
 PacketErrRate: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^([0-9]E-[0-9])$",
+        pattern=r"^([0-9]E-[0-9])$",
         description='String representing Packet Error Rate (see clause 5.7.3.5 and 5.7.4 of 3GPP TS 23.501, expressed as a "scalar x 10-k" where the scalar and the exponent k are each encoded as one decimal digit.',
     ),
 ]
@@ -213,7 +211,7 @@ ExternalGroupId: TypeAlias = Annotated[
 Gpsi: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+|.+)$",
+        pattern=r"^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+|.+)$",
         description="String identifying a Gpsi shall contain either an External Id or an MSISDN.  It shall be formatted as follows -External Identifier= \"extid-'extid', where 'extid'  shall be formatted according to clause 19.7.2 of 3GPP TS 23.003 that describes an  External Identifier.",
     ),
 ]
@@ -228,7 +226,7 @@ Uri: TypeAlias = Annotated[
 Nid: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^[A-Fa-f0-9]{11}$",
+        pattern=r"^[A-Fa-f0-9]{11}$",
         description="This represents the Network Identifier, which together with a PLMN ID is used to identify an SNPN (see 3GPP TS 23.003 and 3GPP TS 23.501 clause 5.30.2.1).",
     ),
 ]
@@ -261,7 +259,7 @@ class UplinkDownlinkSupport(str, Enum):
 MacAddr48: TypeAlias = Annotated[
     str,
     Field(
-        regex=r"^([0-9a-fA-F]{2})((-[0-9a-fA-F]{2}){5})$",
+        pattern=r"^([0-9a-fA-F]{2})((-[0-9a-fA-F]{2}){5})$",
         description="String identifying a MAC address formatted in the hexadecimal notation according to clause 1.1 and clause 2.1 of RFC 7042.",
     ),
 ]
@@ -278,7 +276,7 @@ AverWindow: TypeAlias = Annotated[
 
 
 # TS 29.514
-class AlternativeServiceRequirementsData(ExtraBaseModel):
+class AlternativeServiceRequirementsData(BaseModel):
     altQosParamSetRef: str = Field(
         ..., description="Reference to this alternative QoS related parameter set."
     )
@@ -302,7 +300,7 @@ class AlternativeServiceRequirementsData(ExtraBaseModel):
 
 
 # TS 29.122
-class FlowInfo(ExtraBaseModel):
+class FlowInfo(BaseModel):
     """Represents IP flow information."""
 
     flowId: Annotated[int, Field(description="Indicates the IP flow identifier.")]
@@ -310,15 +308,15 @@ class FlowInfo(ExtraBaseModel):
         Optional[List[str]],
         Field(
             description="Indicates the packet filters of the IP flow. Refer to clause 5.3.8 of 3GPP TS 29.214 for encoding. It shall contain UL and/or DL IP flow description.",
-            min_items=1,
-            max_items=2,
+            min_length=1,
+            max_length=2,
         ),
     ] = None
     tosTC: Optional[TosTrafficClass] = None
 
 
 # TS 29.122
-class TimeWindow(ExtraBaseModel):
+class TimeWindow(BaseModel):
     """Represents a time window identified by a start time and a stop time."""
 
     startTime: datetime
@@ -366,11 +364,11 @@ class QosMonitoringParamType(str, Enum):
 
 
 # TS 29.122
-class QosMonitoringInformation(ExtraBaseModel):
+class QosMonitoringInformation(BaseModel):
     reqQosMonParams: Annotated[
-        List[RequestedQosMonitoringParameter], Field(min_items=1)
+        List[RequestedQosMonitoringParameter], Field(min_length=1)
     ]
-    repFreqs: Annotated[List[ReportingFrequency], Field(min_items=1)]
+    repFreqs: Annotated[List[ReportingFrequency], Field(min_length=1)]
     repThreshDl: Optional[Uinteger] = None
     repThreshUl: Optional[Uinteger] = None
     repThreshRp: Optional[Uinteger] = None
@@ -392,7 +390,7 @@ Volume: TypeAlias = Annotated[
 
 
 # TS 29.122
-class UsageThreshold(ExtraBaseModel):
+class UsageThreshold(BaseModel):
     duration: Annotated[
         Optional[int],
         Field(
@@ -406,7 +404,7 @@ class UsageThreshold(ExtraBaseModel):
 
 
 # TS 29.514
-class EthFlowDescription(ExtraBaseModel):
+class EthFlowDescription(BaseModel):
     destMacAddr: Optional[MacAddr48] = None
     ethType: str
     fDesc: Optional[FlowDescription] = None
@@ -424,7 +422,7 @@ TscPriorityLevel: TypeAlias = Annotated[
 
 
 # TS 29.514
-class PeriodicityRange(ExtraBaseModel):
+class PeriodicityRange(BaseModel):
     lowerBound: Optional[Uinteger] = None
     upperBound: Optional[Uinteger] = None
     periodicVals: Annotated[Optional[List[Uinteger]], Field(min_length=1)] = None
@@ -456,7 +454,7 @@ class PeriodicityRange(ExtraBaseModel):
 
 
 # TS 29.514
-class TscaiInputContainer(ExtraBaseModel):
+class TscaiInputContainer(BaseModel):
     periodicity: Optional[Uinteger] = None
     burstArrivalTime: Optional[datetime] = None
     surTimeInNumMsg: Optional[Uinteger] = None
@@ -478,7 +476,7 @@ class MediaType(str, Enum):
 
 
 # TS 29.514
-class RttFlowReference(ExtraBaseModel):
+class RttFlowReference(BaseModel):
     flowDir: Optional[FlowDirection] = None
     sharedKey: Uint32
 
@@ -532,7 +530,7 @@ class AfNotifMethod(str, Enum):
 
 
 # TS 29.514
-class AfEventSubscription(ExtraBaseModel):
+class AfEventSubscription(BaseModel):
     event: AfEvent
     notifMethod: Optional[AfNotifMethod] = None
     repPeriod: Optional[DurationSec] = None
@@ -555,25 +553,25 @@ AfAppId: TypeAlias = Annotated[
 
 
 # TS 29.514
-class EventsSubscReqData(ExtraBaseModel):
-    events: Annotated[List[AfEventSubscription], Field(min_items=1)]
+class EventsSubscReqData(BaseModel):
+    events: Annotated[List[AfEventSubscription], Field(min_length=1)]
     notifUri: Optional[Uri] = None
     reqQosMonParams: Optional[
-        Annotated[List[RequestedQosMonitoringParameter], Field(min_items=1)]
+        Annotated[List[RequestedQosMonitoringParameter], Field(min_length=1)]
     ] = None
     qosMon: Optional[QosMonitoringInformation] = None
     qosMonDatRate: Optional[QosMonitoringInformation] = None
     pdvReqMonParams: Optional[
-        Annotated[List[RequestedQosMonitoringParameter], Field(min_items=1)]
+        Annotated[List[RequestedQosMonitoringParameter], Field(min_length=1)]
     ] = None
     pdvMon: Optional[QosMonitoringInformation] = None
     congestMon: Optional[QosMonitoringInformation] = None
     rttMon: Optional[QosMonitoringInformation] = None
     rttFlowRef: Optional[RttFlowReference] = None
-    reqAnis: Optional[Annotated[List[RequiredAccessInfo], Field(min_items=1)]] = None
+    reqAnis: Optional[Annotated[List[RequiredAccessInfo], Field(min_length=1)]] = None
     usgThres: Optional[UsageThreshold] = None
     notifCorreId: Optional[str] = None
-    afAppIds: Optional[Annotated[List[AfAppId], Field(min_items=1)]] = None
+    afAppIds: Optional[Annotated[List[AfAppId], Field(min_length=1)]] = None
     directNotifInd: Annotated[
         Optional[bool],
         Field(
@@ -601,17 +599,17 @@ ContentVersion: TypeAlias = Annotated[
 
 
 # TS 29.514
-class Flows(ExtraBaseModel):
-    contVers: Annotated[Optional[List[ContentVersion]], Field(min_items=1)] = None
-    fNums: Annotated[Optional[List[int]], Field(min_items=1)] = None
+class Flows(BaseModel):
+    contVers: Annotated[Optional[List[ContentVersion]], Field(min_length=1)] = None
+    fNums: Annotated[Optional[List[int]], Field(min_length=1)] = None
     medCompN: int
 
 
 # TS 29.514
-class PdvMonitoringReport(ExtraBaseModel):
+class PdvMonitoringReport(BaseModel):
     flows: Annotated[
         Optional[List[Flows]],
-        Field(description="Identification of the flows.", min_items=1),
+        Field(description="Identification of the flows.", min_length=1),
     ] = None
     ulPdv: Annotated[
         Optional[int],
@@ -630,7 +628,7 @@ class PdvMonitoringReport(ExtraBaseModel):
 
 
 # TS 29.514
-class BatOffsetInfo(ExtraBaseModel):
+class BatOffsetInfo(BaseModel):
     ranBatOffsetNotif: Annotated[
         int,
         Field(
@@ -642,7 +640,7 @@ class BatOffsetInfo(ExtraBaseModel):
         Optional[List[Flows]],
         Field(
             description="Identification of the flows. If no flows are provided, the BAT offset applies for all flows of the AF session.",
-            min_items=1,
+            min_length=1,
         ),
     ] = None
 
@@ -659,7 +657,7 @@ class RtpHeaderExtType(str, Enum):
 
 
 # TS 29.571
-class RtpHeaderExtInfo(ExtraBaseModel):
+class RtpHeaderExtInfo(BaseModel):
     rtpHeaderExtType: Optional[RtpHeaderExtType] = None
     rtpHeaderExtId: Annotated[Optional[int], Field(ge=1, le=255)] = None
     longFormat: Optional[bool] = None
@@ -673,93 +671,93 @@ class RtpPayloadFormat(str, Enum):
 
 
 # TS 29.571
-class RtpPayloadInfo(ExtraBaseModel):
+class RtpPayloadInfo(BaseModel):
     rtpPayloadTypeList: Annotated[
-        Optional[List[Annotated[int, Field(ge=1, le=127)]]], Field(min_items=1)
+        Optional[List[Annotated[int, Field(ge=1, le=127)]]], Field(min_length=1)
     ] = None
     rtpPayloadFormat: Optional[RtpPayloadFormat] = None
 
 
 # TS 29.571
-class ProtocolDescription(ExtraBaseModel):
+class ProtocolDescription(BaseModel):
     transportProto: Optional[MediaTransportProto] = None
     rtpHeaderExtInfo: Optional[RtpHeaderExtInfo] = None
     rtpPayloadInfoList: Annotated[
-        Optional[List[RtpPayloadInfo]], Field(min_items=1)
+        Optional[List[RtpPayloadInfo]], Field(min_length=1)
     ] = None
 
 
 # TS 29.571
-class PlmnId(ExtraBaseModel):
+class PlmnId(BaseModel):
     mcc: int
     mnc: int
 
 
 # TS 29.571
-class Ecgi(ExtraBaseModel):
+class Ecgi(BaseModel):
     """Contains the ECGI (E-UTRAN Cell Global Identity), as described in 3GPP 23.003"""
 
     plmnId: PlmnId
-    eutraCellId: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{7}$")]
-    nid: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]{11}$")]] = None
+    eutraCellId: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{7}$")]
+    nid: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{11}$")]] = None
 
 
 # TS 29.571
-class Ncgi(ExtraBaseModel):
+class Ncgi(BaseModel):
     """Contains the NCGI (NR Cell Global Identity), as described in 3GPP 23.003"""
 
     plmnId: PlmnId
-    nrCellId: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{9}$")]
-    nid: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]{11}$")]] = None
+    nrCellId: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{9}$")]
+    nid: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{11}$")]] = None
 
 
 # TS 29.571
-class GNbId(ExtraBaseModel):
+class GNbId(BaseModel):
     """Provides the G-NB identifier."""
 
     bitLength: int | None = Field(None, description="", ge=22, le=32)
-    gNBValue: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{6,8}$")]
+    gNBValue: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{6,8}$")]
 
 
 # TS 29.571
-class GlobalRanNodeId(ExtraBaseModel):
+class GlobalRanNodeId(BaseModel):
     """One of the six attributes n3IwfId, gNbIdm, ngeNbId, wagfId, tngfId, eNbId shall be present."""
 
     plmnId: PlmnId
-    n3IwfId: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]+$")]] = None
+    n3IwfId: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]+$")]] = None
     gNbId: Optional[GNbId] = None
     ngeNbId: Optional[
         Annotated[
             str,
             Field(
-                regex=r"^(MacroNGeNB-[A-Fa-f0-9]{5}|LMacroNGeNB-[A-Fa-f0-9]{6}|SMacroNGeNB-[A-Fa-f0-9]{5})$"
+                pattern=r"^(MacroNGeNB-[A-Fa-f0-9]{5}|LMacroNGeNB-[A-Fa-f0-9]{6}|SMacroNGeNB-[A-Fa-f0-9]{5})$"
             ),
         ]
     ] = None
-    wagfId: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]+$")]] = None
-    tngfId: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]+$")]] = None
-    nid: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{11}$")]
+    wagfId: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]+$")]] = None
+    tngfId: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]+$")]] = None
+    nid: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{11}$")]
     eNbId: Optional[
         Annotated[
             str,
             Field(
-                regex=r"^(MacroeNB-[A-Fa-f0-9]{5}|LMacroeNB-[A-Fa-f0-9]{6}|SMacroeNB-[A-Fa-f0-9]{5}|HomeeNB-[A-Fa-f0-9]{7})$"
+                pattern=r"^(MacroeNB-[A-Fa-f0-9]{5}|LMacroeNB-[A-Fa-f0-9]{6}|SMacroeNB-[A-Fa-f0-9]{5}|HomeeNB-[A-Fa-f0-9]{7})$"
             ),
         ]
     ] = None
 
 
 # TS 29.571
-class Tai(ExtraBaseModel):
+class Tai(BaseModel):
     """Contains the tracking area identity as described in 3GPP 23.003"""
 
     plmnId: PlmnId
-    tac: Annotated[str, Field(regex=r"(^[A-Fa-f0-9]{4}$)|(^[A-Fa-f0-9]{6}$)")]
-    nid: Optional[Annotated[str, Field(regex=r"^[A-Fa-f0-9]{11}$")]] = None
+    tac: Annotated[str, Field(pattern=r"(^[A-Fa-f0-9]{4}$)|(^[A-Fa-f0-9]{6}$)")]
+    nid: Optional[Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{11}$")]] = None
 
 
 # TS 29.571
-class EutraLocation(ExtraBaseModel):
+class EutraLocation(BaseModel):
     """Contains the E-UTRA user location."""
 
     tai: Tai
@@ -768,14 +766,14 @@ class EutraLocation(ExtraBaseModel):
     ignoreEcgi: bool = Field(False)
     ageOfLocationInformation: int | None = Field(None, description="", ge=0, le=32767)
     ueLocationTimestamp: datetime
-    geographicalInformation: Annotated[str, Field(regex=r"^[0-9A-F]{16}$")]
-    geodeticInformation: Annotated[str, Field(regex=r"^[0-9A-F]{20}$")]
+    geographicalInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{16}$")]
+    geodeticInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{20}$")]
     globalNgenbId: GlobalRanNodeId
     globalENbId: GlobalRanNodeId
 
 
 # TS 29.571
-class NrLocation(ExtraBaseModel):
+class NrLocation(BaseModel):
     """Contains the NR user location."""
 
     tai: Tai
@@ -784,58 +782,58 @@ class NrLocation(ExtraBaseModel):
     ignoreNcgi: bool = Field(False)
     ageOfLocationInformation: int | None = Field(None, description="", ge=0, le=32767)
     ueLocationTimestamp: datetime
-    geographicalInformation: Annotated[str, Field(regex=r"^[0-9A-F]{16}$")]
-    geodeticInformation: Annotated[str, Field(regex=r"^[0-9A-F]{20}$")]
+    geographicalInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{16}$")]
+    geodeticInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{20}$")]
     globalGnbId: GlobalRanNodeId
 
 
 # TS 29.571
-class CellGlobalId(ExtraBaseModel):
+class CellGlobalId(BaseModel):
     """Contains a Cell Global Identification as defined in 3GPP TS 23.003, clause 4.3.1."""
 
     plmnId: PlmnId
-    lac: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{4}$")]
-    cellId: Annotated[str, Field(regex=r"^[A-Fa-f0-9]{4}$")]
+    lac: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{4}$")]
+    cellId: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]{4}$")]
 
 
 # TS 29.571
-class ServiceAreaId(ExtraBaseModel):
+class ServiceAreaId(BaseModel):
     """Contains a Service Area Identifier as defined in 3GPP TS 23.003, clause 12.5."""
 
     plmnId: PlmnId
     lac: Annotated[
-        str, Field(regex=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
+        str, Field(pattern=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
     ]
     sac: Annotated[
-        str, Field(regex=r"^[A-Fa-f0-9]{4}$", description="Service Area Code.")
+        str, Field(pattern=r"^[A-Fa-f0-9]{4}$", description="Service Area Code.")
     ]
 
 
 # TS 29.571
-class LocationAreaId(ExtraBaseModel):
+class LocationAreaId(BaseModel):
     """Contains a Location area identification as defined in 3GPP TS 23.003, clause 4.1."""
 
     plmnId: PlmnId
     lac: Annotated[
-        str, Field(regex=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
+        str, Field(pattern=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
     ]
 
 
 # TS 29.571
-class RoutingAreaId(ExtraBaseModel):
+class RoutingAreaId(BaseModel):
     """Contains a Routing Area Identification as defined in 3GPP TS 23.003, clause 4.2."""
 
     plmnId: PlmnId
     lac: Annotated[
-        str, Field(regex=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
+        str, Field(pattern=r"^[A-Fa-f0-9]{4}$", description="Location Area Code.")
     ]
     rac: Annotated[
-        str, Field(regex=r"^[A-Fa-f0-9]{2}$", description="Routing Area Code.")
+        str, Field(pattern=r"^[A-Fa-f0-9]{2}$", description="Routing Area Code.")
     ]
 
 
 # TS 29.571
-class UtraLocation(ExtraBaseModel):
+class UtraLocation(BaseModel):
     """Exactly one of cgi, sai or lai shall be present."""
 
     cgi: CellGlobalId
@@ -844,8 +842,8 @@ class UtraLocation(ExtraBaseModel):
     rai: RoutingAreaId
     ageOfLocationInformation: int | None = Field(None, description="", ge=0, le=32767)
     ueLocationTimestamp: datetime
-    geographicalInformation: Annotated[str, Field(regex=r"^[0-9A-F]{16}$")]
-    geodeticInformation: Annotated[str, Field(regex=r"^[0-9A-F]{20}$")]
+    geographicalInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{16}$")]
+    geodeticInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{20}$")]
 
 
 # TS 29.571
@@ -861,7 +859,7 @@ class LineType(str, Enum):
 
 
 # TS 29.571
-class TnapId(ExtraBaseModel):
+class TnapId(BaseModel):
     """Contain the TNAP Identifier see clause5.6.2 of 3GPP TS 23.501."""
 
     ssId: str | None = Field(
@@ -875,13 +873,13 @@ class TnapId(ExtraBaseModel):
     civicAddress: Annotated[
         str,
         Field(
-            regex=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            pattern=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
         ),
     ]
 
 
 # TS 29.571
-class TwapId(ExtraBaseModel):
+class TwapId(BaseModel):
     """Contain the TWAP Identifier as defined in clause 4.2.8.5.3 of 3GPP TS 23.501 or the WLAN location information as defined in clause 4.5.7.2.8 of 3GPP TS 23.402."""
 
     ssId: str | None = Field(
@@ -895,17 +893,17 @@ class TwapId(ExtraBaseModel):
     civicAddress: Annotated[
         str,
         Field(
-            regex=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            pattern=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
         ),
     ]
 
 
 # TS 29.571
-class NThreegaLocation(ExtraBaseModel):
+class NThreegaLocation(BaseModel):
     """Contains the Non-3GPP access user location."""
 
     n3gppTai: Tai
-    n3IwfId: Annotated[str, Field(regex=r"^[A-Fa-f0-9]+$")]
+    n3IwfId: Annotated[str, Field(pattern=r"^[A-Fa-f0-9]+$")]
     ueIpv4Addr: AnyHttpUrl | None = Field(
         None, description="String identifying an Ipv4 address"
     )
@@ -924,7 +922,7 @@ class NThreegaLocation(ExtraBaseModel):
     gli: Annotated[
         str,
         Field(
-            regex=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            pattern=r"^@(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
         ),
     ]
     w5gbanLineType: LineType
@@ -935,7 +933,7 @@ class NThreegaLocation(ExtraBaseModel):
 
 
 # TS 29.571
-class GeraLocation(ExtraBaseModel):
+class GeraLocation(BaseModel):
     """Contains the Non-3GPP access user location."""
 
     locationNumber: str | None = Field(
@@ -954,12 +952,12 @@ class GeraLocation(ExtraBaseModel):
     )
     ageOfLocationInformation: int | None = Field(None, description="", ge=0, le=32767)
     ueLocationTimestamp: datetime
-    geographicalInformation: Annotated[str, Field(regex=r"^[0-9A-F]{16}$")]
-    geodeticInformation: Annotated[str, Field(regex=r"^[0-9A-F]{20}$")]
+    geographicalInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{16}$")]
+    geodeticInformation: Annotated[str, Field(pattern=r"^[0-9A-F]{20}$")]
 
 
 # TS 29.571
-class UserLocation(ExtraBaseModel):
+class UserLocation(BaseModel):
     """At least one of eutraLocation, nrLocation and n3gaLocation shall be present. Several
     of them may be present."""
 
@@ -971,7 +969,7 @@ class UserLocation(ExtraBaseModel):
 
 
 # TS 29.122
-class DayOfWeek(ExtraBaseModel):
+class DayOfWeek(BaseModel):
     day: int | None = Field(None, description="", ge=1, le=7)
 
 
@@ -1099,7 +1097,7 @@ class PduSetHandlingInfo(str, Enum):
 
 
 # TS 29.571
-class PduSetQosPara(ExtraBaseModel):
+class PduSetQosPara(BaseModel):
     pduSetDelayBudget: Optional[ExtPacketDelBudget] = None
     pduSetErrRate: Optional[PacketErrRate] = None
     pduSetHandlingInfo: Optional[PduSetHandlingInfo] = None
@@ -1121,14 +1119,14 @@ class PduSetQosPara(ExtraBaseModel):
 
 
 # TS 29.571
-class PlmnIdNid(ExtraBaseModel):
+class PlmnIdNid(BaseModel):
     mcc: int
     mnc: int
     nid: Optional[Nid] = None
 
 
 # TS 29.122
-class WebsockNotifConfig(ExtraBaseModel):
+class WebsockNotifConfig(BaseModel):
     """Represents the configuration information for the delivery of notifications over Websockets."""
 
     websocketUri: Optional[Link] = None
@@ -1141,7 +1139,7 @@ class WebsockNotifConfig(ExtraBaseModel):
 
 
 # TS 29.122
-class SponsorInformation(ExtraBaseModel):
+class SponsorInformation(BaseModel):
     sponsorId: Annotated[str, Field(description="It indicates Sponsor ID.")]
     aspId: Annotated[
         str, Field(description="It indicates Application Service Provider ID.")
@@ -1149,7 +1147,7 @@ class SponsorInformation(ExtraBaseModel):
 
 
 # TS 29.122
-class TscQosRequirement(ExtraBaseModel):
+class TscQosRequirement(BaseModel):
     reqGbrDl: Optional[BitRate] = None
     reqGbrUl: Optional[BitRate] = None
     reqMbrDl: Optional[BitRate] = None
@@ -1191,7 +1189,7 @@ class UserPlaneEvent(str, Enum):
 
 
 # TS 29.122
-class AccumulatedUsage(ExtraBaseModel):
+class AccumulatedUsage(BaseModel):
     duration: Optional[DurationSec] = None
     totalVolume: Optional[Volume] = None
     downlinkVolume: Optional[Volume] = None
@@ -1199,15 +1197,15 @@ class AccumulatedUsage(ExtraBaseModel):
 
 
 # TS 29.565
-class TemporalInValidity(ExtraBaseModel):
+class TemporalInValidity(BaseModel):
     startTime: datetime
     stopTime: datetime
 
 
 # TS 29.122
 # TODO: locationArea5g
-# class LocationArea5G(ExtraBaseModel):
+# class LocationArea5G(BaseModel):
 #     """Represents a user location area when the UE is attached to 5G. """
-#     geographicAreas: List[GeographicArea] = Field(None, description="Identifies a list of geographic area of the user where the UE is located.", min_items=0)
-#     civicAddresses: List[CivicAddress] = Field(None, description="Identifies a list of civic addresses of the user where the UE is located.", min_items=0)
+#     geographicAreas: List[GeographicArea] = Field(None, description="Identifies a list of geographic area of the user where the UE is located.", min_length=0)
+#     civicAddresses: List[CivicAddress] = Field(None, description="Identifies a list of civic addresses of the user where the UE is located.", min_length=0)
 #     nwAreaInfo: NetworkAreaInfo

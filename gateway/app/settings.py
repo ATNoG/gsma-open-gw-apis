@@ -23,6 +23,11 @@ class OTPBackend(str, Enum):
     Redis = "redis"
 
 
+class QodProvisioningBackend(str, Enum):
+    Mock = "mock"
+    Nef = "nef"
+
+
 class SMSOTPSettings(BaseModel):
     sms_backend: SMSBackend
     otp_backend: OTPBackend
@@ -36,10 +41,11 @@ class SMSOTPSettings(BaseModel):
 
 
 class ProvisioningSettings(BaseModel):
+    qod_provisioning_backend: QodProvisioningBackend
     nef_url: AnyHttpUrl
     gateway_url_callback: AnyHttpUrl
     gateway_url: AnyHttpUrl
-    as_id: int
+    af_id: int
 
 
 class Settings(BaseSettings):
@@ -49,7 +55,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     sms_otp: SMSOTPSettings
-    provisioning: ProvisioningSettings
+    qod_provisioning: ProvisioningSettings
 
     @classmethod
     def settings_customise_sources(

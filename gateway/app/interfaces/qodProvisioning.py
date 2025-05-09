@@ -16,9 +16,9 @@ class DeviceNotFound(Exception):
     pass
 
 
-class QoDProvisioningAbstractInterface(ABC):
+class QoDProvisioningInterface(ABC):
     @abstractmethod
-    async def crate_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
+    async def create_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
         pass
 
     @abstractmethod
@@ -31,7 +31,7 @@ class QoDProvisioningAbstractInterface(ABC):
 
     @abstractmethod
     async def get_qod_information_device(
-        self, device: RetrieveProvisioningByDevice
+        self, device_req: RetrieveProvisioningByDevice
     ) -> ProvisioningInfo:
         pass
 

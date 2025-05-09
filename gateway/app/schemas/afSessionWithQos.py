@@ -3,9 +3,7 @@
 from ipaddress import IPv4Address, IPv6Address
 from typing import Optional, List
 from typing_extensions import Annotated
-from pydantic import Field
-
-from .utils import ExtraBaseModel
+from pydantic import BaseModel, Field
 
 from .commonData import (
     IpAddr,
@@ -49,7 +47,7 @@ from .commonData import (
 )
 
 
-class EthFlowInfo(ExtraBaseModel):
+class EthFlowInfo(BaseModel):
     flowId: Annotated[
         int, Field(..., description="Indicates the Ethernet flow identifier.")
     ]
@@ -63,12 +61,12 @@ class EthFlowInfo(ExtraBaseModel):
     ] = None
 
 
-class UeAddInfo(ExtraBaseModel):
+class UeAddInfo(BaseModel):
     ueIpAddr: Optional[IpAddr] = None
     portNumber: Optional[Port] = None
 
 
-class AsSessionMediaComponent(ExtraBaseModel):
+class AsSessionMediaComponent(BaseModel):
     flowInfos: Annotated[
         Optional[List[FlowInfo]],
         Field(
@@ -116,7 +114,7 @@ class AsSessionMediaComponent(ExtraBaseModel):
     evSubsc: Optional[EventsSubscReqData] = None
 
 
-class AsSessionWithQoSSubscription(ExtraBaseModel):
+class AsSessionWithQoSSubscription(BaseModel):
     self: Optional[Link] = None
     supportedFeatures: Optional[SupportedFeatures] = None
     dnn: Optional[Dnn] = None
@@ -236,7 +234,7 @@ class AsSessionWithQoSSubscription(ExtraBaseModel):
     ] = None
 
 
-class MultiModalFlows(ExtraBaseModel):
+class MultiModalFlows(BaseModel):
     medCompN: Annotated[
         int,
         Field(
@@ -252,7 +250,7 @@ class MultiModalFlows(ExtraBaseModel):
     ] = None
 
 
-class QosMonitoringReport(ExtraBaseModel):
+class QosMonitoringReport(BaseModel):
     ulDelays: Annotated[Optional[List[Uinteger]], Field(min_length=1)] = None
     dlDelays: Annotated[Optional[List[Uinteger]], Field(min_length=1)] = None
     rtDelays: Annotated[Optional[List[Uinteger]], Field(min_length=1)] = None
@@ -268,7 +266,7 @@ class QosMonitoringReport(ExtraBaseModel):
     dlConInfo: Optional[Uinteger] = None
 
 
-class UserPlaneEventReport(ExtraBaseModel):
+class UserPlaneEventReport(BaseModel):
     event: UserPlaneEvent
     accumulatedUsage: Optional[AccumulatedUsage] = None
     flowIds: Annotated[
@@ -344,7 +342,7 @@ class UserPlaneEventReport(ExtraBaseModel):
     ] = None
 
 
-class UserPlaneNotificationData(ExtraBaseModel):
+class UserPlaneNotificationData(BaseModel):
     transaction: Link
     eventReports: Annotated[
         List[UserPlaneEventReport],
