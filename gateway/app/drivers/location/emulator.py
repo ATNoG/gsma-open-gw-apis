@@ -1,40 +1,46 @@
 from datetime import datetime
+import logging
+from os import device_encoding
 import httpx
 from pydantic import AnyHttpUrl
 from fastapi import HTTPException
 
-from app.settings import settings
+from app.drivers.nef_auth import NEFAuth
 from app.interfaces.location import LocationInterface
 from app.schemas.location import Location, Circle, Point, Polygon
 from app.schemas.device import Device
 
 
 class NEFEmulatorDriver(LocationInterface):
-    def __init__(self, emulator_url: AnyHttpUrl) -> None:
+    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
         super().__init__()
-
-        self.emulator_url = emulator_url
-        self.httpx_client = httpx.AsyncClient()
+        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
 
     async def retrieve_location(
         self, device: Device, max_age: int, max_surface: int
     ) -> Location:
-        if not device.phoneNumber:
-            raise HTTPException(status_code=501, detail="Identifier not implemented")
 
         data = {
-            "analyEvent": "UE_MOBILITY",
-            "tgtUe": {"gpsi": device.phoneNumber.lstrip("+")},
-            "suppFeat": "a",
+            "monitoringType": "LOCATION_REPORTING",
+            "notificationDestination": "https://0.0.0.0",
+            "maximumNumberOfReports": 1,
         }
-        url = (
-            f"{self.emulator_url}/api/v1/3gpp-analyticsexposure/v1/{settings.afId}/fetch",
-        )
 
-        print("Querying the NEF Emulator at", url, "with data", data)
+        if device.phoneNumber is not None:
+            data["msisdn"] = device.phoneNumber.lstrip("+")
+        elif device.ipv4Address is not None:
+            data["ipv4Addr"] = str(device.ipv4Address.publicAddress)
+        elif device.ipv6Address is not None:
+            data["ipv6Addr"] = str(device.ipv6Address)
+        elif device.networkAccessIdentifier is not None:
+            data["externalId"] = device.networkAccessIdentifier
+
+        url = "/nef/api/v1/3gpp-monitoring-event/v1/myNetApp/subscriptions"
+
+        logging.debug("Querying the NEF Emulator at %s with data %s", url, data)
 
         doc = self.httpx_client.post(
-            f"{self.emulator_url}nef/api/v1/3gpp-analyticsexposure/v1/{settings.afId}/fetch",
+            url,
             json=data,
         )
 
@@ -47,7 +53,7 @@ class NEFEmulatorDriver(LocationInterface):
         doc = doc.json()
 
         print(doc)
-        area = doc["ueMobilityInfos"][0]["locInfo"][0]["loc"]["geographicAreas"][0]
+        area = doc["locationInfo"]["geographicArea"]
 
         if area["shape"] == "POINT":
             point = area["point"]

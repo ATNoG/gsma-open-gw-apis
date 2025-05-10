@@ -9,6 +9,5 @@ sender_id = "1234"
 [qos_profiles]
 backend = "nef"
 
-[emulator]
-emulator_url = "http://localhost:8888"
-location_backend = "emulator"
+[location]
+backend = "emulator"
