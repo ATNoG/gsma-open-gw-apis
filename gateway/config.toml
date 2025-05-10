@@ -23,6 +23,5 @@ auth = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDc0NzIxMjEsInN1
 
 [geofencing]
 monitoring_url = "http://localhost:8888/nef/api/v1/3gpp-monitoring-event/v1/camara"
-analytics_url = "http://localhost:8888/nef/api/v1/3gpp-analyticsexposure/v1/camara"
 nef_webhook = "http://host.docker.internal:8000/geofencing/webhook"
 geofencing_url = "http://localhost:8000/geofencing-subscriptions/v0"

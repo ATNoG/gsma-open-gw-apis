@@ -4,8 +4,8 @@ from enum import Enum
 from http import HTTPStatus
 from typing import Optional
 
-import geopy
-import geopy.distance
+import geopy  # type: ignore[import-untyped]
+import geopy.distance  # type: ignore[import-untyped]
 import httpx
 from pydantic import AnyUrl
 
@@ -44,7 +44,7 @@ class State(str, Enum):
     OUTSIDE = "OUTSIDE"
 
 
-def _handle_post_error(res: httpx.Response):
+def _handle_post_error(res: httpx.Response) -> None:
     raise ApiException(
         status=HTTPStatus.INTERNAL_SERVER_ERROR,
         message="Error comunicating with the core",
@@ -122,7 +122,7 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             subscription_result.self
         )
 
-        res = Subscription(
+        sub = Subscription(
             protocol=Protocol.HTTP,
             sink=req.sink,
             types=req.types,
@@ -137,7 +137,7 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             status=Status.ACTIVE,
         )
 
-        return res
+        return sub
 
     def _get_subscription_id_from_subscription_url(self, url: AnyUrl | None) -> str:
         if url is None or url.path is None:
@@ -147,7 +147,7 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
     async def queue_notification(
         self, subscription_id: str, location: GeographicalCoordinates
-    ):
+    ) -> None:
         redis = get_redis()
         await redis.rpush(f"{_prefix_queue}:{subscription_id}", location.model_dump_json())  # type: ignore [misc]
         await redis.expire(f"{_prefix_queue}:{subscription_id}", 10, nx=True)
@@ -157,8 +157,8 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
         key = f"{_prefix_subscription}:{subscription.id}"
         queue_key = f"{_prefix_queue}:{subscription.id}"
-        queued_location = await redis.lrange(queue_key, 0, -1)  # type: ignore [misc]
-        for location in queued_location:
+        queued_locations = await redis.lrange(queue_key, 0, -1)  # type: ignore [misc]
+        for location in queued_locations:
             location = GeographicalCoordinates.model_validate_json(location)
             if await self.notify_location(subscription, location, pre_store=True):
                 break
@@ -170,8 +170,6 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
     async def delete_subscription(
         self, id: str, *, pre_store_sub: Optional[Subscription] = None
     ) -> None:
-        if pre_store_sub is not None:
-            print("IM BEING CALLED")
         redis = get_redis()
 
         subscription_key = f"{_prefix_subscription}:{id}"
@@ -250,7 +248,7 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         subscription: Subscription,
         location: GeographicalCoordinates,
         *,
-        pre_store=False,
+        pre_store: bool = False,
     ) -> bool:
         """Returns bool indicating whether the subscription was deleted or not."""
         redis = get_redis()

@@ -5,7 +5,7 @@ from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel, conint
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
 
 
 class Protocol(str, Enum):
@@ -128,24 +128,25 @@ NetworkAccessIdentifier = Annotated[
 ]
 
 
-class SingleIpv4Addr(RootModel[IPv4Address]):
-    root: IPv4Address = Field(
-        ...,
+SingleIpv4Addr = Annotated[
+    IPv4Address,
+    Field(
         description="A single IPv4 address with no subnet mask.",
         examples=["84.125.93.10"],
-    )
+    ),
+]
 
 
-class Port(RootModel[conint(ge=0, le=65535)]):
-    root: int = Field(..., ge=0, le=65535, description="TCP or UDP port number.")
+Port = Annotated[int, Field(ge=0, le=65535, description="TCP or UDP port number.")]
 
 
-class DeviceIpv6Address(RootModel[IPv6Address]):
-    root: IPv6Address = Field(
-        ...,
+DeviceIpv6Address = Annotated[
+    IPv6Address,
+    Field(
         description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
         examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
-    )
+    ),
+]
 
 
 class AreaType(str, Enum):
@@ -185,7 +186,6 @@ class Datacontenttype(str, Enum):
 Source = Annotated[
     str,
     Field(
-        ...,
         min_length=1,
         description="Identifies the context in which an event happened - be a non-empty `URI-reference` like:\n- URI with a DNS authority:\n  * https://github.com/cloudevents\n  * mailto:cncf-wg-serverless@lists.cncf.io\n- Universally-unique URN with a UUID:\n  * urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66\n- Application-specific identifier:\n  * /cloudevents/spec/pull/123\n  * 1-555-123-4567\n",
         examples=["https://notificationSendServer12.supertelco.com"],
@@ -334,7 +334,7 @@ class Device(BaseModel):
 
 
 class Circle(Area):
-    areaType: Literal[AreaType.CIRCLE] = AreaType.CIRCLE  # type: ignore[reportIncompatibleVariableOverride]
+    areaType: Literal[AreaType.CIRCLE] = AreaType.CIRCLE
     center: Point
     radius: int = Field(
         ...,
