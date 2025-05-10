@@ -59,7 +59,7 @@ class LocationSettings(BaseModel):
 
 class ProvisioningSettings(BaseModel):
     qod_provisioning_backend: QodProvisioningBackend
-    af_id: int
+    af_id: str
 
 
 class Settings(BaseSettings):
