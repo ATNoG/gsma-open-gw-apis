@@ -49,6 +49,10 @@ class LocationBackend(str, Enum):
     NefEmulator = "emulator"
 
 
+class LocationSettings(BaseModel):
+    backend: LocationBackend
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -61,6 +65,7 @@ class Settings(BaseSettings):
 
     sms_otp: SMSOTPSettings
     qos_profiles: QoSProfilesSettings
+    location: LocationSettings
 
     @classmethod
     def settings_customise_sources(

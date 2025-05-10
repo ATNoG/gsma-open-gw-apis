@@ -4,8 +4,7 @@ from typing import Any, Union
 
 from app.schemas import ErrorInfo
 
-from . import smsotp, qos_profiles
-from . import smsotp, location
+from . import smsotp, qos_profiles, location
 
 responses: dict[Union[int, str], dict[str, Any]] = {
     400: {

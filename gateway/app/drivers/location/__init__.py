@@ -3,17 +3,22 @@ from fastapi import Depends
 from typing import Annotated
 
 from app.settings import LocationBackend, settings
+from app.drivers.nef_auth import NEFAuth
 from app.interfaces.location import LocationInterface
 
 from .mock import MockLocationDriver
 from .emulator import NEFEmulatorDriver
 
 location_interface: LocationInterface
-match settings.emulator.location_backend:
+match settings.location.backend:
     case LocationBackend.Mock:
         location_interface = MockLocationDriver()
     case LocationBackend.NefEmulator:
-        location_interface = NEFEmulatorDriver(settings.emulator.emulator_url)
+        nef_auth = NEFAuth(
+            settings.nef_url, settings.nef_username, settings.nef_password
+        )
+
+        location_interface = NEFEmulatorDriver(settings.nef_url, nef_auth)
 
 
 async def get_location_driver() -> LocationInterface:
