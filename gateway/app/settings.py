@@ -10,8 +10,6 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
-from app.schemas import geofencing
-
 LogLevel = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
 
@@ -69,7 +67,6 @@ class NefSettigns(BaseModel):
 
 class GeofencingSettings(BaseModel):
     monitoring_url: AnyHttpUrl
-    analytics_url: AnyHttpUrl
     nef_webhook: AnyHttpUrl
     geofencing_url: AnyHttpUrl
 

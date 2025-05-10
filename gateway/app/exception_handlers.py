@@ -92,7 +92,9 @@ def install_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(status_code=404, content=jsonable_encoder(body))
 
     @app.exception_handler(GeofencingSubscriptionNotFound)
-    async def geofencing_subscription_not_found(request: Request, exc: Exception):
+    async def geofencing_subscription_not_found(
+        request: Request, exc: Exception
+    ) -> Response:
         body = ErrorInfo(
             status=404,
             code="NOT_FOUND",
@@ -101,7 +103,7 @@ def install_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(status_code=404, content=jsonable_encoder(body))
 
     @app.exception_handler(ApiException)
-    async def api_exception(request: Request, exc: ApiException):
+    async def api_exception(request: Request, exc: ApiException) -> Response:
         body = ErrorInfo(
             status=exc.status,
             code=exc.code,

@@ -1,4 +1,5 @@
 import logging
+from http import HTTPStatus
 
 from fastapi import APIRouter
 from pydantic import AnyUrl
@@ -19,7 +20,7 @@ def _get_nef_sub_from_subscription_url(url: AnyUrl | None) -> str:
     return url.path.rsplit("/")[-1]
 
 
-@router.post("/geofencing/webhook")
+@router.post("/geofencing/webhook", status_code=HTTPStatus.NO_CONTENT)
 async def webhook(
     notification: MonitoringNotification,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
@@ -43,4 +44,5 @@ async def webhook(
     except GeofencingSubscriptionNotFound:
         await geofencing_subscription_interface.queue_notification(nef_sub, point)
         return
+
     await geofencing_subscription_interface.notify_location(subscription, point)
