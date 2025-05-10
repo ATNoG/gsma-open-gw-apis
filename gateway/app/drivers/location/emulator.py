@@ -23,19 +23,21 @@ class NEFEmulatorDriver(LocationInterface):
             raise HTTPException(status_code=501, detail="Identifier not implemented")
 
         data = {
-            "analyEvent": "UE_MOBILITY",
-            "tgtUe": {"gpsi": device.phoneNumber.lstrip("+")},
-            "suppFeat": "a",
+            "msisdn": device.phoneNumber.lstrip("+"),
+            "monitoringType": "LOCATION_REPORTING",
+            "notificationDestination": "https://0.0.0.0",
+            "maximumNumberOfReports": 1,
         }
-        url = (
-            f"{self.emulator_url}/api/v1/3gpp-analyticsexposure/v1/{settings.afId}/fetch",
-        )
+        url = f"{self.emulator_url}nef/api/v1/3gpp-monitoring-event/v1/myNetApp/subscriptions"
 
         print("Querying the NEF Emulator at", url, "with data", data)
 
         doc = self.httpx_client.post(
-            f"{self.emulator_url}nef/api/v1/3gpp-analyticsexposure/v1/{settings.afId}/fetch",
+            url,
             json=data,
+            headers={
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDc1Mjg0MjMsInN1YiI6IjEifQ.9TOohjrMBiK8CzpBzN_RWiZjoxIEwcCeo84fobQbUH4"
+            },
         )
 
         doc = await doc
@@ -47,7 +49,7 @@ class NEFEmulatorDriver(LocationInterface):
         doc = doc.json()
 
         print(doc)
-        area = doc["ueMobilityInfos"][0]["locInfo"][0]["loc"]["geographicAreas"][0]
+        area = doc["locationArea"]["geographicAreas"][0]
 
         if area["shape"] == "POINT":
             point = area["point"]
