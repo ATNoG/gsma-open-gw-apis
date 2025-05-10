@@ -42,9 +42,6 @@ class SMSOTPSettings(BaseModel):
 
 class ProvisioningSettings(BaseModel):
     qod_provisioning_backend: QodProvisioningBackend
-    nef_url: AnyHttpUrl
-    gateway_url_callback: AnyHttpUrl
-    gateway_url: AnyHttpUrl
     af_id: int
 
 
@@ -53,6 +50,9 @@ class Settings(BaseSettings):
 
     log_level: LogLevel = "INFO"
     redis_url: str = "redis://localhost:6379"
+
+    nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
+    gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
 
     sms_otp: SMSOTPSettings
     qod_provisioning: ProvisioningSettings

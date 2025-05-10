@@ -1,7 +1,7 @@
 from app.schemas.afSessionWithQos import UserPlaneNotificationData
 from fastapi import APIRouter
 
-from app.drivers.qodProvisioning.nef import NEFQoDProvisioningInterface
+from app.drivers.qodProvisioning import qodProvisioningInterfaceDep
 
 router = APIRouter()
 
@@ -10,6 +10,6 @@ router = APIRouter()
 async def receive_callback_message(
     provisioning_id: str,
     body: UserPlaneNotificationData,
-    qodProvisioning_interface: NEFQoDProvisioningInterface,
+    qodProvisioning_interface: qodProvisioningInterfaceDep,
 ) -> None:
     await qodProvisioning_interface.send_callback_message(body, provisioning_id)

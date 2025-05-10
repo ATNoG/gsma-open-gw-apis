@@ -1,15 +1,15 @@
 from fastapi import APIRouter
 
-from app.drivers.qodProvisioning.nef import NEFQoDProvisioningInterface
 from app.schemas.qodProvisioning import ProvisioningInfo, RetrieveProvisioningByDevice
+from app.drivers.qodProvisioning import qodProvisioningInterfaceDep
 
 router = APIRouter()
 
 
-@router.get("/retrieve-device-qos", response_model_exclude_unset=True)
+@router.get("/retrieve-device-qos")
 async def get_qod_information_by_id(
     device: RetrieveProvisioningByDevice,
-    qodProvisioning_interface: NEFQoDProvisioningInterface,
+    qodProvisioning_interface: qodProvisioningInterfaceDep,
 ) -> ProvisioningInfo:
     provisioning_info = await qodProvisioning_interface.get_qod_information_device(
         device
