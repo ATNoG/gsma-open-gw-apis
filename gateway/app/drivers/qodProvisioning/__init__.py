@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
+
 from .nef import NEFQoDProvisioningInterface
 from app.interfaces.qodProvisioning import QoDProvisioningInterface
 
