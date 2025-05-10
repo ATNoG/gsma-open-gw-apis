@@ -23,6 +23,11 @@ class OTPBackend(str, Enum):
     Redis = "redis"
 
 
+class QodProvisioningBackend(str, Enum):
+    Mock = "mock"
+    Nef = "nef"
+
+
 class SMSOTPSettings(BaseModel):
     sms_backend: SMSBackend
     otp_backend: OTPBackend
@@ -35,13 +40,22 @@ class SMSOTPSettings(BaseModel):
     sender_id: Annotated[str, Field(max_length=11)]
 
 
+class ProvisioningSettings(BaseModel):
+    qod_provisioning_backend: QodProvisioningBackend
+    af_id: int
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
     log_level: LogLevel = "INFO"
     redis_url: str = "redis://localhost:6379"
 
+    nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
+    gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
+
     sms_otp: SMSOTPSettings
+    qod_provisioning: ProvisioningSettings
 
     @classmethod
     def settings_customise_sources(
