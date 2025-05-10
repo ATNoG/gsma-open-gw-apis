@@ -1,0 +1,70 @@
+from datetime import datetime
+import httpx
+from pydantic import AnyHttpUrl
+from fastapi import HTTPException
+
+from app.settings import settings
+from app.interfaces.location import LocationInterface
+from app.schemas.location import Location, Circle, Point, Polygon
+from app.schemas.device import Device
+
+
+class NEFEmulatorDriver(LocationInterface):
+    def __init__(self, emulator_url: AnyHttpUrl) -> None:
+        super().__init__()
+
+        self.emulator_url = emulator_url
+        self.httpx_client = httpx.AsyncClient()
+
+    async def retrieve_location(
+        self, device: Device, max_age: int, max_surface: int
+    ) -> Location:
+        if not device.phoneNumber:
+            raise HTTPException(status_code=501, detail="Identifier not implemented")
+
+        data = {
+            "msisdn": device.phoneNumber.lstrip("+"),
+            "monitoringType": "LOCATION_REPORTING",
+            "notificationDestination": "https://0.0.0.0",
+            "maximumNumberOfReports": 1,
+        }
+        url = f"{self.emulator_url}nef/api/v1/3gpp-monitoring-event/v1/myNetApp/subscriptions"
+
+        print("Querying the NEF Emulator at", url, "with data", data)
+
+        doc = self.httpx_client.post(
+            url,
+            json=data,
+            headers={
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDc1Mjg0MjMsInN1YiI6IjEifQ.9TOohjrMBiK8CzpBzN_RWiZjoxIEwcCeo84fobQbUH4"
+            },
+        )
+
+        doc = await doc
+        if doc.status_code != httpx.codes.OK:
+            raise HTTPException(
+                status_code=doc.status_code, detail=doc.json()["detail"]
+            )
+
+        doc = doc.json()
+
+        print(doc)
+        area = doc["locationArea"]["geographicAreas"][0]
+
+        if area["shape"] == "POINT":
+            point = area["point"]
+            return Location(
+                lastLocationTime=datetime.now(),
+                area=Circle(
+                    center=Point(latitude=point["lat"], longitude=point["lon"]),
+                    radius=10,
+                ),
+            )
+
+        if area["shape"] == "POLYGON":
+            return Location(
+                lastLocationTime=datetime.now(),
+                area=Polygon(boundary=area["pointList"]),
+            )
+
+        raise HTTPException(status_code=501, detail="Area response not supported")
