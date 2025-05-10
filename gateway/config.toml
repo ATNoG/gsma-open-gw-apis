@@ -1,5 +1,5 @@
-gateway_url = "http://host.docker.internal:8000/qod-provisioning/v0.1"
-nef_url = "http://localhost:8888/nef/api/3gpp-as-session-with-qos/v1/"
+gateway_url = "http://host.docker.internal:8000"
+nef_url = "http://localhost:8888"
 
 [sms_otp]
 sms_backend = "mock"
@@ -15,4 +15,4 @@ backend = "nef"
 
 [qod_provisioning]
 qod_provisioning_backend = "nef"
-af_id = 1
+af_id = "gateway"

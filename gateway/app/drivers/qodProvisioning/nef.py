@@ -32,7 +32,6 @@ from app.schemas.qodProvisioning import (
     Type,
 )
 from app.settings import settings
-import hashlib
 import json
 from pydantic.json import pydantic_encoder
 
@@ -76,7 +75,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             )
 
         res = await self.httpx_client.post(
-            f"{settings.nef_url}/nef/api/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subcriptions",
+            f"{settings.nef_url}nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
             content=payload.model_dump_json(),
         )
 
@@ -105,13 +104,21 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         key = f"{_prefix_gateway_nef}:{str(provisioning_id)}"
         self.redis.set(key, nef_sub_id)
 
-        # TODO: change this to save every identifier
-        if req.device:
-            device_hash = hashlib.sha256(
-                req.device.model_dump_json().encode("UTF-8")
-            ).hexdigest()
+        if device := req.device:
+            if device.phoneNumber:
+                key = f"{_prefix_device}:{device.phoneNumber}"
+                self.redis.set(key, str(provisioning_id))
+            if device.networkAccessIdentifier:
+                key = f"{_prefix_device}:{device.networkAccessIdentifier}"
+                self.redis.set(key, str(provisioning_id))
+            if device.ipv4Address.privateAddress:
+                key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
+                self.redis.set(key, str(provisioning_id))
+            if device.ipv4Address.publicPort:
+                key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
+                self.redis.set(key, str(provisioning_id))
 
-            key = f"{_prefix_device}:{device_hash}"
+            key = f"{_prefix_device}:{device.ipv6Address}"
             self.redis.set(key, str(provisioning_id))
 
         return response
@@ -126,7 +133,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         nef_id = await self.redis.get(key)
 
         res = await self.httpx_client.delete(
-            f"{settings.nef_url}/nef/api/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
+            f"{settings.nef_url}nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
         )
 
         if res.status_code == 404:
@@ -148,14 +155,30 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if device_req.device is None:
             raise ResourceNotFound()
 
-        device_hash = hashlib.sha256(
-            device_req.device.model_dump_json().encode("UTF-8")
-        ).hexdigest()
+        device = device_req.device
 
-        key = f"{_prefix_device}:{device_hash}"
+        id = ""
+
+        if device.phoneNumber:
+            key = f"{_prefix_device}:{device.phoneNumber}"
+            id = await self.redis.get(key)
+        if device.networkAccessIdentifier:
+            key = f"{_prefix_device}:{device.networkAccessIdentifier}"
+            id = await self.redis.get(key)
+        if device.ipv4Address.privateAddress:
+            key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
+            id = await self.redis.get(key)
+        if device.ipv4Address.publicPort:
+            key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
+            id = await self.redis.get(key)
+
+        key = f"{_prefix_device}:{device.ipv6Address}"
         id = await self.redis.get(key)
 
         sub_info = await self._get_subscription_info(id)
+
+        if not sub_info:
+            raise ResourceNotFound()
 
         return sub_info
 

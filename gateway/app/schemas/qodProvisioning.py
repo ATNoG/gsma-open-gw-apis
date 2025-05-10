@@ -168,7 +168,7 @@ class EventStatusChanged(CloudEvent):
 
 class DeviceIpv4Addr(BaseModel):
     publicAddress: IPv4Address
-    privateAddress: Optional[IPv4Address]
+    privateAddress: Optional[IPv4Address] = None
     publicPort: Optional[Port] = None
 
     @model_validator(mode="after")
