@@ -8,7 +8,7 @@ from . import (
 )
 
 
-router = APIRouter(prefix="/qod-provisioning/v0.1")
+router = APIRouter(prefix="/qod-provisioning/v0.2")
 router.include_router(create_device_qos.router)
 router.include_router(get_device_qod_by_id.router)
 router.include_router(delete_device_qod.router)

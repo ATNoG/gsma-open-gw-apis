@@ -1,14 +1,15 @@
 import datetime
 import logging
+import re
 from typing import Awaitable
 import uuid
 
-from fastapi import HTTPException
 import httpx
 from pydantic import AnyHttpUrl, AnyUrl
 
 from app.drivers.nef_auth import NEFAuth
 from app.interfaces.qodProvisioning import (
+    ProvisioningConflict,
     QoDProvisioningInterface,
     ResourceNotFound,
 )
@@ -24,7 +25,7 @@ from app.schemas.commonData import (
 )
 from app.schemas.qodProvisioning import (
     CloudEvent,
-    CreateProvisioning,
+    TriggerProvisioning,
     Datacontenttype,
     ProvisioningInfo,
     RetrieveProvisioningByDevice,
@@ -47,15 +48,16 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
     def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
         super().__init__()
         self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+        self.httpx_client_callback = httpx.AsyncClient()
         self.redis = get_redis()
 
-    async def create_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
+    async def create_provisioning(self, req: TriggerProvisioning) -> ProvisioningInfo:
         provisioning_id = uuid.uuid4()
 
         payload = AsSessionWithQoSSubscription(
             supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.gateway_url}/callbacks/v1/qos/{provisioning_id}"
+                f"{settings.gateway_url}callbacks/v1/qos/{provisioning_id}"
             ),
             flowInfo=[
                 FlowInfo(
@@ -70,25 +72,25 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         )
 
         if req.device:
-            # payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
-            payload.ueIpv6Addr = req.device.ipv6Address
-            # payload.gpsi = (
-            #     f"msisdn-{req.device.phoneNumber}" if req.device.phoneNumber else None
-            # )
+            if req.device.ipv4Address and req.device.ipv4Address.publicAddress:
+                payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
+            elif req.device.ipv6Address:
+                payload.ueIpv6Addr = req.device.ipv6Address
+            elif req.device.phoneNumber:
+                pattern = re.compile(r"^(?:\+|00)\d{1,3}[\s\-]*")
+                phone_number = pattern.sub("", req.device.phoneNumber)
+                payload.gpsi = f"msisdn-{phone_number}"
 
         res = await self.httpx_client.post(
             f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
-            content=payload.model_dump_json(),
+            json=payload.model_dump_json(),
         )
 
         if res.status_code == 404:
             raise ResourceNotFound()
 
         if res.status_code == 409:
-            raise HTTPException(
-                status_code=409,
-                detail="Subscription for this UE already exists",
-            )
+            raise ProvisioningConflict()
 
         subcription_result = AsSessionWithQoSSubscription.model_validate_json(
             res.content
@@ -119,10 +121,10 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             if device.networkAccessIdentifier:
                 key = f"{_prefix_device}:{device.networkAccessIdentifier}"
                 await self.redis.set(key, str(provisioning_id))
-            if device.ipv4Address.privateAddress:
+            if device.ipv4Address and device.ipv4Address.privateAddress:
                 key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
                 await self.redis.set(key, str(provisioning_id))
-            if device.ipv4Address.publicPort:
+            if device.ipv4Address and device.ipv4Address.publicPort:
                 key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
                 await self.redis.set(key, str(provisioning_id))
 
@@ -132,9 +134,15 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         return response
 
     async def get_qod_information_by_id(self, id: str) -> ProvisioningInfo:
-        sub_info = await self._get_subscription_info(id)
+        key = f"{_prefix_info}:{id}"
 
-        return sub_info
+        data = self.redis.hgetall(key)
+        if isinstance(data, Awaitable):
+            data = await data
+
+        decoded_data = {k: json.loads(v) for k, v in data.items()}
+
+        return ProvisioningInfo.model_validate(decoded_data)
 
     async def delete_qod_provisioning(self, id: str) -> ProvisioningInfo:
         key = f"{_prefix_gateway_nef}:{id}"
@@ -147,7 +155,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if res.status_code == 404:
             raise ResourceNotFound()
 
-        sub_info = await self._get_subscription_info(id)
+        sub_info = await self.get_qod_information_by_id(id)
 
         if res.status_code == 204:
             sub_info.status = Status.UNAVAILABLE
@@ -173,17 +181,17 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if device.networkAccessIdentifier:
             key = f"{_prefix_device}:{device.networkAccessIdentifier}"
             id = await self.redis.get(key)
-        if device.ipv4Address.privateAddress:
+        if device.ipv4Address and device.ipv4Address.privateAddress:
             key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
             id = await self.redis.get(key)
-        if device.ipv4Address.publicPort:
+        if device.ipv4Address and device.ipv4Address.publicPort:
             key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
             id = await self.redis.get(key)
 
         key = f"{_prefix_device}:{device.ipv6Address}"
         id = await self.redis.get(key)
 
-        sub_info = await self._get_subscription_info(id)
+        sub_info = await self.get_qod_information_by_id(id)
 
         if not sub_info:
             raise ResourceNotFound()
@@ -193,21 +201,23 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
     async def send_callback_message(
         self, body: UserPlaneNotificationData, id: str
     ) -> None:
-        sub_info = await self._get_subscription_info(id)
+        sub_info = await self.get_qod_information_by_id(id)
 
         if sub_info is None:
             raise ResourceNotFound()
 
-        sub_info.status = self._get_qod_status(body)
-        sub_info.statusInfo = (
-            StatusInfo.NETWORK_TERMINATED
-            if sub_info.status == Status.UNAVAILABLE
-            else None
-        )
+        status = self._get_qod_status(body)
+        if status is not None:
+            sub_info.status = status
+            sub_info.statusInfo = (
+                StatusInfo.NETWORK_TERMINATED
+                if sub_info.status == Status.UNAVAILABLE
+                else None
+            )
 
         cloud_event = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}/qod-provisioning/v0.1/device-qos/{id}",
+            source=f"{settings.gateway_url}qod-provisioning/v0.1/device-qos/{id}",
             type=Type.org_camaraproject_qod_provisioning_v0_status_changed,
             specversion=Specversion.field_1_0,
             datacontenttype=Datacontenttype.application_json,
@@ -219,9 +229,9 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if sink is None:
             raise ResourceNotFound()
 
-        print(sink)
-
-        await self.httpx_client.post(sink, content=cloud_event.model_dump_json())
+        await self.httpx_client_callback.post(
+            str(sink), content=cloud_event.model_dump_json()
+        )
 
         await self._save_subscription_info(id, sub_info)
 
@@ -231,34 +241,18 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
 
         return url.path.rsplit("/", maxsplit=1)[-1]
 
-    def _get_phone_number(self, gpsi: str | None) -> str | None:
-        if gpsi is None:
-            return None
-
-        phone_number = gpsi.strip("msisdn-")
-        return phone_number
-
-    def _get_qod_status(self, nef_response: UserPlaneNotificationData) -> Status:
-        if nef_response.eventReports[0].event == UserPlaneEvent.QOS_GUARANTEED:
-            return Status.AVAILABLE
-        elif nef_response.eventReports[0].event == UserPlaneEvent.SESSION_TERMINATION:
-            return Status.UNAVAILABLE
-        elif nef_response.eventReports[0].event == UserPlaneEvent.QOS_MONITORING:
-            return Status.REQUESTED
-        raise Exception
-
-    async def _get_subscription_info(self, id: str) -> ProvisioningInfo:
-        key = f"{_prefix_info}:{id}"
-
-        data = self.redis.hgetall(key)
-        if isinstance(data, Awaitable):
-            data = await data
-
-        decoded_data = {k: json.loads(v) for k, v in data.items()}
-
-        sub_info = ProvisioningInfo.model_validate(decoded_data)
-
-        return sub_info
+    def _get_qod_status(self, nef_response: UserPlaneNotificationData) -> Status | None:
+        status = None
+        for report in nef_response.eventReports:
+            if report.event == UserPlaneEvent.QOS_GUARANTEED:
+                status = Status.AVAILABLE
+            elif report.event == UserPlaneEvent.FAILED_RESOURCES_ALLOCATION:
+                status = Status.UNAVAILABLE
+            elif report.event == UserPlaneEvent.QOS_NOT_GUARANTEED:
+                status = Status.REQUESTED
+            elif report.event == UserPlaneEvent.SUCCESSFUL_RESOURCES_ALLOCATION:
+                status = Status.AVAILABLE
+        return status
 
     async def _save_subscription_info(self, id: str, data: ProvisioningInfo) -> None:
         key = f"{_prefix_info}:{id}"
@@ -266,8 +260,6 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             k: json.dumps(v, default=pydantic_encoder)
             for k, v in data.model_dump().items()
         }
-
-        print(f"key: {key}, data: {data_dict}")
 
         res = self.redis.hset(key, mapping=data_dict)
         if isinstance(res, Awaitable):

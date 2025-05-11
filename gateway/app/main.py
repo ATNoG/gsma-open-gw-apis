@@ -12,7 +12,7 @@ from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
 app.include_router(endpoints.router)
-app.include_router(callbacks.router)
+app.include_router(callbacks.router, include_in_schema=False)
 
 install_exception_handlers(app)
 

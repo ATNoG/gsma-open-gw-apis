@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.schemas.qodProvisioning import ProvisioningInfo
-from app.drivers.qodProvisioning import qodProvisioningInterfaceDep
+from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 
 router = APIRouter()
 
@@ -9,9 +9,6 @@ router = APIRouter()
 @router.delete("/device-qos/{provisioningId}")
 async def delete_qod(
     provisioningId: str,
-    qodProvisioning_interface: qodProvisioningInterfaceDep,
+    qod_provisioning_interface: QodProvisioningInterfaceDep,
 ) -> ProvisioningInfo:
-    provisioning_info = await qodProvisioning_interface.delete_qod_provisioning(
-        provisioningId
-    )
-    return provisioning_info
+    return await qod_provisioning_interface.delete_qod_provisioning(provisioningId)
