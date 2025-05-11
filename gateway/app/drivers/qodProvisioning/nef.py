@@ -3,9 +3,11 @@ import logging
 from typing import Awaitable
 import uuid
 
+from fastapi import HTTPException
 import httpx
-from pydantic import AnyUrl
+from pydantic import AnyHttpUrl, AnyUrl
 
+from app.drivers.nef_auth import NEFAuth
 from app.interfaces.qodProvisioning import (
     QoDProvisioningInterface,
     ResourceNotFound,
@@ -42,9 +44,9 @@ LOG = logging.getLogger(__name__)
 
 
 class NEFQoDProvisioningInterface(QoDProvisioningInterface):
-    def __init__(self) -> None:
+    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient()
+        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
         self.redis = get_redis()
 
     async def create_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
@@ -68,19 +70,25 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         )
 
         if req.device:
-            payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
+            # payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
             payload.ueIpv6Addr = req.device.ipv6Address
-            payload.gpsi = (
-                f"msisdn-{req.device.phoneNumber}" if req.device.phoneNumber else None
-            )
+            # payload.gpsi = (
+            #     f"msisdn-{req.device.phoneNumber}" if req.device.phoneNumber else None
+            # )
 
         res = await self.httpx_client.post(
-            f"{settings.nef_url}nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
+            f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
             content=payload.model_dump_json(),
         )
 
         if res.status_code == 404:
             raise ResourceNotFound()
+
+        if res.status_code == 409:
+            raise HTTPException(
+                status_code=409,
+                detail="Subscription for this UE already exists",
+            )
 
         subcription_result = AsSessionWithQoSSubscription.model_validate_json(
             res.content
@@ -99,27 +107,27 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             startedAt=datetime.datetime.now(),
         )
 
-        self._save_subscription_info(str(provisioning_id), response)
+        await self._save_subscription_info(str(provisioning_id), response)
 
         key = f"{_prefix_gateway_nef}:{str(provisioning_id)}"
-        self.redis.set(key, nef_sub_id)
+        await self.redis.set(key, nef_sub_id)
 
         if device := req.device:
             if device.phoneNumber:
                 key = f"{_prefix_device}:{device.phoneNumber}"
-                self.redis.set(key, str(provisioning_id))
+                await self.redis.set(key, str(provisioning_id))
             if device.networkAccessIdentifier:
                 key = f"{_prefix_device}:{device.networkAccessIdentifier}"
-                self.redis.set(key, str(provisioning_id))
+                await self.redis.set(key, str(provisioning_id))
             if device.ipv4Address.privateAddress:
                 key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
-                self.redis.set(key, str(provisioning_id))
+                await self.redis.set(key, str(provisioning_id))
             if device.ipv4Address.publicPort:
                 key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
-                self.redis.set(key, str(provisioning_id))
+                await self.redis.set(key, str(provisioning_id))
 
             key = f"{_prefix_device}:{device.ipv6Address}"
-            self.redis.set(key, str(provisioning_id))
+            await self.redis.set(key, str(provisioning_id))
 
         return response
 
@@ -133,7 +141,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         nef_id = await self.redis.get(key)
 
         res = await self.httpx_client.delete(
-            f"{settings.nef_url}nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subcriptions/{nef_id}",
+            f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions/{nef_id}",
         )
 
         if res.status_code == 404:
@@ -145,7 +153,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             sub_info.status = Status.UNAVAILABLE
             sub_info.statusInfo = StatusInfo.NETWORK_TERMINATED
 
-        self._save_subscription_info(id, sub_info)
+        await self._save_subscription_info(id, sub_info)
 
         return sub_info
 
@@ -211,9 +219,11 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if sink is None:
             raise ResourceNotFound()
 
+        print(sink)
+
         await self.httpx_client.post(sink, content=cloud_event.model_dump_json())
 
-        self._save_subscription_info(id, sub_info)
+        await self._save_subscription_info(id, sub_info)
 
     def _get_subscription_id_from_subscription_url(self, url: AnyUrl | None) -> str:
         if url is None or url.path is None:
@@ -244,17 +254,21 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         if isinstance(data, Awaitable):
             data = await data
 
-        decoded_data = {k.decode(): json.loads(v) for k, v in data.items()}
+        decoded_data = {k: json.loads(v) for k, v in data.items()}
 
         sub_info = ProvisioningInfo.model_validate(decoded_data)
 
         return sub_info
 
-    def _save_subscription_info(self, id: str, data: ProvisioningInfo) -> None:
+    async def _save_subscription_info(self, id: str, data: ProvisioningInfo) -> None:
         key = f"{_prefix_info}:{id}"
         data_dict = {
             k: json.dumps(v, default=pydantic_encoder)
             for k, v in data.model_dump().items()
         }
 
-        self.redis.hset(key, mapping=data_dict)
+        print(f"key: {key}, data: {data_dict}")
+
+        res = self.redis.hset(key, mapping=data_dict)
+        if isinstance(res, Awaitable):
+            await res

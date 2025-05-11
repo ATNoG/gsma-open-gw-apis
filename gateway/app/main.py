@@ -7,10 +7,12 @@ from typing import Any
 from collections.abc import Awaitable, Callable
 
 from app import endpoints
+from app.drivers.qodProvisioning import callbacks
 from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
 app.include_router(endpoints.router)
+app.include_router(callbacks.router)
 
 install_exception_handlers(app)
 

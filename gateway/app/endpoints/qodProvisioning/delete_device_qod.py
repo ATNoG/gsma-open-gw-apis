@@ -6,7 +6,7 @@ from app.drivers.qodProvisioning import qodProvisioningInterfaceDep
 router = APIRouter()
 
 
-@router.get("/device-qos/{provisioningId}")
+@router.delete("/device-qos/{provisioningId}")
 async def delete_qod(
     provisioningId: str,
     qodProvisioning_interface: qodProvisioningInterfaceDep,
