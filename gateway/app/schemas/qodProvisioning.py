@@ -58,7 +58,9 @@ class CredentialType(Enum):
 
 
 class SinkCredential(BaseModel):
-    credentialType: CredentialType = Field(description="The type of the credential.")
+    credentialType: Optional[CredentialType] = Field(
+        None, description="The type of the credential."
+    )
 
 
 class PlainCredential(SinkCredential):
