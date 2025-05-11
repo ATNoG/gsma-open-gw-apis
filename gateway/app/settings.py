@@ -61,12 +61,8 @@ class ProvisioningSettings(BaseModel):
     af_id: str
 
 
-class NefSettigns(BaseModel):
-    auth: str
-
-
 class GeofencingSettings(BaseModel):
-    monitoring_url: AnyHttpUrl
+    monitoring_base_path: str
     nef_webhook: AnyHttpUrl
     geofencing_url: AnyHttpUrl
 
@@ -90,7 +86,6 @@ class Settings(BaseSettings):
     qod_provisioning: ProvisioningSettings
 
     geofencing: GeofencingSettings
-    nef: NefSettigns
 
     @classmethod
     def settings_customise_sources(

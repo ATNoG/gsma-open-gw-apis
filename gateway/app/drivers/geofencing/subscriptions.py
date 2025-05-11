@@ -7,8 +7,9 @@ from typing import Optional
 import geopy  # type: ignore[import-untyped]
 import geopy.distance  # type: ignore[import-untyped]
 import httpx
-from pydantic import AnyUrl
+from pydantic import AnyHttpUrl, AnyUrl
 
+from app.drivers.nef_auth import NEFAuth
 from app.exceptions import ApiException
 from app.interfaces.geofencing_subscriptions import (
     GeofencingSubscriptionInterface,
@@ -53,10 +54,9 @@ def _handle_post_error(res: httpx.Response) -> None:
 
 
 class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
-
-    def __init__(self) -> None:
+    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient()
+        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
 
     async def clear_expired_subscriptions(self) -> None:
         redis = get_redis()
@@ -106,9 +106,8 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         )
 
         res = await self.httpx_client.post(
-            f"{settings.geofencing.monitoring_url}/subscriptions",
+            f"{settings.geofencing.monitoring_base_path}/subscriptions",
             content=body.model_dump_json(),
-            headers={"Authorization": settings.nef.auth},
         )
 
         if 200 > res.status_code or res.status_code > 299:
@@ -149,7 +148,9 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         self, subscription_id: str, location: GeographicalCoordinates
     ) -> None:
         redis = get_redis()
-        await redis.rpush(f"{_prefix_queue}:{subscription_id}", location.model_dump_json())  # type: ignore [misc]
+        await redis.rpush(
+            f"{_prefix_queue}:{subscription_id}", location.model_dump_json()
+        )  # type: ignore [misc]
         await redis.expire(f"{_prefix_queue}:{subscription_id}", 10, nx=True)
 
     async def store_subscription(self, subscription: Subscription) -> None:
@@ -181,8 +182,7 @@ class RedisGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             raise GeofencingSubscriptionNotFound()
 
         await self.httpx_client.delete(
-            f"{settings.geofencing.monitoring_url}/subscriptions/{id}",
-            headers={"Authorization": settings.nef.auth},
+            f"{settings.geofencing.monitoring_base_path}/subscriptions/{id}",
         )
 
         await redis.delete(subscription_key)
