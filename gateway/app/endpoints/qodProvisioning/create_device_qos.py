@@ -1,15 +1,14 @@
 from fastapi import APIRouter
 
-from app.schemas.qodProvisioning import CreateProvisioning, ProvisioningInfo
-from app.drivers.qodProvisioning import qodProvisioningInterfaceDep
+from app.schemas.qodProvisioning import TriggerProvisioning, ProvisioningInfo
+from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 
 router = APIRouter()
 
 
 @router.post("/device-qos")
 async def crate_provisioning(
-    req: CreateProvisioning,
-    qodProvisioning_interface: qodProvisioningInterfaceDep,
+    req: TriggerProvisioning,
+    qod_provisioning_interface: QodProvisioningInterfaceDep,
 ) -> ProvisioningInfo:
-    provisioning_info = await qodProvisioning_interface.create_provisioning(req)
-    return provisioning_info
+    return await qod_provisioning_interface.create_provisioning(req)

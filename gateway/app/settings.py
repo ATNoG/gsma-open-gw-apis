@@ -25,7 +25,6 @@ class OTPBackend(Enum):
 
 
 class QodProvisioningBackend(str, Enum):
-    Mock = "mock"
     Nef = "nef"
 
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.schemas.afSessionWithQos import UserPlaneNotificationData
 from app.schemas.qodProvisioning import (
-    CreateProvisioning,
+    TriggerProvisioning,
     ProvisioningInfo,
     RetrieveProvisioningByDevice,
 )
@@ -16,9 +16,13 @@ class DeviceNotFound(Exception):
     pass
 
 
+class ProvisioningConflict(Exception):
+    pass
+
+
 class QoDProvisioningInterface(ABC):
     @abstractmethod
-    async def create_provisioning(self, req: CreateProvisioning) -> ProvisioningInfo:
+    async def create_provisioning(self, req: TriggerProvisioning) -> ProvisioningInfo:
         pass
 
     @abstractmethod
@@ -33,10 +37,4 @@ class QoDProvisioningInterface(ABC):
     async def get_qod_information_device(
         self, device_req: RetrieveProvisioningByDevice
     ) -> ProvisioningInfo:
-        pass
-
-    @abstractmethod
-    async def send_callback_message(
-        self, body: UserPlaneNotificationData, id: str
-    ) -> None:
         pass
