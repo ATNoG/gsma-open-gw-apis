@@ -12,7 +12,6 @@ class GeofencingSubscriptionNotFound(Exception):
 
 
 class GeofencingSubscriptionInterface(ABC):
-
     @abstractmethod
     async def create_location_retrieval_subscription(
         self, req: SubscriptionRequest

@@ -18,10 +18,7 @@ backend = "nef"
 qod_provisioning_backend = "nef"
 af_id = "gateway"
 
-[nef]
-auth = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDc0NzIxMjEsInN1YiI6IjEifQ.m9vZGpaP7V49WcpbqAuVtxS4a68MVjseJK_4yc2SQ6g"
-
 [geofencing]
-monitoring_url = "http://localhost:8888/nef/api/v1/3gpp-monitoring-event/v1/camara"
+monitoring_base_path = "/nef/api/v1/3gpp-monitoring-event/v1/camara"
 nef_webhook = "http://host.docker.internal:8000/geofencing/webhook"
 geofencing_url = "http://localhost:8000/geofencing-subscriptions/v0"
