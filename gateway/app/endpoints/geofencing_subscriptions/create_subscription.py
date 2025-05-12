@@ -11,11 +11,8 @@ async def post_subscriptions(
     req: SubscriptionRequest,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
 ) -> Subscription:
-    await geofencing_subscription_interface.clear_expired_subscriptions()
-    subscription = (
-        await geofencing_subscription_interface.create_location_retrieval_subscription(
-            req
-        )
+    device = req.config.subscriptionDetail.device
+    subscription = await geofencing_subscription_interface.create_subscription(
+        req, device
     )
-    await geofencing_subscription_interface.store_subscription(subscription)
     return subscription

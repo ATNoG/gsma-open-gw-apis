@@ -2,7 +2,6 @@ from typing import Any, Union
 
 from fastapi import APIRouter
 
-from app.endpoints import geofencing_webhook
 from app.schemas import ErrorInfo
 
 from . import geofencing_subscriptions, location, qodProvisioning, qos_profiles, smsotp
@@ -22,4 +21,3 @@ router.include_router(qodProvisioning.router, tags=["QoD Provisioning"])
 router.include_router(
     geofencing_subscriptions.router, tags=["Geofencing Subscriptions"]
 )
-router.include_router(geofencing_webhook.router)

@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
-from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional
 
-from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field
+
+from app.schemas.device import Device
 
 
 class Protocol(str, Enum):
@@ -30,12 +29,12 @@ class SinkCredential(BaseModel):
 
 
 class PlainCredential(SinkCredential):
-    identifier: str = Field(
-        ..., description="The identifier might be an account or username."
-    )
-    secret: str = Field(
-        ..., description="The secret might be a password or passphrase."
-    )
+    identifier: Annotated[
+        str, Field(description="The identifier might be an account or username.")
+    ]
+    secret: Annotated[
+        str, Field(description="The secret might be a password or passphrase.")
+    ]
 
 
 class AccessTokenType(str, Enum):
@@ -43,41 +42,57 @@ class AccessTokenType(str, Enum):
 
 
 class AccessTokenCredential(SinkCredential):
-    accessToken: str = Field(
-        ...,
-        description="REQUIRED. An access token is a previously acquired token granting access to the target resource.",
-    )
-    accessTokenExpiresUtc: datetime = Field(
-        ...,
-        description="REQUIRED. An absolute UTC instant at which the token shall be considered expired.",
-    )
-    accessTokenType: AccessTokenType = Field(
-        ...,
-        description="REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1)).",
-    )
+    accessToken: Annotated[
+        str,
+        Field(
+            description="REQUIRED. An access token is a previously acquired token granting access to the target resource."
+        ),
+    ]
+    accessTokenExpiresUtc: Annotated[
+        datetime,
+        Field(
+            description="REQUIRED. An absolute UTC instant at which the token shall be considered expired."
+        ),
+    ]
+    accessTokenType: Annotated[
+        AccessTokenType,
+        Field(
+            description="REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1))."
+        ),
+    ]
 
 
 class RefreshTokenCredential(SinkCredential):
-    accessToken: str = Field(
-        ...,
-        description="REQUIRED. An access token is a previously acquired token granting access to the target resource.",
-    )
-    accessTokenExpiresUtc: datetime = Field(
-        ...,
-        description="REQUIRED. An absolute UTC instant at which the token shall be considered expired.",
-    )
-    accessTokenType: AccessTokenType = Field(
-        ...,
-        description="REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1)).",
-    )
-    refreshToken: str = Field(
-        ...,
-        description="REQUIRED. An refresh token credential used to acquire access tokens.",
-    )
-    refreshTokenEndpoint: AnyUrl = Field(
-        ...,
-        description="REQUIRED. A URL at which the refresh token can be traded for an access token.",
-    )
+    accessToken: Annotated[
+        str,
+        Field(
+            description="REQUIRED. An access token is a previously acquired token granting access to the target resource."
+        ),
+    ]
+    accessTokenExpiresUtc: Annotated[
+        datetime,
+        Field(
+            description="REQUIRED. An absolute UTC instant at which the token shall be considered expired."
+        ),
+    ]
+    accessTokenType: Annotated[
+        AccessTokenType,
+        Field(
+            description="REQUIRED. Type of the access token (See [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-7.1))."
+        ),
+    ]
+    refreshToken: Annotated[
+        str,
+        Field(
+            description="REQUIRED. A refresh token credential used to acquire access tokens."
+        ),
+    ]
+    refreshTokenEndpoint: Annotated[
+        AnyUrl,
+        Field(
+            description="REQUIRED. A URL at which the refresh token can be traded for an access token."
+        ),
+    ]
 
 
 class SubscriptionEventType(str, Enum):
@@ -106,45 +121,6 @@ SubscriptionId = Annotated[
     Field(
         description="The unique identifier of the subscription in the scope of the subscription manager. When this information is contained within an event notification, this concept SHALL be referred as `subscriptionId` as per [Commonalities Event Notification Model](https://github.com/camaraproject/Commonalities/blob/main/documentation/API-design-guidelines.md#122-event-notification).",
         examples=["qs15-h556-rt89-1298"],
-    ),
-]
-
-PhoneNumber = Annotated[
-    str,
-    Field(
-        pattern=r"^\+[1-9][0-9]{4,14}$",
-        description="A public identifier addressing a telephone subscription. In mobile networks, it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
-        examples=["+123456789"],
-    ),
-]
-
-
-NetworkAccessIdentifier = Annotated[
-    str,
-    Field(
-        description="A public identifier addressing a subscription in a mobile network. In 3GPP terminology, it corresponds to the GPSI formatted with the External Identifier ({Local Identifier}@{Domain Identifier}). Unlike the telephone number, the network access identifier is not subjected to portability ruling in force, and is individually managed by each operator.",
-        examples=["123456789@domain.com"],
-    ),
-]
-
-
-SingleIpv4Addr = Annotated[
-    IPv4Address,
-    Field(
-        description="A single IPv4 address with no subnet mask.",
-        examples=["84.125.93.10"],
-    ),
-]
-
-
-Port = Annotated[int, Field(ge=0, le=65535, description="TCP or UDP port number.")]
-
-
-DeviceIpv6Address = Annotated[
-    IPv6Address,
-    Field(
-        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
-        examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
     ),
 ]
 
@@ -216,13 +192,16 @@ class Method(str, Enum):
 
 
 class HTTPSettings(BaseModel):
-    headers: Optional[Dict[str, str]] = Field(
-        None,
-        description="A set of key/value pairs that is copied into the HTTP request as custom headers.\n\nNOTE: Use/Applicability of this concept has not been discussed in Commonalities under the scope of Meta Release v0.4. When required by an API project as an option to meet a UC/Requirement, please generate an issue for Commonalities discussion about it.",
-    )
-    method: Optional[Method] = Field(
-        None, description="The HTTP method to use for sending the message."
-    )
+    headers: Annotated[
+        Optional[Dict[str, str]],
+        Field(
+            description="A set of key/value pairs that is copied into the HTTP request as custom headers.\n\nNOTE: Use/Applicability of this concept has not been discussed in Commonalities under the scope of Meta Release v0.4. When required by an API project as an option to meet a UC/Requirement, please generate an issue for Commonalities discussion about it.",
+        ),
+    ] = None
+    method: Annotated[
+        Optional[Method],
+        Field(description="The HTTP method to use for sending the message."),
+    ] = None
 
 
 class MQTTSettings(BaseModel):
@@ -258,26 +237,6 @@ class NATSSettings(BaseModel):
 
 class SubscriptionAsync(BaseModel):
     id: Optional[SubscriptionId] = None
-
-
-class DeviceIpv4Addr1(BaseModel):
-    publicAddress: SingleIpv4Addr
-    privateAddress: SingleIpv4Addr
-    publicPort: Optional[Port] = None
-
-
-class DeviceIpv4Addr2(BaseModel):
-    publicAddress: SingleIpv4Addr
-    privateAddress: Optional[SingleIpv4Addr] = None
-    publicPort: Port
-
-
-class DeviceIpv4Addr(RootModel[Union[DeviceIpv4Addr1, DeviceIpv4Addr2]]):
-    root: Union[DeviceIpv4Addr1, DeviceIpv4Addr2] = Field(
-        ...,
-        description="The device should be identified by either the public (observed) IP address and port as seen by the application server, or the private (local) and any public (observed) IP addresses in use by the device (this information can be obtained by various means, for example from some DNS servers).\n\nIf the allocated and observed IP addresses are the same (i.e. NAT is not in use) then  the same address should be specified for both publicAddress and privateAddress.\n\nIf NAT64 is in use, the device should be identified by its publicAddress and publicPort, or separately by its allocated IPv6 address (field ipv6Address of the Device object)\n\nIn all cases, publicAddress must be specified, along with at least one of either privateAddress or publicPort, dependent upon which is known. In general, mobile devices cannot be identified by their public IPv4 address alone.\n",
-        examples=[{"publicAddress": "84.125.93.10", "publicPort": 59765}],
-    )
 
 
 class Area(BaseModel):
@@ -326,22 +285,17 @@ class CloudEvent(BaseModel):
     time: DateTime
 
 
-class Device(BaseModel):
-    phoneNumber: Optional[PhoneNumber] = None
-    networkAccessIdentifier: Optional[NetworkAccessIdentifier] = None
-    ipv4Address: Optional[DeviceIpv4Addr] = None
-    ipv6Address: Optional[DeviceIpv6Address] = None
-
-
 class Circle(Area):
     areaType: Literal[AreaType.CIRCLE] = AreaType.CIRCLE
     center: Point
-    radius: int = Field(
-        ...,
-        ge=1,
-        le=200000,
-        description="Expected accuracy for the subscription event of device location, in meters from `center`.\nNote: The area surface could be restricted locally depending on regulations. Implementations may enforce a larger minimum radius (e.g. 1000 meters).\n",
-    )
+    radius: Annotated[
+        int,
+        Field(
+            ge=1,
+            le=200000,
+            description="Expected accuracy for the subscription event of device location, in meters from `center`.\nNote: The area surface could be restricted locally depending on regulations. Implementations may enforce a larger minimum radius (e.g. 1000 meters).\n",
+        ),
+    ]
 
 
 class AreaLeft(BaseModel):
@@ -360,9 +314,10 @@ class SubscriptionEnds(BaseModel):
     device: Device
     area: Circle
     terminationReason: TerminationReason
-    terminationDescription: Optional[str] = Field(
-        None, description="Explanation why a subscription ended or had to end."
-    )
+    terminationDescription: Annotated[
+        Optional[str],
+        Field(description="Explanation why a subscription ended or had to end."),
+    ] = None
     subscriptionId: SubscriptionId
 
 

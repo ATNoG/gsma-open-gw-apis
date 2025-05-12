@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from pydantic import AnyUrl
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
+from app.drivers.geofencing.subscriptions import NefGeofencingSubscriptionInterface
 from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
 from app.schemas.geofencing import MonitoringNotification, Subscription
 
@@ -20,14 +21,18 @@ def _get_nef_sub_from_subscription_url(url: AnyUrl | None) -> str:
     return url.path.rsplit("/")[-1]
 
 
-@router.post("/geofencing/webhook", status_code=HTTPStatus.NO_CONTENT)
+@router.post("/geofencing", status_code=HTTPStatus.NO_CONTENT)
 async def webhook(
     notification: MonitoringNotification,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
 ) -> None:
     LOG.debug(notification)
+    if not isinstance(
+        geofencing_subscription_interface, NefGeofencingSubscriptionInterface
+    ):
+        return
+
     nef_sub = _get_nef_sub_from_subscription_url(notification.subscription)
-    await geofencing_subscription_interface.clear_expired_subscriptions()
 
     if (
         notification.monitoringEventReports is None
@@ -42,7 +47,7 @@ async def webhook(
     try:
         subscription = await geofencing_subscription_interface.get_subscription(nef_sub)
     except GeofencingSubscriptionNotFound:
-        await geofencing_subscription_interface.queue_notification(nef_sub, point)
+        await geofencing_subscription_interface._queue_notification(nef_sub, point)
         return
 
-    await geofencing_subscription_interface.notify_location(subscription, point)
+    await geofencing_subscription_interface._notify_location(subscription, point)
