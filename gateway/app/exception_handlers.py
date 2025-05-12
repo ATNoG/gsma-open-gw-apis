@@ -1,17 +1,19 @@
-from app.interfaces.qodProvisioning import ProvisioningConflict, ResourceNotFound
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, Response
 
-from app.schemas import ErrorInfo
+from app.exceptions import ApiException
+from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
 from app.interfaces.otp import (
     OTPExpiredCodeError,
     OTPInvalidCodeError,
     OTPNotFoundError,
     OTPTooManyAttemptsError,
 )
+from app.interfaces.qodProvisioning import ProvisioningConflict, ResourceNotFound
 from app.interfaces.qos_profiles import QoSProfileNotFound
+from app.schemas import ErrorInfo
 
 
 def install_exception_handlers(app: FastAPI) -> None:
@@ -87,4 +89,22 @@ def install_exception_handlers(app: FastAPI) -> None:
             code="NOT_FOUND",
             message="The specified resource is not found.",
         )
-        return JSONResponse(status_code=409, content=jsonable_encoder(body))
+        return JSONResponse(status_code=404, content=jsonable_encoder(body))
+
+    @app.exception_handler(GeofencingSubscriptionNotFound)
+    async def geofencing_subscription_not_found(request: Request, exc: Exception):
+        body = ErrorInfo(
+            status=404,
+            code="NOT_FOUND",
+            message="The specified resource is not found.",
+        )
+        return JSONResponse(status_code=404, content=jsonable_encoder(body))
+
+    @app.exception_handler(ApiException)
+    async def api_exception(request: Request, exc: ApiException):
+        body = ErrorInfo(
+            status=exc.status,
+            code=exc.code,
+            message=exc.message,
+        )
+        return JSONResponse(status_code=exc.status, content=jsonable_encoder(body))

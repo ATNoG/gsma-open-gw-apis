@@ -3,13 +3,14 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
-
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
     TomlConfigSettingsSource,
 )
+
+from app.schemas import geofencing
 
 LogLevel = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
@@ -62,6 +63,17 @@ class ProvisioningSettings(BaseModel):
     af_id: str
 
 
+class NefSettigns(BaseModel):
+    auth: str
+
+
+class GeofencingSettings(BaseModel):
+    monitoring_url: AnyHttpUrl
+    analytics_url: AnyHttpUrl
+    nef_webhook: AnyHttpUrl
+    geofencing_url: AnyHttpUrl
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -79,6 +91,9 @@ class Settings(BaseSettings):
     qos_profiles: QoSProfilesSettings
     location: LocationSettings
     qod_provisioning: ProvisioningSettings
+
+    geofencing: GeofencingSettings
+    nef: NefSettigns
 
     @classmethod
     def settings_customise_sources(
