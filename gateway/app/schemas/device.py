@@ -33,12 +33,12 @@ SingleIpv4Addr = Annotated[
 
 class DeviceIpv4Addr(BaseModel):
     publicAddress: SingleIpv4Addr
-    privateAddress: Optional[SingleIpv4Addr]
+    privateAddress: Optional[SingleIpv4Addr] = None
     publicPort: Optional[Port] = None
 
     @model_validator(mode="after")
     def check_field(self) -> Self:
-        if not self.privateAddress and not self.publicPort:
+        if not self.privateAddress and self.publicPort is None:
             raise ValueError(
                 "At least a private address or public port must be provided"
             )
