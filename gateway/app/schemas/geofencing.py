@@ -5,6 +5,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field
 
+from app.schemas.common import Point
 from app.schemas.device import Device
 
 
@@ -130,28 +131,6 @@ class AreaType(str, Enum):
     CIRCLE = "CIRCLE"
 
 
-Latitude = Annotated[
-    float,
-    Field(
-        ge=-90.0,
-        le=90.0,
-        description="Latitude component of a location.",
-        examples=[50.735851],
-    ),
-]
-
-Longitude = Annotated[
-    float,
-    Field(
-        ...,
-        ge=-180.0,
-        le=180.0,
-        description="Longitude component of location.",
-        examples=[7.10066],
-    ),
-]
-
-
 class Specversion(str, Enum):
     field_1_0 = "1.0"
 
@@ -242,11 +221,6 @@ class SubscriptionAsync(BaseModel):
 
 class Area(BaseModel):
     areaType: AreaType
-
-
-class Point(BaseModel):
-    latitude: Latitude
-    longitude: Longitude
 
 
 class Circle(Area):
