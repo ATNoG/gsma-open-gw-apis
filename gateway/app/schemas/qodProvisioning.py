@@ -58,11 +58,11 @@ class CredentialType(Enum):
 
 class SinkCredential(BaseModel):
     credentialType: Annotated[
-        CredentialType,
+        Optional[CredentialType],
         Field(
             description="The type of the credential.\nNote: Type of the credential - MUST be set to ACCESSTOKEN for now.\n",
         ),
-    ]
+    ] = None
 
 
 class PlainCredential(SinkCredential):

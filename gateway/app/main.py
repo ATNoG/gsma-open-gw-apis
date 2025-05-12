@@ -6,13 +6,12 @@ from fastapi.openapi.utils import get_openapi
 from typing import Any
 from collections.abc import Awaitable, Callable
 
-from app import endpoints
-from app.drivers.qodProvisioning import callbacks
+from app import endpoints, drivers
 from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
 app.include_router(endpoints.router)
-app.include_router(callbacks.router, include_in_schema=False)
+app.include_router(drivers.router, include_in_schema=False)
 
 install_exception_handlers(app)
 

@@ -1,9 +1,9 @@
-from app.settings import QodProvisioningBackend, settings
 from fastapi import APIRouter
+from app.settings import QodProvisioningBackend, settings
 
 match settings.qod_provisioning.qod_provisioning_backend:
     case QodProvisioningBackend.Nef:
-        from . import nef
+        from .nef import router as nef_router
 
         router = APIRouter(prefix="/callbacks/v1")
-        router.include_router(nef.router)
+        router.include_router(nef_router)

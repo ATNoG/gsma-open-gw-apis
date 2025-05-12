@@ -1,4 +1,4 @@
-from app.interfaces.qodProvisioning import ProvisioningConflict
+from app.interfaces.qodProvisioning import ProvisioningConflict, ResourceNotFound
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
@@ -75,5 +75,16 @@ def install_exception_handlers(app: FastAPI) -> None:
             status=409,
             code="CONFLICT",
             message="There is another existing provisioning for the same device",
+        )
+        return JSONResponse(status_code=409, content=jsonable_encoder(body))
+
+    @app.exception_handler(ResourceNotFound)
+    async def provisioning_Not_found_exception_error(
+        request: Request, exc: QoSProfileNotFound
+    ) -> Response:
+        body = ErrorInfo(
+            status=404,
+            code="NOT_FOUND",
+            message="The specified resource is not found.",
         )
         return JSONResponse(status_code=409, content=jsonable_encoder(body))

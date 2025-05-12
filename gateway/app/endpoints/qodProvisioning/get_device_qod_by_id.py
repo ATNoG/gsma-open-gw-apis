@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
 from app.schemas.qodProvisioning import ProvisioningInfo
-from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
+from app.drivers.qodProvisioning.nef import QodProvisioningInterfaceDep
 
 router = APIRouter()
 
 
-@router.get("/device-qos/{provisioningId}")
+@router.get("/device-qos/{provisioningId}", response_model_exclude_none=True)
 async def get_qod_information_by_id(
     provisioningId: str, qod_provisioning_interface: QodProvisioningInterfaceDep
 ) -> ProvisioningInfo:
