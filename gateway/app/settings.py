@@ -46,7 +46,7 @@ class QoSProfilesSettings(BaseModel):
 
 class LocationBackend(str, Enum):
     Mock = "mock"
-    NefEmulator = "emulator"
+    Nef = "nef"
 
 
 class LocationSettings(BaseModel):

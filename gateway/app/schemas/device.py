@@ -1,6 +1,6 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Self
 from ipaddress import IPv4Address, IPv6Address
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 PhoneNumber = Annotated[
     str,
@@ -32,14 +32,22 @@ SingleIpv4Addr = Annotated[
 
 class DeviceIpv4Addr(BaseModel):
     publicAddress: SingleIpv4Addr
-    privateAddress: SingleIpv4Addr
+    privateAddress: Optional[SingleIpv4Addr]
     publicPort: Optional[Port] = None
+
+    @model_validator(mode="after")
+    def check_field(self) -> Self:
+        if not self.privateAddress and not self.publicPort:
+            raise ValueError(
+                "At least a private address or public port must be provided"
+            )
+
+        return self
 
 
 DeviceIpv6Addr = Annotated[
     IPv6Address,
     Field(
-        ...,
         description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
         example="2001:db8:85a3:8d3:1319:8a2e:370:7344",
     ),

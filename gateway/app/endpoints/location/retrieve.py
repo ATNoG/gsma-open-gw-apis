@@ -9,13 +9,11 @@ router = APIRouter()
 
 
 @router.post("/retrieve")
-async def send_code(
+async def retrieve_location(
     body: RetrievalLocationRequest, location_interface: LocationInterfaceDep
 ) -> Location:
     device = body.device
 
-    loc = await location_interface.retrieve_location(
+    return await location_interface.retrieve_location(
         device, body.maxAge, body.maxSurface
     )
-
-    return loc
