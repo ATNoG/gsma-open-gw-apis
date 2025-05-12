@@ -1,11 +1,9 @@
-from typing import Annotated
+from app.settings import settings
+from app.drivers.nef_auth import NEFAuth
 
-from fastapi import Depends
+from .nef_interface import NEFQoDProvisioningInterface
 
-from app.drivers.qodProvisioning import get_qodProvisioning_interface
-from app.drivers.qodProvisioning.nef.nef_interface import NEFQoDProvisioningInterface
-
-
-QodProvisioningInterfaceDep = Annotated[
-    NEFQoDProvisioningInterface, Depends(get_qodProvisioning_interface)
-]
+_nef_auth = NEFAuth(settings.nef_url, settings.nef_username, settings.nef_password)
+nef_qod_provisioning_interface = NEFQoDProvisioningInterface(
+    settings.nef_url, _nef_auth
+)

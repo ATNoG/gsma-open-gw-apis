@@ -1,7 +1,8 @@
 from fastapi import APIRouter
+from fastapi.exceptions import RequestValidationError
 
 from app.schemas.qodProvisioning import TriggerProvisioning, ProvisioningInfo
-from app.drivers.qodProvisioning.nef import QodProvisioningInterfaceDep
+from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 
 router = APIRouter()
 
@@ -11,4 +12,7 @@ async def create_provisioning(
     req: TriggerProvisioning,
     qod_provisioning_interface: QodProvisioningInterfaceDep,
 ) -> ProvisioningInfo:
-    return await qod_provisioning_interface.create_provisioning(req)
+    if req.device is None:
+        raise RequestValidationError("Device must be set")
+
+    return await qod_provisioning_interface.create_provisioning(req, req.device)

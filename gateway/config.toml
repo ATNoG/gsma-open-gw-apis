@@ -1,5 +1,6 @@
-gateway_url = "http://host.docker.internal:8000"
+gateway_url = "http://localhost:8000"
 nef_url = "http://localhost:8888"
+nef_gateway_url = "http://host.docker.internal:8000"
 
 [sms_otp]
 sms_backend = "mock"

@@ -1,12 +1,11 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
-from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated, Any, Dict, Optional
 from uuid import UUID
 
-from pydantic import AnyUrl, BaseModel, Field, model_validator
+from pydantic import AnyUrl, BaseModel, Field
+
+from .device import Device
 
 ProvisioningId = Annotated[
     UUID, Field(description="Provisioning Identifier in UUID format")
@@ -23,31 +22,6 @@ QosProfileName = Annotated[
 ]
 
 Port = Annotated[int, Field(ge=0, le=65535, description="TCP or UDP port number.")]
-
-NetworkAccessIdentifier = Annotated[
-    str,
-    Field(
-        description="A public identifier addressing a subscription in a mobile network. In 3GPP terminology, it corresponds to the GPSI formatted with the External Identifier ({Local Identifier}@{Domain Identifier}). Unlike the telephone number, the network access identifier is not subjected to portability ruling in force, and is individually managed by each operator.",
-        examples=["123456789@domain.com"],
-    ),
-]
-
-PhoneNumber = Annotated[
-    str,
-    Field(
-        pattern=r"^\+[1-9][0-9]{4,14}$",
-        description="A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
-        examples=["+123456789"],
-    ),
-]
-
-DeviceIpv6Address = Annotated[
-    IPv6Address,
-    Field(
-        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
-        examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
-    ),
-]
 
 
 class CredentialType(Enum):
@@ -224,40 +198,8 @@ class EventStatusChanged(CloudEvent):
     ]
 
 
-class DeviceIpv4Addr(BaseModel):
-    publicAddress: IPv4Address
-    privateAddress: Optional[IPv4Address] = None
-    publicPort: Optional[Port] = None
-
-    @model_validator(mode="after")
-    def any_of(cls, v: Any) -> Any:
-        if v.privateAddress is None and v.publicPort is None:
-            raise ValueError(
-                "Either the private address or the public address and public port should be set."
-            )
-        return v
-
-
-class Device(BaseModel):
-    phoneNumber: Optional[PhoneNumber] = None
-    networkAccessIdentifier: Optional[NetworkAccessIdentifier] = None
-    ipv4Address: Optional[DeviceIpv4Addr] = None
-    ipv6Address: Optional[DeviceIpv6Address] = None
-
-    @model_validator(mode="after")
-    def any_of(cls, v: Any) -> Any:
-        if (
-            v.phoneNumber is None
-            and v.networkAccessIdentifier is None
-            and v.ipv4Address is None
-            and v.ipv6Address is None
-        ):
-            raise ValueError("At least one of the device's field should be set")
-        return v
-
-
 class BaseProvisioningInfo(BaseModel):
-    device: Device
+    device: Optional[Device]
     qosProfile: QosProfileName
     sink: Annotated[
         Optional[AnyUrl],
@@ -287,4 +229,4 @@ class TriggerProvisioning(BaseProvisioningInfo):
 
 
 class RetrieveProvisioningByDevice(BaseModel):
-    device: Device
+    device: Optional[Device]

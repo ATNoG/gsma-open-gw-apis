@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.schemas.qodProvisioning import ProvisioningInfo
-from app.drivers.qodProvisioning.nef import QodProvisioningInterfaceDep
+from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 
 router = APIRouter()
 

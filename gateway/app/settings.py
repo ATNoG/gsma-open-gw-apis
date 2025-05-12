@@ -56,6 +56,7 @@ class LocationBackend(str, Enum):
 class LocationSettings(BaseModel):
     backend: LocationBackend
 
+
 class ProvisioningSettings(BaseModel):
     qod_provisioning_backend: QodProvisioningBackend
     af_id: str
@@ -67,10 +68,12 @@ class Settings(BaseSettings):
     log_level: LogLevel = "INFO"
     redis_url: str = "redis://localhost:6379"
 
+    gateway_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
+
     nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
+    nef_gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
     nef_username: str = "admin@my-email.com"
     nef_password: str = "pass"
-    gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
 
     sms_otp: SMSOTPSettings
     qos_profiles: QoSProfilesSettings
