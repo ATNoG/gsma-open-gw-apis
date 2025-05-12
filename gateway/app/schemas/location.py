@@ -36,9 +36,7 @@ PointList = Annotated[
 
 class Polygon(Area):
     boundary: PointList
-
-    def __init__(self, **data) -> None:
-        super().__init__(areaType=AreaType.POLYGON, **data)
+    areaType: AreaType = AreaType.POLYGON
 
 
 @override
@@ -47,9 +45,7 @@ class Circle(Area):
     radius: Annotated[
         float, Field(ge=1, description="Distance from the center in meters")
     ]
-
-    def __init__(self, **data) -> None:
-        super().__init__(**data, areaType=AreaType.CIRCLE)
+    areaType: AreaType = AreaType.CIRCLE
 
 
 class Location(BaseModel):

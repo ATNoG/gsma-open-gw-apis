@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 from ipaddress import IPv4Address, IPv6Address
 from pydantic import BaseModel, Field
 
