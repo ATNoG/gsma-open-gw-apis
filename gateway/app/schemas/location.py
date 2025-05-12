@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Annotated, override
+from typing import Annotated, Optional
 from pydantic import BaseModel, Field, SerializeAsAny
 from datetime import datetime
 
@@ -39,7 +39,6 @@ class Polygon(Area):
     areaType: AreaType = AreaType.POLYGON
 
 
-@override
 class Circle(Area):
     center: Point
     radius: Annotated[
@@ -61,13 +60,13 @@ class Location(BaseModel):
 class RetrievalLocationRequest(BaseModel):
     device: Device
     maxAge: Annotated[
-        int,
+        Optional[int],
         'Maximum age of the location information which is accepted for the location retrieval (in seconds). Absence of maxAge means "any age" and maxAge=0 means a fresh calculation.',
-    ]
+    ] = None
     maxSurface: Annotated[
-        int,
+        Optional[int],
         Field(
             ge=1,
             description='Maximum surface in square meters which is accepted by the client for the location retrieval. Absence of maxSurface means "any surface size".',
         ),
-    ]
+    ] = None
