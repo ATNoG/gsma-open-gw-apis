@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from app.schemas.afSessionWithQos import UserPlaneNotificationData
 from app.schemas.qodProvisioning import (
     TriggerProvisioning,
     ProvisioningInfo,
@@ -9,10 +8,6 @@ from app.schemas.qodProvisioning import (
 
 
 class ResourceNotFound(Exception):
-    pass
-
-
-class DeviceNotFound(Exception):
     pass
 
 
