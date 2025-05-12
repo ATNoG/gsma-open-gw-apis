@@ -12,6 +12,7 @@ from app.interfaces.qodProvisioning import (
     ResourceNotFound,
 )
 from app.redis import get_redis
+from app.schemas.device import Device
 from app.schemas.nef_schemas.afSessionWithQos import (
     AsSessionWithQoSSubscription,
     UserPlaneNotificationData,
@@ -26,7 +27,6 @@ from app.schemas.qodProvisioning import (
     TriggerProvisioning,
     Datacontenttype,
     ProvisioningInfo,
-    RetrieveProvisioningByDevice,
     Specversion,
     Status,
     StatusInfo,
@@ -47,13 +47,15 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         self.httpx_client_callback = httpx.AsyncClient()
         self.redis = get_redis()
 
-    async def create_provisioning(self, req: TriggerProvisioning) -> ProvisioningInfo:
+    async def create_provisioning(
+        self, req: TriggerProvisioning, device: Device
+    ) -> ProvisioningInfo:
         provisioning_id = uuid.uuid4()
 
         payload = AsSessionWithQoSSubscription(
             supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.gateway_url}callbacks/v1/qos/{provisioning_id}"
+                f"{settings.nef_gateway_url}callbacks/v1/qos/{provisioning_id}"
             ),
             flowInfo=[
                 FlowInfo(
@@ -67,14 +69,13 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             qosReference=req.qosProfile,
         )
 
-        if req.device:
-            if req.device.ipv4Address and req.device.ipv4Address.publicAddress:
-                payload.ueIpv4Addr = req.device.ipv4Address.publicAddress
-            elif req.device.ipv6Address:
-                payload.ueIpv6Addr = req.device.ipv6Address
-            elif req.device.phoneNumber:
-                phone_number = req.device.phoneNumber.lstrip("+")
-                payload.gpsi = f"msisdn-{phone_number}"
+        if device.ipv4Address and device.ipv4Address.publicAddress:
+            payload.ueIpv4Addr = device.ipv4Address.publicAddress
+        elif device.ipv6Address:
+            payload.ueIpv6Addr = device.ipv6Address
+        elif device.phoneNumber:
+            phone_number = device.phoneNumber.lstrip("+")
+            payload.gpsi = f"msisdn-{phone_number}"
 
         res = await self.httpx_client.post(
             f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
@@ -95,7 +96,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         nef_sub_id = str(subcription_result.self)
 
         response = ProvisioningInfo(
-            device=req.device,
+            device=device,
             qosProfile=req.qosProfile,
             status=Status.REQUESTED,
             sink=req.sink,
@@ -108,22 +109,21 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         key = f"{_prefix_gateway_nef}:{str(provisioning_id)}"
         await self.redis.set(key, nef_sub_id)
 
-        if device := req.device:
-            if device.phoneNumber:
-                key = f"{_prefix_device}:{device.phoneNumber}"
-                await self.redis.set(key, str(provisioning_id))
-            if device.networkAccessIdentifier:
-                key = f"{_prefix_device}:{device.networkAccessIdentifier}"
-                await self.redis.set(key, str(provisioning_id))
-            if device.ipv4Address and device.ipv4Address.privateAddress:
-                key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
-                await self.redis.set(key, str(provisioning_id))
-            if device.ipv4Address and device.ipv4Address.publicPort:
-                key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
-                await self.redis.set(key, str(provisioning_id))
-            if device.ipv6Address:
-                key = f"{_prefix_device}:{device.ipv6Address.exploded}"
-                await self.redis.set(key, str(provisioning_id))
+        if device.phoneNumber:
+            key = f"{_prefix_device}:{device.phoneNumber}"
+            await self.redis.set(key, str(provisioning_id))
+        if device.networkAccessIdentifier:
+            key = f"{_prefix_device}:{device.networkAccessIdentifier}"
+            await self.redis.set(key, str(provisioning_id))
+        if device.ipv4Address and device.ipv4Address.privateAddress:
+            key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
+            await self.redis.set(key, str(provisioning_id))
+        if device.ipv4Address and device.ipv4Address.publicPort:
+            key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
+            await self.redis.set(key, str(provisioning_id))
+        if device.ipv6Address:
+            key = f"{_prefix_device}:{device.ipv6Address.exploded}"
+            await self.redis.set(key, str(provisioning_id))
 
         return response
 
@@ -156,11 +156,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
 
         return sub_info
 
-    async def get_qod_information_device(
-        self, device_req: RetrieveProvisioningByDevice
-    ) -> ProvisioningInfo:
-        device = device_req.device
-
+    async def get_qod_information_device(self, device: Device) -> ProvisioningInfo:
         id = ""
 
         if device.phoneNumber:
@@ -197,6 +193,8 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         status = self._get_qod_status(body)
         if status is not None:
             sub_info.status = status
+
+        if sub_info.status == Status.UNAVAILABLE:
             sub_info.statusInfo = (
                 StatusInfo.NETWORK_TERMINATED
                 if sub_info.status == Status.UNAVAILABLE
@@ -223,12 +221,6 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         )
 
         await self._save_subscription_info(id, sub_info)
-
-    def _get_subscription_id_from_subscription_url(self, url: str | None) -> str:
-        if url is None:
-            raise ResourceNotFound()
-
-        return url.rsplit("/", maxsplit=1)[-1]
 
     def _get_qod_status(self, nef_response: UserPlaneNotificationData) -> Status | None:
         status = None

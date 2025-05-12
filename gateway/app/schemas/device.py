@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, Self
+from typing import Annotated, Optional, Self, Any
 from ipaddress import IPv4Address, IPv6Address
 from pydantic import BaseModel, Field, model_validator
 
@@ -48,8 +48,8 @@ class DeviceIpv4Addr(BaseModel):
 DeviceIpv6Addr = Annotated[
     IPv6Address,
     Field(
-        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n",
-        example="2001:db8:85a3:8d3:1319:8a2e:370:7344",
+        description="The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).",
+        examples=["2001:db8:85a3:8d3:1319:8a2e:370:7344"],
     ),
 ]
 
@@ -59,3 +59,14 @@ class Device(BaseModel):
     networkAccessIdentifier: Optional[NetworkAccessIdentifier] = None
     ipv4Address: Optional[DeviceIpv4Addr] = None
     ipv6Address: Optional[DeviceIpv6Addr] = None
+
+    @model_validator(mode="after")
+    def any_of(cls, v: Any) -> Any:
+        if (
+            v.phoneNumber is None
+            and v.networkAccessIdentifier is None
+            and v.ipv4Address is None
+            and v.ipv6Address is None
+        ):
+            raise ValueError("At least one of the device's field should be set")
+        return v
