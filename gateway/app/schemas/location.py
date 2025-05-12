@@ -1,8 +1,10 @@
+from datetime import datetime
 from enum import Enum
 from typing import Annotated, Optional, Self
-from pydantic import BaseModel, Field, SerializeAsAny, model_validator
-from datetime import datetime
 
+from pydantic import BaseModel, Field, SerializeAsAny, model_validator
+
+from app.schemas.common import Point
 from app.schemas.device import Device
 
 
@@ -13,19 +15,6 @@ class AreaType(Enum):
 
 class Area(BaseModel):
     areaType: AreaType
-
-
-Latitude = Annotated[
-    float, Field(ge=-90, le=90, description="Latitude component of a location")
-]
-Longitude = Annotated[
-    float, Field(ge=-90, le=90, description="Longitude component of a location")
-]
-
-
-class Point(BaseModel):
-    latitude: Latitude
-    longitude: Longitude
 
 
 PointList = Annotated[

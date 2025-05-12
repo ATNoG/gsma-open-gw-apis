@@ -1,14 +1,16 @@
 import logging
-import httpx
 from datetime import datetime
 from typing import Optional
-from pydantic import AnyHttpUrl
+
+import httpx
 from fastapi import HTTPException
+from pydantic import AnyHttpUrl
 
 from app.drivers.nef_auth import NEFAuth
 from app.interfaces.location import LocationInterface
-from app.schemas.location import Location, Circle, Point, Polygon
+from app.schemas.common import Point
 from app.schemas.device import Device
+from app.schemas.location import Circle, Location, Polygon
 
 
 class NEFDriver(LocationInterface):
