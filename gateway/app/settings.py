@@ -61,7 +61,12 @@ class ProvisioningSettings(BaseModel):
     af_id: str
 
 
+class GeofencingBackend(Enum):
+    NEF = "nef"
+
+
 class GeofencingSettings(BaseModel):
+    backend: GeofencingBackend
     monitoring_base_path: str
     nef_webhook: AnyHttpUrl
     geofencing_url: AnyHttpUrl
@@ -74,7 +79,6 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     gateway_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
-
     nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
     nef_gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
     nef_username: str = "admin@my-email.com"

@@ -1,5 +1,6 @@
-from typing import Annotated, Optional, Self, Any
 from ipaddress import IPv4Address, IPv6Address
+from typing import Annotated, Any, Optional, Self
+
 from pydantic import BaseModel, Field, model_validator
 
 PhoneNumber = Annotated[

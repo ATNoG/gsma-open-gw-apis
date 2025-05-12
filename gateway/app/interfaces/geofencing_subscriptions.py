@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.schemas.geofencing import (
-    GeographicalCoordinates,
-    Subscription,
-    SubscriptionRequest,
-)
+from app.schemas.device import Device
+from app.schemas.geofencing import Subscription, SubscriptionRequest
 
 
 class GeofencingSubscriptionNotFound(Exception):
@@ -13,13 +10,9 @@ class GeofencingSubscriptionNotFound(Exception):
 
 class GeofencingSubscriptionInterface(ABC):
     @abstractmethod
-    async def create_location_retrieval_subscription(
-        self, req: SubscriptionRequest
+    async def create_subscription(
+        self, req: SubscriptionRequest, device: Device
     ) -> Subscription:
-        pass
-
-    @abstractmethod
-    async def store_subscription(self, subscription: Subscription) -> None:
         pass
 
     @abstractmethod
@@ -32,21 +25,4 @@ class GeofencingSubscriptionInterface(ABC):
 
     @abstractmethod
     async def get_subscriptions(self) -> list[Subscription]:
-        pass
-
-    @abstractmethod
-    async def notify_location(
-        self, subscription: Subscription, location: GeographicalCoordinates
-    ) -> bool:
-        """Returns bool indicating whether the subscription was deleted or not."""
-        pass
-
-    @abstractmethod
-    async def clear_expired_subscriptions(self) -> None:
-        pass
-
-    @abstractmethod
-    async def queue_notification(
-        self, subscription_id: str, location: GeographicalCoordinates
-    ) -> None:
         pass

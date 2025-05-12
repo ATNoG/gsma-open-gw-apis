@@ -1,12 +1,12 @@
+from collections.abc import Awaitable, Callable
+from typing import Any
+
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.requests import Request
 from fastapi.responses import Response
-from fastapi.openapi.utils import get_openapi
 
-from typing import Any
-from collections.abc import Awaitable, Callable
-
-from app import endpoints, drivers
+from app import drivers, endpoints
 from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
