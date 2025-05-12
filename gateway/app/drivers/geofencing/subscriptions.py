@@ -29,8 +29,10 @@ from app.schemas.geofencing import (
     Protocol,
     Status,
     Subscription,
+    SubscriptionEnds,
     SubscriptionEventType,
     SubscriptionRequest,
+    TerminationReason,
 )
 from app.settings import settings
 
@@ -87,7 +89,9 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             ):
                 continue
 
-            await self.delete_subscription(sub.id)
+            await self.delete_subscription(
+                sub.id, termination_reason=TerminationReason.SUBSCRIPTION_EXPIRED
+            )
 
     async def create_subscription(
         self, req: SubscriptionRequest, device: Device
@@ -99,17 +103,29 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
                 message="Only HTTP is supported.",
             )
 
-        if device.phoneNumber is None:
+        if (
+            device.phoneNumber is None
+            and device.ipv4Address is None
+            and device.ipv6Address is None
+        ):
             raise ApiException(
                 status=HTTPStatus.UNPROCESSABLE_ENTITY,
                 code="UNSUPPORTED_IDENTIFIER",
                 message="The identifier provided is not supported.",
             )
 
-        number = device.phoneNumber[1:]
+        number = None
+        if device.phoneNumber is not None:
+            number = device.phoneNumber[1:]
+
+        ipv4 = None
+        if device.ipv4Address is not None:
+            ipv4 = device.ipv4Address.publicAddress
 
         body = MonitoringEventSubscription(
             msisdn=number,
+            ipv6Addr=device.ipv6Address,
+            ipv4Addr=ipv4,
             notificationDestination=AnyUrl(
                 f"{settings.nef_gateway_url}callbacks/v1/geofencing"
             ),
@@ -186,7 +202,11 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         await self.redis.expire(f"{_prefix_queue}:{subscription_id}", 10, nx=True)
 
     async def delete_subscription(
-        self, id: str, *, pre_store_sub: Optional[Subscription] = None
+        self,
+        id: str,
+        *,
+        pre_store_sub: Optional[Subscription] = None,
+        termination_reason: TerminationReason = TerminationReason.SUBSCRIPTION_DELETED,
     ) -> None:
         subscription_key = f"{_prefix_subscription}:{id}"
         last_state_key = f"{_prefix_last_state}:{id}"
@@ -221,11 +241,12 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
                 if subscription.config.subscriptionExpireTime is None
                 else subscription.config.subscriptionExpireTime.tzinfo
             ),
-            data=AreaEntered(
+            data=SubscriptionEnds(
+                terminationReason=termination_reason,
                 device=subscription.config.subscriptionDetail.device,
                 area=subscription.config.subscriptionDetail.area,
                 subscriptionId=subscription.id,
-            ).model_dump(),
+            ),
         )
 
         await self.httpx_client.post(
@@ -289,7 +310,9 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             counter += 1
             if counter == subscription.config.subscriptionMaxEvents:
                 await self.delete_subscription(
-                    subscription.id, pre_store_sub=subscription if pre_store else None
+                    subscription.id,
+                    pre_store_sub=subscription if pre_store else None,
+                    termination_reason=TerminationReason.MAX_EVENTS_REACHED,
                 )
                 return True
             await self.redis.set(key, counter)
@@ -326,7 +349,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
                 device=subscription.config.subscriptionDetail.device,
                 area=subscription.config.subscriptionDetail.area,
                 subscriptionId=subscription.id,
-            ).model_dump(),
+            ),
         )
 
         await self.httpx_client.post(
@@ -367,7 +390,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
                 device=subscription.config.subscriptionDetail.device,
                 area=subscription.config.subscriptionDetail.area,
                 subscriptionId=subscription.id,
-            ).model_dump(),
+            ),
         )
 
         await self.httpx_client.post(subscription.sink, content=res.model_dump_json())

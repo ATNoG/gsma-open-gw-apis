@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from ipaddress import IPv4Address, IPv6Address
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field
 
@@ -248,43 +249,6 @@ class Point(BaseModel):
     longitude: Longitude
 
 
-class CloudEvent(BaseModel):
-    id: Annotated[
-        str,
-        Field(
-            description="Identifier of this event, that must be unique in the source context."
-        ),
-    ]
-
-    source: Source
-    type: NotificationEventType
-
-    specversion: Annotated[
-        Specversion,
-        Field(
-            description="Version of the specification to which this event conforms (must be 1.0 if it conforms to cloudevents 1.0.2 version).",
-        ),
-    ] = Specversion.field_1_0
-
-    datacontenttype: Optional[
-        Annotated[
-            Datacontenttype,
-            Field(
-                description='media-type that describes the event payload encoding, must be "application/json" for CAMARA APIs',
-            ),
-        ]
-    ] = Datacontenttype.application_json
-
-    data: Annotated[
-        Dict[str, Any],
-        Field(
-            description="Event details payload described in each CAMARA API and referenced by its type."
-        ),
-    ]
-
-    time: DateTime
-
-
 class Circle(Area):
     areaType: Literal[AreaType.CIRCLE] = AreaType.CIRCLE
     center: Point
@@ -319,6 +283,43 @@ class SubscriptionEnds(BaseModel):
         Field(description="Explanation why a subscription ended or had to end."),
     ] = None
     subscriptionId: SubscriptionId
+
+
+class CloudEvent(BaseModel):
+    id: Annotated[
+        str,
+        Field(
+            description="Identifier of this event, that must be unique in the source context."
+        ),
+    ]
+
+    source: Source
+    type: NotificationEventType
+
+    specversion: Annotated[
+        Specversion,
+        Field(
+            description="Version of the specification to which this event conforms (must be 1.0 if it conforms to cloudevents 1.0.2 version).",
+        ),
+    ] = Specversion.field_1_0
+
+    datacontenttype: Optional[
+        Annotated[
+            Datacontenttype,
+            Field(
+                description='media-type that describes the event payload encoding, must be "application/json" for CAMARA APIs',
+            ),
+        ]
+    ] = Datacontenttype.application_json
+
+    data: Annotated[
+        Union[AreaEntered, AreaLeft, SubscriptionEnds],
+        Field(
+            description="Event details payload described in each CAMARA API and referenced by its type."
+        ),
+    ]
+
+    time: DateTime
 
 
 class SubscriptionDetail(BaseModel):
@@ -535,6 +536,9 @@ class MonitoringEventSubscription(BaseModel):
 
     immediateRep: Optional[bool] = None
 
+    ipv4Addr: Optional[IPv4Address] = None
+    ipv6Addr: Optional[IPv6Address] = None
+
 
 class SupportedGADShapes(str, Enum):
     POINT = "POINT"
@@ -580,7 +584,6 @@ ExternalId = Annotated[
 
 
 class MonitoringEventReport(BaseModel):
-    externalId: Optional[ExternalId] = None
     locationInfo: Optional[LocationInfo] = None
     monitoringType: MonitoringType
 
