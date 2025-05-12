@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-from os import device_encoding
 import httpx
 from pydantic import AnyHttpUrl
 from fastapi import HTTPException
@@ -19,7 +18,6 @@ class NEFEmulatorDriver(LocationInterface):
     async def retrieve_location(
         self, device: Device, max_age: int, max_surface: int
     ) -> Location:
-
         data = {
             "monitoringType": "LOCATION_REPORTING",
             "notificationDestination": "https://0.0.0.0",
@@ -39,21 +37,18 @@ class NEFEmulatorDriver(LocationInterface):
 
         logging.debug("Querying the NEF Emulator at %s with data %s", url, data)
 
-        doc = self.httpx_client.post(
+        resp = self.httpx_client.post(
             url,
             json=data,
         )
 
-        doc = await doc
+        doc = await resp
         if doc.status_code != httpx.codes.OK:
             raise HTTPException(
                 status_code=doc.status_code, detail=doc.json()["detail"]
             )
 
-        doc = doc.json()
-
-        print(doc)
-        area = doc["locationInfo"]["geographicArea"]
+        area = doc.json().get("locationInfo").get("geographicArea")
 
         if area["shape"] == "POINT":
             point = area["point"]

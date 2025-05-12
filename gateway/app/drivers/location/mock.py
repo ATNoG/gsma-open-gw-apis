@@ -5,7 +5,9 @@ from app.schemas.device import Device
 
 
 class MockLocationDriver(LocationInterface):
-    async def retrieve_location(self, device: Device) -> Location:
+    async def retrieve_location(
+        self, device: Device, max_age: int, max_surface: int
+    ) -> Location:
         print(f"Location was requested for {device}")
         return Location(
             lastLocationTime=datetime.now(),
