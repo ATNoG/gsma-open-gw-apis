@@ -4,8 +4,7 @@ from typing import AsyncIterator
 
 from fastapi import APIRouter, FastAPI
 
-from app.drivers.geofencing import get_geofencing_subscription_interface
-from app.drivers.geofencing.subscriptions import NefGeofencingSubscriptionInterface
+from app.drivers.geofencing.nef import nef_geofencing_subscription_interface
 from app.settings import GeofencingBackend, settings
 
 from .nef import router as nef_router
@@ -13,11 +12,7 @@ from .nef import router as nef_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    geofencing_interface = get_geofencing_subscription_interface()
-    if not isinstance(geofencing_interface, NefGeofencingSubscriptionInterface):
-        return
-
-    task = asyncio.create_task(geofencing_interface._clear_loop())
+    task = asyncio.create_task(nef_geofencing_subscription_interface._clear_loop())
 
     yield
 

@@ -4,10 +4,13 @@ from http import HTTPStatus
 from fastapi import APIRouter
 from pydantic import AnyUrl
 
-from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
-from app.drivers.geofencing.subscriptions import NefGeofencingSubscriptionInterface
+from app.drivers.geofencing.nef import nef_geofencing_subscription_interface
 from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
-from app.schemas.geofencing import MonitoringNotification, Subscription
+from app.schemas.geofencing import Subscription
+from app.schemas.nef_schemas.monitoringevent import (
+    MonitoringNotification,
+    SupportedGADShapes,
+)
 
 router = APIRouter()
 
@@ -21,33 +24,33 @@ def _get_nef_sub_from_subscription_url(url: AnyUrl | None) -> str:
     return url.path.rsplit("/")[-1]
 
 
-@router.post("/geofencing", status_code=HTTPStatus.NO_CONTENT)
-async def webhook(
-    notification: MonitoringNotification,
-    geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
-) -> None:
+@router.post("/geofencing/{sub_id}", status_code=HTTPStatus.NO_CONTENT)
+async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
     LOG.debug(notification)
-    if not isinstance(
-        geofencing_subscription_interface, NefGeofencingSubscriptionInterface
-    ):
-        return
-
-    nef_sub = _get_nef_sub_from_subscription_url(notification.subscription)
 
     if (
         notification.monitoringEventReports is None
         or notification.monitoringEventReports[0].locationInfo is None
         or notification.monitoringEventReports[0].locationInfo.geographicArea is None
     ):
-        LOG.debug("No location details in received notification")
+        LOG.warning("No location details in received notification")
         return
 
-    point = notification.monitoringEventReports[0].locationInfo.geographicArea.point
+    geographicArea = notification.monitoringEventReports[0].locationInfo.geographicArea
+    if geographicArea.shape != SupportedGADShapes.POINT:
+        LOG.warning("Received shape is not a POINT")
+        return
+
+    point = geographicArea.point
     subscription: Subscription
     try:
-        subscription = await geofencing_subscription_interface.get_subscription(nef_sub)
+        subscription = await nef_geofencing_subscription_interface.get_subscription(
+            sub_id
+        )
     except GeofencingSubscriptionNotFound:
-        await geofencing_subscription_interface._queue_notification(nef_sub, point)
+        LOG.warning("Received notification for non exisiting subscription")
         return
 
-    await geofencing_subscription_interface._notify_location(subscription, point)
+    await nef_geofencing_subscription_interface._notify_location(
+        subscription, point, endpoint=notification.subscription.unicode_string()
+    )
