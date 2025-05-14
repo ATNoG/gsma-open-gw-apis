@@ -22,15 +22,17 @@ from app.schemas.nef_schemas.commonData import (
     Link,
     UserPlaneEvent,
 )
+from app.schemas.subscriptions import (
+    Datacontenttype,
+    Specversion,
+)
 from app.schemas.qodProvisioning import (
     CloudEvent,
+    NotificationEventType,
     TriggerProvisioning,
-    Datacontenttype,
     ProvisioningInfo,
-    Specversion,
     Status,
     StatusInfo,
-    Type,
 )
 from app.settings import settings
 
@@ -205,7 +207,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         cloud_event = CloudEvent(
             id=str(uuid.uuid4()),
             source=f"{settings.gateway_url}qod-provisioning/v0.2/device-qos/{id}",
-            type=Type.org_camaraproject_qod_provisioning_v0_status_changed,
+            type=NotificationEventType.org_camaraproject_qod_provisioning_v0_status_changed,
             specversion=Specversion.field_1_0,
             datacontenttype=Datacontenttype.application_json,
             data=sub_info.model_dump(mode="json", exclude_unset=True),

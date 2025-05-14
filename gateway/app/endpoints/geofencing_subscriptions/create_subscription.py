@@ -1,17 +1,19 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
 from app.exceptions import ApiException, MissingDevice
-from app.schemas.geofencing import Protocol, Subscription, SubscriptionRequest
+from app.schemas.geofencing import Subscription, SubscriptionRequest
+from app.schemas.subscriptions import Protocol
 
 router = APIRouter()
 
 
 @router.post("/subscriptions")
 async def post_subscriptions(
-    req: SubscriptionRequest,
+    req: Annotated[SubscriptionRequest, Body()],
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
 ) -> Subscription:
     if req.protocol != Protocol.HTTP:
