@@ -3,8 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
-from app.exceptions import ApiException
-from app.interfaces.geofencing_subscriptions import MissingDevice
+from app.exceptions import ApiException, MissingDevice
 from app.schemas.geofencing import Protocol, Subscription, SubscriptionRequest
 
 router = APIRouter()
