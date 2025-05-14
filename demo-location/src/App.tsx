@@ -1,5 +1,11 @@
+import { cn } from "@/lib/utils";
 import { parseISO } from "date-fns";
-import { ArrowDownRight } from "lucide-react";
+import {
+  ArrowDownRight,
+  CircleCheckBig,
+  CircleX,
+  LoaderCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Circle,
@@ -60,6 +66,17 @@ const req: components["schemas"]["SubscriptionRequest"] = {
   },
 };
 
+const verifyReq: components["schemas"]["VerifyLocationRequest"] = {
+  area: {
+    areaType: "CIRCLE",
+    center: { latitude: 40.633189926609525, longitude: -8.659489441414976 },
+    radius: 75,
+  },
+  device: {
+    phoneNumber: "+2020100000001",
+  },
+};
+
 function App() {
   const [notifs, setNotifs] = useState<CloudEvent[]>([]);
 
@@ -81,6 +98,12 @@ function App() {
     { refetchInterval: 500 },
   );
 
+  const {
+    mutate: verifyLocationMutation,
+    isPending,
+    data: verifyLocationData,
+  } = $api.useMutation("post", "/location-verification/v2/verify");
+
   const handleMessage = (data: CloudEvent) => {
     setNotifs((notifs) => [data, ...notifs]);
   };
@@ -90,6 +113,10 @@ function App() {
       socket.off("data", handleMessage);
     };
   }, []);
+
+  const verifyLocation = () => {
+    verifyLocationMutation({ body: verifyReq });
+  };
 
   const startGeofencing = () => {
     mutate({ body: req });
@@ -102,6 +129,30 @@ function App() {
       </h1>
 
       <Button onClick={startGeofencing}>Start Geofencing</Button>
+      <span className="mx-4 space-x-4">
+        <Button type="submit" disabled={isPending} onClick={verifyLocation}>
+          Verify Area
+        </Button>
+        <span className="relative">
+          <CircleCheckBig
+            className={cn("inline-block text-green-600", {
+              "opacity-0":
+                isPending || verifyLocationData?.verificationResult === "FALSE",
+            })}
+          />
+          <LoaderCircle
+            className={cn("absolute inset-0", {
+              "opacity-0": !isPending,
+            })}
+          />
+          <CircleX
+            className={cn("absolute inset-0 text-red-600", {
+              "opacity-0":
+                isPending || verifyLocationData?.verificationResult === "TRUE",
+            })}
+          />
+        </span>
+      </span>
       <div className="h-[516px] overflow-hidden rounded-md border-2 border-black">
         <MapContainer
           center={[
