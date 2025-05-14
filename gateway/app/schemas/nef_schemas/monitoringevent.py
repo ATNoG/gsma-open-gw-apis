@@ -12,6 +12,11 @@ class MonitoringType(str, Enum):
     UE_REACHABILITY = "UE_REACHABILITY"
 
 
+class ReachabilityType(str, Enum):
+    SMS = "SMS"
+    DATA = "DATA"
+
+
 class MonitoringEventSubscription(BaseModel):
     externalId: Optional[
         Annotated[
@@ -60,6 +65,9 @@ class MonitoringEventSubscription(BaseModel):
     self: Optional[AnyUrl] = None
 
     immediateRep: Optional[bool] = None
+
+    addnMonTypes: Optional[List[MonitoringType]] = None
+    reachabilityType: Optional[ReachabilityType] = None
 
     ipv4Addr: Optional[IPv4Address] = None
     ipv6Addr: Optional[IPv6Address] = None
