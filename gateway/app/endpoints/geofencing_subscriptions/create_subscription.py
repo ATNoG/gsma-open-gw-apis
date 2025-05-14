@@ -1,7 +1,11 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter
+from fastapi.exceptions import RequestValidationError
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
-from app.schemas.geofencing import Subscription, SubscriptionRequest
+from app.exceptions import ApiException
+from app.schemas.geofencing import Protocol, Subscription, SubscriptionRequest
 
 router = APIRouter()
 
@@ -11,7 +15,23 @@ async def post_subscriptions(
     req: SubscriptionRequest,
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
 ) -> Subscription:
+    if req.protocol != Protocol.HTTP:
+        raise ApiException(
+            status=HTTPStatus.BAD_REQUEST,
+            code="INVALID_PROTOCOL",
+            message="Only HTTP is supported.",
+        )
+
     device = req.config.subscriptionDetail.device
+    if device is None:
+        raise RequestValidationError("Device must be set")
+
+    if device.networkAccessIdentifier is not None:
+        raise ApiException(
+            status=HTTPStatus.UNPROCESSABLE_ENTITY,
+            code="UNSUPPORTED_IDENTIFIER",
+            message="The identifier provided is not supported.",
+        )
     subscription = await geofencing_subscription_interface.create_subscription(
         req, device
     )

@@ -17,7 +17,7 @@ strict = true
 plugins = ['pydantic.mypy']
 
 [[tool.mypy.overrides]]
-module = ["geopy"]
+module = ["geopy", "geopy.distance"]
 ignore_missing_imports = true
 
 [dependency-groups]

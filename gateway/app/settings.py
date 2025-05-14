@@ -68,8 +68,6 @@ class GeofencingBackend(Enum):
 class GeofencingSettings(BaseModel):
     backend: GeofencingBackend
     monitoring_base_path: str
-    nef_webhook: AnyHttpUrl
-    geofencing_url: AnyHttpUrl
 
 
 class Settings(BaseSettings):

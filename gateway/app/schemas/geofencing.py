@@ -24,9 +24,9 @@ class CredentialType(str, Enum):
 
 
 class SinkCredential(BaseModel):
-    credentialType: CredentialType = Field(
-        ..., description="The type of the credential."
-    )
+    credentialType: Annotated[
+        CredentialType, Field(description="The type of the credential.")
+    ]
 
 
 class PlainCredential(SinkCredential):
@@ -236,19 +236,19 @@ class Circle(Area):
 
 
 class AreaLeft(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Area
     subscriptionId: SubscriptionId
 
 
 class AreaEntered(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Circle
     subscriptionId: SubscriptionId
 
 
 class SubscriptionEnds(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Circle
     terminationReason: TerminationReason
     terminationDescription: Annotated[
@@ -296,7 +296,7 @@ class CloudEvent(BaseModel):
 
 
 class SubscriptionDetail(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Circle
 
 
