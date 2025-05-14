@@ -4,7 +4,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
 from app.exceptions import ApiException
-from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
+from app.interfaces.geofencing_subscriptions import (
+    GeofencingSubscriptionNotFound,
+    MissingDevice,
+)
 from app.interfaces.otp import (
     OTPExpiredCodeError,
     OTPInvalidCodeError,
@@ -110,3 +113,14 @@ def install_exception_handlers(app: FastAPI) -> None:
             message=exc.message,
         )
         return JSONResponse(status_code=exc.status, content=jsonable_encoder(body))
+
+    @app.exception_handler(MissingDevice)
+    async def missing_identifier_found_exception_error(
+        request: Request, exc: MissingDevice
+    ) -> Response:
+        body = ErrorInfo(
+            status=422,
+            code="MISSING_IDENTIFIER",
+            message="The device cannot be identified.",
+        )
+        return JSONResponse(status_code=422, content=jsonable_encoder(body))
