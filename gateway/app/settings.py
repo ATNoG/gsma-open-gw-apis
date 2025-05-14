@@ -76,6 +76,8 @@ class ReachabilityStatusBackend(str, Enum):
 
 class ReachabilityStatusSettings(BaseModel):
     backend: ReachabilityStatusBackend
+    af_id: str
+    nef_base_path: str
 
 
 class Settings(BaseSettings):
