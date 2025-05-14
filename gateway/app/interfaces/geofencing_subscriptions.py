@@ -16,11 +16,11 @@ class GeofencingSubscriptionInterface(ABC):
         pass
 
     @abstractmethod
-    async def delete_subscription(self, id: str) -> None:
+    async def delete_subscription(self, sub_id: str) -> None:
         pass
 
     @abstractmethod
-    async def get_subscription(self, id: str) -> Subscription:
+    async def get_subscription(self, sub_id: str) -> Subscription:
         pass
 
     @abstractmethod

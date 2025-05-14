@@ -2,7 +2,6 @@ import logging
 from http import HTTPStatus
 
 from fastapi import APIRouter
-from pydantic import AnyUrl
 
 from app.drivers.geofencing.nef import nef_geofencing_subscription_interface
 from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
@@ -15,13 +14,6 @@ from app.schemas.nef_schemas.monitoringevent import (
 router = APIRouter()
 
 LOG = logging.getLogger(__name__)
-
-
-def _get_nef_sub_from_subscription_url(url: AnyUrl | None) -> str:
-    if url is None or url.path is None:
-        raise Exception("Invalid url")
-
-    return url.path.rsplit("/")[-1]
 
 
 @router.post("/geofencing/{sub_id}", status_code=HTTPStatus.NO_CONTENT)
