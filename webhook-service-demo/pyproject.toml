@@ -5,15 +5,16 @@ description = "Sends webhook callbacks into a webhook"
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.0",
-    "Flask-SocketIO>=5.5.1"
+    "Flask-SocketIO>=5.5.1",
+    "types-flask-socketio>=5.5.0.20250321",
 ]
 
 [tool.mypy]
 strict = true
-plugins = ['pydantic.mypy']
 
 [dependency-groups]
 dev = [
     "ruff>=0.11.0",
+    "mypy>=1.15.0",
 ]
 
