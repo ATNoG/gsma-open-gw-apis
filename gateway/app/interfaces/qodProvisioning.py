@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from app.exceptions import ApiException
 from app.schemas.device import Device
 from app.schemas.qodProvisioning import (
     TriggerProvisioning,
@@ -7,12 +8,13 @@ from app.schemas.qodProvisioning import (
 )
 
 
-class ResourceNotFound(Exception):
-    pass
-
-
-class ProvisioningConflict(Exception):
-    pass
+class ProvisioningConflict(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=409,
+            code="CONFLICT",
+            message="There is another existing provisioning for the same device",
+        )
 
 
 class QoDProvisioningInterface(ABC):

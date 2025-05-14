@@ -3,8 +3,8 @@ from http import HTTPStatus
 
 from fastapi import APIRouter
 
+from app.exceptions import ResourceNotFound
 from app.drivers.geofencing.nef import nef_geofencing_subscription_interface
-from app.interfaces.geofencing_subscriptions import GeofencingSubscriptionNotFound
 from app.schemas.geofencing import Subscription
 from app.schemas.nef_schemas.monitoringevent import (
     MonitoringNotification,
@@ -39,7 +39,7 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
         subscription = await nef_geofencing_subscription_interface.get_subscription(
             sub_id
         )
-    except GeofencingSubscriptionNotFound:
+    except ResourceNotFound:
         LOG.warning("Received notification for non exisiting subscription")
         return
 

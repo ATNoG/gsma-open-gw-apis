@@ -5,11 +5,11 @@ import uuid
 import httpx
 from pydantic import AnyHttpUrl
 
+from app.exceptions import ResourceNotFound
 from app.drivers.nef_auth import NEFAuth
 from app.interfaces.qodProvisioning import (
     ProvisioningConflict,
     QoDProvisioningInterface,
-    ResourceNotFound,
 )
 from app.redis import get_redis
 from app.schemas.device import Device

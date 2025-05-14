@@ -4,14 +4,6 @@ from app.schemas.device import Device
 from app.schemas.geofencing import Subscription, SubscriptionRequest
 
 
-class GeofencingSubscriptionNotFound(Exception):
-    pass
-
-
-class MissingDevice(Exception):
-    pass
-
-
 class GeofencingSubscriptionInterface(ABC):
     @abstractmethod
     async def create_subscription(

@@ -11,11 +11,11 @@ import httpx
 from fastapi.encoders import jsonable_encoder
 from pydantic import AnyHttpUrl, AnyUrl
 
+from app.exceptions import ResourceNotFound
 from app.drivers.nef_auth import NEFAuth
 from app.exceptions import ApiException
 from app.interfaces.geofencing_subscriptions import (
     GeofencingSubscriptionInterface,
-    GeofencingSubscriptionNotFound,
 )
 from app.redis import get_redis
 from app.schemas.device import Device
@@ -202,7 +202,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
         subscription = await self.redis.get(subscription_key)
         if subscription is None:
-            raise GeofencingSubscriptionNotFound()
+            raise ResourceNotFound()
 
         nef_subscription_url: str
         if endpoint is None:
@@ -246,7 +246,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         result = await self.redis.get(key)
 
         if result is None:
-            raise GeofencingSubscriptionNotFound()
+            raise ResourceNotFound()
 
         return Subscription.model_validate_json(result)
 
