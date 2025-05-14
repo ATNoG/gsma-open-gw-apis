@@ -3,14 +3,14 @@ from fastapi import Depends
 from typing import Annotated
 
 from app.drivers.nef_auth import NEFAuth
-from app.settings import SMSBackend, settings
+from app.settings import QoSProfilesBackend, settings
 from app.interfaces.qos_profiles import QoSProfilesInterface
 
 from .nef import NefQoSProfilesInterface
 
 qos_profiles_interface: QoSProfilesInterface
-match settings.sms_otp.sms_backend:
-    case SMSBackend.Mock:
+match settings.qos_profiles.backend:
+    case QoSProfilesBackend.NEF:
         nef_auth = NEFAuth(
             settings.nef_url, settings.nef_username, settings.nef_password
         )
