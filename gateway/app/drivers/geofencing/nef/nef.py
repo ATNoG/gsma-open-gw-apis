@@ -87,12 +87,13 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
     def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
         super().__init__()
         self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+        self.httpx_client_callback = httpx.AsyncClient()
         self.redis = get_redis()
 
     async def _clear_loop(self) -> Never:
         while True:
             try:
-                LOG.info("Clearing expired subscriptions")
+                LOG.debug("Clearing expired subscriptions")
                 await self._clear_expired_subscriptions()
                 await asyncio.sleep(5)
             except Exception as e:
@@ -340,5 +341,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             ),
         )
 
-        await self.httpx_client.post(subscription.sink, json=jsonable_encoder(res))
+        await self.httpx_client_callback.post(
+            subscription.sink, json=jsonable_encoder(res)
+        )
         return True
