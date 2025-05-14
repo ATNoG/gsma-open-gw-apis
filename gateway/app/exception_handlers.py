@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 
+from app.interfaces.quality_on_demand import SessionConflict
 from app.schemas import ErrorInfo
 from app.interfaces.otp import (
     OTPExpiredCodeError,
@@ -86,5 +87,16 @@ def install_exception_handlers(app: FastAPI) -> None:
             status=404,
             code="NOT_FOUND",
             message="The specified resource is not found.",
+        )
+        return JSONResponse(status_code=409, content=jsonable_encoder(body))
+
+    @app.exception_handler(SessionConflict)
+    async def session_conflict_exception_error(
+        request: Request, exc: QoSProfileNotFound
+    ) -> Response:
+        body = ErrorInfo(
+            status=409,
+            code="CONFLICT",
+            message="Conflict with an existing session for the same device.",
         )
         return JSONResponse(status_code=409, content=jsonable_encoder(body))

@@ -17,3 +17,8 @@ backend = "nef"
 [qod_provisioning]
 qod_provisioning_backend = "nef"
 af_id = "gateway"
+
+
+[qod]
+qod_provisioning_backend = "nef"
+af_id = "gateway"

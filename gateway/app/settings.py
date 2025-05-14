@@ -62,6 +62,15 @@ class ProvisioningSettings(BaseModel):
     af_id: str
 
 
+class QodBackend(str, Enum):
+    Nef = "nef"
+
+
+class QodSettings(BaseModel):
+    qod_backend: QodProvisioningBackend
+    af_id: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -79,6 +88,7 @@ class Settings(BaseSettings):
     qos_profiles: QoSProfilesSettings
     location: LocationSettings
     qod_provisioning: ProvisioningSettings
+    qod: QodSettings
 
     @classmethod
     def settings_customise_sources(
