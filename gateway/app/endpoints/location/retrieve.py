@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+
+from app.exceptions import MissingDevice
 from app.schemas.location import (
     RetrievalLocationRequest,
     Location,
@@ -12,8 +14,9 @@ router = APIRouter(prefix="/location-retrieval/v0.4")
 async def retrieve_location(
     body: RetrievalLocationRequest, location_interface: LocationInterfaceDep
 ) -> Location:
-    device = body.device
+    if body.device is None:
+        raise MissingDevice()
 
     return await location_interface.retrieve_location(
-        device, body.maxAge, body.maxSurface
+        body.device, body.maxAge, body.maxSurface
     )
