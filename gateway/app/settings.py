@@ -197,6 +197,15 @@ class RedisSettings(BaseModel):
     password: Optional[str] = None
 
 
+class QodBackend(str, Enum):
+    Nef = "nef"
+
+
+class QodSettings(BaseModel):
+    qod_backend: QodProvisioningBackend
+    af_id: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file="config.toml",
@@ -219,6 +228,7 @@ class Settings(BaseSettings):
     qod_provisioning: ProvisioningSettings
     reachability_status: ReachabilityStatusSettings
     geofencing: GeofencingSettings
+    qod: QodSettings
 
     @classmethod
     def settings_customise_sources(
