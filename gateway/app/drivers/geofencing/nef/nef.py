@@ -313,7 +313,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             await self.redis.set(key, state.value)
             return False
 
-        if last_state == state:
+        if last_state == state.value:
             return False
 
         await self.redis.set(key, state.value)
