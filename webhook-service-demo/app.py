@@ -1,5 +1,5 @@
-from flask import Flask, request, Response, jsonify
-from flask_socketio import SocketIO, emit
+from flask import Flask, Response, jsonify, request
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
@@ -7,7 +7,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.route("/webhook", methods=["POST"])
-def respond():
+def respond() -> Response:
     data = request.json
     print(data)
     socketio.emit("data", data)
