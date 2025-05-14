@@ -239,7 +239,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             ),
         )
 
-        await self.httpx_client.post(
+        await self.httpx_client_callback.post(
             subscription.sink,
             json=jsonable_encoder(res),
         )
