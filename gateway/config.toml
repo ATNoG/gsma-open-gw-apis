@@ -21,3 +21,6 @@ af_id = "gateway"
 [geofencing]
 backend = "nef"
 monitoring_base_path = "/nef/api/v1/3gpp-monitoring-event/v1/camara"
+
+[reachability_status]
+backend = "nef"
