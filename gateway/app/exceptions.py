@@ -31,3 +31,12 @@ class ResourceNotFound(ApiException):
             code="NOT_FOUND",
             message="The specified resource is not found.",
         )
+
+
+class UnsupportedIdentifier(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=HTTPStatus.UNPROCESSABLE_ENTITY,
+            code="UNSUPPORTED_IDENTIFIER",
+            message="The identifier provided is not supported.",
+        )

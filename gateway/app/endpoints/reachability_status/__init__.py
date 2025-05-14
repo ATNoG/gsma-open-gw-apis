@@ -7,7 +7,10 @@ from app.schemas.reachability_status import (
     RequestReachabilityStatus,
 )
 
+from .subscriptions import router as sub_router_internal
+
 router = APIRouter(prefix="/device-reachability-status/v1")
+subscriptions_router = sub_router_internal
 
 
 @router.post(

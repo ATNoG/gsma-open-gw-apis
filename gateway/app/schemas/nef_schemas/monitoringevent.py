@@ -118,6 +118,13 @@ class LocationInfo(BaseModel):
 class MonitoringEventReport(BaseModel):
     locationInfo: Optional[LocationInfo] = None
     monitoringType: MonitoringType
+    reachabilityType: Optional[ReachabilityType] = None
+    lossOfConnectReason: Annotated[
+        Optional[int],
+        Field(
+            description='If "monitoringType" is "LOSS_OF_CONNECTIVITY", this parameter shall be included if available to identify the reason why loss of connectivity is reported. Refer to 3GPP TS 29.336 clause 8.4.58.',
+        ),
+    ] = None
 
 
 class MonitoringNotification(BaseModel):

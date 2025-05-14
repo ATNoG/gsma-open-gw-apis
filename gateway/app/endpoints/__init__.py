@@ -29,3 +29,6 @@ router.include_router(
     geofencing_subscriptions.router, tags=["Geofencing Subscriptions"]
 )
 router.include_router(reachability_status.router, tags=["Device Reachability Status"])
+router.include_router(
+    reachability_status.subscriptions_router, tags=["Device Reachability Status"]
+)
