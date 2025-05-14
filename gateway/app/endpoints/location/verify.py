@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from geopy import distance
 
 from app.drivers.location import LocationInterfaceDep
+from app.exceptions import MissingDevice
 from app.schemas.location import (
     VerifyLocationRequest,
     VerifyLocationResponse,
@@ -17,6 +18,9 @@ router = APIRouter(prefix="/location-verification/v2")
 async def retrieve_location(
     body: VerifyLocationRequest, location_interface: LocationInterfaceDep
 ) -> VerifyLocationResponse:
+    if body.device is None:
+        raise MissingDevice()
+
     loc = await location_interface.retrieve_location(body.device, body.maxAge, 3)
 
     if not loc:

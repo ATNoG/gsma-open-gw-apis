@@ -47,7 +47,7 @@ class Location(BaseModel):
 
 
 class RetrievalLocationRequest(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     maxAge: Annotated[
         Optional[int],
         'Maximum age of the location information which is accepted for the location retrieval (in seconds). Absence of maxAge means "any age" and maxAge=0 means a fresh calculation.',
@@ -62,7 +62,7 @@ class RetrievalLocationRequest(BaseModel):
 
 
 class VerifyLocationRequest(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Circle
     maxAge: Annotated[
         Optional[int],
