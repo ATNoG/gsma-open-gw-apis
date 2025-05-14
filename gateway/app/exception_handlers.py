@@ -22,4 +22,4 @@ def install_exception_handlers(app: FastAPI) -> None:
             code=exc.code,
             message=exc.message,
         )
-        return JSONResponse(status_code=exc.status, content=jsonable_encoder(body))
+        return JSONResponse(status_code=400, content=jsonable_encoder(body))

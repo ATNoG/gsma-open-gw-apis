@@ -26,6 +26,11 @@ Gpsi: TypeAlias = Annotated[
     ),
 ]
 
+Volume: TypeAlias = Annotated[
+    int,
+    Field(description="Unsigned integer identifying a volume in units of bytes.", ge=0),
+]
+
 
 # TS 29.122
 class FlowInfo(BaseModel):
@@ -61,3 +66,16 @@ class UserPlaneEvent(str, Enum):
     BAT_OFFSET_INFO = "BAT_OFFSET_INFO"
     RT_DELAY_TWO_QOS_FLOWS = "RT_DELAY_TWO_QOS_FLOWS"
     PACK_DELAY_VAR = "PACK_DELAY_VAR"
+
+
+class UsageThreshold(BaseModel):
+    duration: Annotated[
+        Optional[int],
+        Field(
+            description="Unsigned integer identifying a period of time in units of seconds.",
+            ge=0,
+        ),
+    ] = None
+    totalVolume: Optional[Volume] = None
+    downlinkVolume: Optional[Volume] = None
+    uplinkVolume: Optional[Volume] = None
