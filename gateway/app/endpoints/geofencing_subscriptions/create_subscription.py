@@ -32,4 +32,5 @@ async def post_subscriptions(
             code="UNSUPPORTED_IDENTIFIER",
             message="The identifier provided is not supported.",
         )
+
     return await geofencing_subscription_interface.create_subscription(req, device)
