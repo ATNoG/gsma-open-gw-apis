@@ -24,12 +24,16 @@ from app.schemas.geofencing import (
     AreaLeft,
     CloudEvent,
     NotificationEventType,
-    Protocol,
-    Status,
     Subscription,
-    SubscriptionEnds,
     SubscriptionEventType,
     SubscriptionRequest,
+    SubscriptionTypeAdapter,
+    SubscriptionEnds,
+)
+from app.schemas.subscriptions import (
+    HTTPSubscriptionResponse,
+    Protocol,
+    SubscriptionStatus,
     TerminationReason,
 )
 from app.schemas.nef_schemas.monitoringevent import (
@@ -59,9 +63,9 @@ def _handle_post_error(res: httpx.Response) -> None:
 
 
 _termination_reason_to_status = {
-    TerminationReason.SUBSCRIPTION_DELETED: Status.DELETED,
-    TerminationReason.SUBSCRIPTION_EXPIRED: Status.EXPIRED,
-    TerminationReason.MAX_EVENTS_REACHED: Status.EXPIRED,
+    TerminationReason.SUBSCRIPTION_DELETED: SubscriptionStatus.DELETED,
+    TerminationReason.SUBSCRIPTION_EXPIRED: SubscriptionStatus.EXPIRED,
+    TerminationReason.MAX_EVENTS_REACHED: SubscriptionStatus.EXPIRED,
 }
 
 _handle_state_details: dict[
@@ -108,9 +112,9 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             if sub is None:
                 continue
 
-            sub = Subscription.model_validate_json(sub)
+            sub = SubscriptionTypeAdapter.validate_json(sub)
             if (
-                sub.status != Status.ACTIVE
+                sub.status != SubscriptionStatus.ACTIVE
                 or sub.config.subscriptionExpireTime is None
                 or datetime.now(sub.config.subscriptionExpireTime.tzinfo)
                 < sub.config.subscriptionExpireTime
@@ -127,7 +131,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         # Store subscription
         req.config.subscriptionDetail.device = device
         sub_id = str(uuid.uuid4())
-        sub = Subscription(
+        sub: Subscription = HTTPSubscriptionResponse(
             protocol=Protocol.HTTP,
             sink=req.sink,
             types=req.types,
@@ -139,7 +143,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             ),
             id=sub_id,
             expiresAt=req.config.subscriptionExpireTime,
-            status=Status.ACTIVE,
+            status=SubscriptionStatus.ACTIVE,
         )
 
         sub_key = f"{_prefix_subscription}:{sub_id}"
@@ -214,7 +218,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
         await self.redis.delete(last_state_key, counter_key, nef_url_key)
 
-        subscription = Subscription.model_validate_json(subscription)
+        subscription = SubscriptionTypeAdapter.validate_json(subscription)
         subscription.status = _termination_reason_to_status[termination_reason]
         await self.redis.set(subscription_key, subscription.model_dump_json())
 
@@ -248,7 +252,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         if result is None:
             raise ResourceNotFound()
 
-        return Subscription.model_validate_json(result)
+        return SubscriptionTypeAdapter.validate_json(result)
 
     async def get_subscriptions(self) -> list[Subscription]:
         keys = await self.redis.keys(f"{_prefix_subscription}:*")
@@ -258,7 +262,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             result = await self.redis.get(key)
             if result is None:
                 continue
-            subscriptions.append(Subscription.model_validate_json(result))
+            subscriptions.append(SubscriptionTypeAdapter.validate_json(result))
 
         return subscriptions
 
