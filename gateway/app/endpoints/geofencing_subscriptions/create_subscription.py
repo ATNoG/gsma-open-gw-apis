@@ -1,10 +1,10 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter
-from fastapi.exceptions import RequestValidationError
 
 from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
 from app.exceptions import ApiException
+from app.interfaces.geofencing_subscriptions import MissingDevice
 from app.schemas.geofencing import Protocol, Subscription, SubscriptionRequest
 
 router = APIRouter()
@@ -24,7 +24,7 @@ async def post_subscriptions(
 
     device = req.config.subscriptionDetail.device
     if device is None:
-        raise RequestValidationError("Device must be set")
+        raise MissingDevice()
 
     if device.networkAccessIdentifier is not None:
         raise ApiException(
@@ -32,7 +32,4 @@ async def post_subscriptions(
             code="UNSUPPORTED_IDENTIFIER",
             message="The identifier provided is not supported.",
         )
-    subscription = await geofencing_subscription_interface.create_subscription(
-        req, device
-    )
-    return subscription
+    return await geofencing_subscription_interface.create_subscription(req, device)

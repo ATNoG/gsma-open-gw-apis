@@ -8,6 +8,10 @@ class GeofencingSubscriptionNotFound(Exception):
     pass
 
 
+class MissingDevice(Exception):
+    pass
+
+
 class GeofencingSubscriptionInterface(ABC):
     @abstractmethod
     async def create_subscription(
