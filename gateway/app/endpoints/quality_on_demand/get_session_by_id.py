@@ -6,7 +6,7 @@ from app.schemas.quality_on_demand import SessionInfo
 router = APIRouter()
 
 
-@router.get("/sessions/{sessionId}", response_model_exclude_none=True)
+@router.get("/sessions/{sessionId}", response_model_exclude_unset=True)
 async def get_qod_information_by_id(
     sessionId: str, qod_interface: QodInterfaceDep
 ) -> SessionInfo:

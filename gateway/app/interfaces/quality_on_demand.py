@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import List
 
+from app.exceptions import ApiException
 from app.schemas.device import Device
 from app.schemas.quality_on_demand import (
     CreateSession,
@@ -8,8 +10,13 @@ from app.schemas.quality_on_demand import (
 )
 
 
-class SessionConflict(Exception):
-    pass
+class SessionConflict(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=409,
+            code="CONFLICT",
+            message="There is another existing provisioning for the same device",
+        )
 
 
 class QoDInterface(ABC):
@@ -32,5 +39,5 @@ class QoDInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_qod_information_device(self, device: Device) -> SessionInfo:
+    async def get_qod_information_device(self, device: Device) -> List[SessionInfo]:
         pass

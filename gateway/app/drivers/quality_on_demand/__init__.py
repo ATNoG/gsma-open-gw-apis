@@ -4,12 +4,11 @@ from fastapi import Depends
 
 from app.interfaces.quality_on_demand import QoDInterface
 from app.settings import QodBackend, settings
-from app.interfaces.qodProvisioning import QoDProvisioningInterface
 
-qod_provisioning_interface: QoDProvisioningInterface
+qod_interface: QoDInterface
 
 
-match settings.qod_provisioning.qod_provisioning_backend:
+match settings.qod.backend:
     case QodBackend.Nef:
         from .nef import nef_qod_interface
 
@@ -17,7 +16,7 @@ match settings.qod_provisioning.qod_provisioning_backend:
 
 
 def get_qod_interface() -> QoDInterface:
-    return qod_provisioning_interface
+    return qod_interface
 
 
-QodInterfaceDep = Annotated[QoDProvisioningInterface, Depends(get_qod_interface)]
+QodInterfaceDep = Annotated[QoDInterface, Depends(get_qod_interface)]
