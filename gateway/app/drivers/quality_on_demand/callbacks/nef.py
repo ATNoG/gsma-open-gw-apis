@@ -1,7 +1,7 @@
 from app.schemas.nef_schemas.afSessionWithQos import UserPlaneNotificationData
 from fastapi import APIRouter
 
-from app.drivers.qodProvisioning.nef import nef_qod_interface
+from app.drivers.quality_on_demand.nef import nef_qod_interface
 
 router = APIRouter()
 

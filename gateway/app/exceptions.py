@@ -31,3 +31,12 @@ class ResourceNotFound(ApiException):
             code="NOT_FOUND",
             message="The specified resource is not found.",
         )
+
+
+class BadRequest(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="INVALID_ARGUMENT",
+            message="Client specified an invalid argument, request body or query param.",
+        )

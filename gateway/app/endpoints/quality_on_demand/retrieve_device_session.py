@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from fastapi.exceptions import RequestValidationError
 
-from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 from app.drivers.quality_on_demand import QodInterfaceDep
 from app.schemas.quality_on_demand import RetrieveSessionsInput, SessionInfo
 
@@ -16,4 +15,4 @@ async def get_qod_information_by_id(
     if req.device is None:
         raise RequestValidationError("Device must be set")
 
-    return await qod_provisioning_interface.get_qod_information_device(req.device)
+    return await qod_interface.get_qod_information_device(req.device)

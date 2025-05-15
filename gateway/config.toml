@@ -20,7 +20,7 @@ af_id = "gateway"
 
 
 [qod]
-qod_provisioning_backend = "nef"
+qod_backend = "nef"
 af_id = "gateway"
 
 [geofencing]

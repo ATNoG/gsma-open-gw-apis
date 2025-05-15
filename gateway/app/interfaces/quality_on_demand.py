@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from app.exceptions import ApiException
 from app.schemas.device import Device
 from app.schemas.quality_on_demand import (
     CreateSession,
@@ -8,8 +9,22 @@ from app.schemas.quality_on_demand import (
 )
 
 
-class SessionConflict(Exception):
-    pass
+class SessionConflict(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=409,
+            code="CONFLICT",
+            message="There is another existing provisioning for the same device",
+        )
+
+
+class UnprocessableContent(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=422,
+            code="IDENTIFIER_MISMATCH",
+            message="Provided identifiers are not consistent.",
+        )
 
 
 class QoDInterface(ABC):

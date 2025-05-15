@@ -1,15 +1,18 @@
 import datetime
 import logging
+from typing import List
 import uuid
 
 import httpx
 from pydantic import AnyHttpUrl
 
 from app.drivers.nef_auth import NEFAuth
-from app.interfaces.qodProvisioning import (
-    ResourceNotFound,
+from app.exceptions import BadRequest, ResourceNotFound
+from app.interfaces.quality_on_demand import (
+    QoDInterface,
+    SessionConflict,
+    UnprocessableContent,
 )
-from app.interfaces.quality_on_demand import QoDInterface, SessionConflict
 from app.redis import get_redis
 from app.schemas.device import Device
 from app.schemas.nef_schemas.afSessionWithQos import (
@@ -54,7 +57,6 @@ class NEFQoDInterface(QoDInterface):
     ) -> SessionInfo:
         qod_id = uuid.uuid4()
 
-        # TODO: what if the ipv4 does not exist, what now?
         payload = AsSessionWithQoSSubscription(
             supportedFeatures="0",
             notificationDestination=Link(
@@ -63,10 +65,7 @@ class NEFQoDInterface(QoDInterface):
             flowInfo=[
                 FlowInfo(
                     flowId=0,
-                    flowDescriptions=[
-                        f"permit in ip from {device.ipv4Address.publicAddress if device.ipv4Address else None} {req.devicePorts} to {req.applicationServer} {req.applicationServerPorts}",
-                        f"permit in ip from {req.applicationServer} {req.applicationServerPorts} to {device.ipv4Address.publicAddress if device.ipv4Address else None} {req.devicePorts}",
-                    ],
+                    flowDescriptions=self._get_flow_description(req),
                 )
             ],
             qosReference=req.qosProfile,
@@ -95,6 +94,9 @@ class NEFQoDInterface(QoDInterface):
         if res.status_code == 409:
             raise SessionConflict()
 
+        if not res.is_success:
+            raise BadRequest()
+
         subcription_result = AsSessionWithQoSSubscription.model_validate_json(
             res.content
         )
@@ -109,6 +111,7 @@ class NEFQoDInterface(QoDInterface):
             applicationServerPorts=req.applicationServerPorts,
             qosProfile=req.qosProfile,
             duration=req.duration,
+            sink=req.sink,
             startedAt=datetime.datetime.now(),
             expiresAt=datetime.datetime.now()
             + datetime.timedelta(seconds=req.duration),
@@ -158,6 +161,9 @@ class NEFQoDInterface(QoDInterface):
         if res.status_code == 404:
             raise ResourceNotFound()
 
+        if not res.is_success:
+            raise BadRequest()
+
         if res.status_code == 204:
             sub_info.qosStatus = QosStatus.UNAVAILABLE
             sub_info.statusInfo = StatusInfo.DELETE_REQUESTED
@@ -193,7 +199,74 @@ class NEFQoDInterface(QoDInterface):
         return sub_info
 
     async def extend_session(self, id: str, req: ExtendSessionDuration) -> SessionInfo:
-        raise NotImplementedError()
+        sub_info = await self.get_qod_information_by_id(id)
+
+        if sub_info.device is None:
+            raise ResourceNotFound()
+
+        key = f"{_prefix_gateway_nef}:{id}"
+        nef_id = await self.redis.get(key)
+
+        payload = AsSessionWithQoSSubscription(
+            self=nef_id,
+            supportedFeatures="0",
+            notificationDestination=Link(
+                f"{settings.nef_gateway_url}callbacks/v1/qod/{id}"
+            ),
+            flowInfo=[
+                FlowInfo(
+                    flowId=0,
+                    flowDescriptions=self._get_flow_description(sub_info),
+                )
+            ],
+            qosReference=sub_info.qosProfile,
+            usageThreshold=UsageThreshold(
+                duration=sub_info.duration + req.requestedAdditionalDuration,
+                totalVolume=0,
+                downlinkVolume=0,
+                uplinkVolume=0,
+            ),
+        )
+
+        if sub_info.device.ipv4Address and sub_info.device.ipv4Address.publicAddress:
+            payload.ueIpv4Addr = sub_info.device.ipv4Address.publicAddress
+        elif sub_info.device.ipv6Address:
+            payload.ueIpv6Addr = sub_info.device.ipv6Address
+        elif sub_info.device.phoneNumber:
+            phone_number = sub_info.device.phoneNumber.lstrip("+")
+            payload.gpsi = f"msisdn-{phone_number}"
+
+        res = await self.httpx_client.put(
+            nef_id,
+            content=payload.model_dump_json(exclude_unset=True),
+            headers={"Content-Type": "application/json"},
+        )
+
+        if res.status_code == 404:
+            raise ResourceNotFound()
+
+        if not res.is_success:
+            raise BadRequest()
+
+        if sub_info.expiresAt is None:
+            raise ResourceNotFound()
+
+        response = SessionInfo(
+            sessionId=sub_info.sessionId,
+            device=sub_info.device,
+            applicationServer=sub_info.applicationServer,
+            devicePorts=sub_info.devicePorts,
+            applicationServerPorts=sub_info.applicationServerPorts,
+            qosProfile=sub_info.qosProfile,
+            duration=sub_info.duration + req.requestedAdditionalDuration,
+            startedAt=sub_info.startedAt,
+            expiresAt=sub_info.expiresAt
+            + datetime.timedelta(seconds=req.requestedAdditionalDuration),
+            qosStatus=QosStatus.REQUESTED,
+        )
+        await self._save_subscription_info(id, response)
+
+        return response
 
     async def send_callback_message(
         self, body: UserPlaneNotificationData, id: str
@@ -230,25 +303,58 @@ class NEFQoDInterface(QoDInterface):
             raise ResourceNotFound()
 
         await self.httpx_client_callback.post(
-            str(sink), content=cloud_event.model_dump_json(exclude_unset=True)
+            str(sink),
+            content=cloud_event.model_dump_json(exclude_unset=True, by_alias=True),
         )
 
         await self._save_subscription_info(id, sub_info)
 
-    def _get_qod_status(self, nef_response: UserPlaneNotificationData) -> Status | None:
+    def _get_qod_status(
+        self, nef_response: UserPlaneNotificationData
+    ) -> QosStatus | None:
         status = None
         for report in nef_response.eventReports:
             if report.event == UserPlaneEvent.QOS_GUARANTEED:
-                status = Status.AVAILABLE
+                status = QosStatus.AVAILABLE
             elif report.event == UserPlaneEvent.FAILED_RESOURCES_ALLOCATION:
-                status = Status.UNAVAILABLE
+                status = QosStatus.UNAVAILABLE
             elif report.event == UserPlaneEvent.QOS_NOT_GUARANTEED:
-                status = Status.REQUESTED
+                status = QosStatus.REQUESTED
             elif report.event == UserPlaneEvent.SUCCESSFUL_RESOURCES_ALLOCATION:
-                status = Status.AVAILABLE
+                status = QosStatus.AVAILABLE
         return status
 
     async def _save_subscription_info(self, id: str, data: SessionInfo) -> None:
         key = f"{_prefix_info}:{id}"
 
-        await self.redis.set(key, data.model_dump_json(exclude_unset=True))
+        await self.redis.set(
+            key, data.model_dump_json(exclude_unset=True, by_alias=True)
+        )
+
+    def _get_flow_description(self, req: CreateSession | SessionInfo) -> List[str]:
+        flow_description = []
+        if req.applicationServerPorts is None or req.devicePorts is None:
+            raise ResourceNotFound()
+
+        if req.applicationServerPorts.ports is None or req.devicePorts.ports is None:
+            raise ResourceNotFound()
+
+        if req.device and req.device.ipv4Address is not None:
+            flow_description.append(
+                f"permit in ip from {req.device.ipv4Address.publicAddress} {req.devicePorts.ports[0]} to {req.applicationServer.ipv4Address} {req.applicationServerPorts.ports[0]}"
+            )
+            flow_description.append(
+                f"permit in ip from {req.applicationServer.ipv4Address} {req.applicationServerPorts.ports[0]} to {req.device.ipv4Address.publicAddress} {req.devicePorts.ports[0]}"
+            )
+
+        elif req.device and req.device.ipv6Address:
+            flow_description.append(
+                f"permit in ip from {req.device.ipv6Address.exploded} to {req.applicationServer.ipv6Address}"
+            )
+            flow_description.append(
+                f"permit in ip from {req.applicationServer.ipv6Address} to {req.device.ipv6Address.exploded}"
+            )
+
+        else:
+            raise UnprocessableContent()
+        return flow_description
