@@ -3,7 +3,6 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
-
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -71,6 +70,15 @@ class QodSettings(BaseModel):
     af_id: str
 
 
+class GeofencingBackend(Enum):
+    NEF = "nef"
+
+
+class GeofencingSettings(BaseModel):
+    backend: GeofencingBackend
+    monitoring_base_path: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -78,7 +86,6 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
 
     gateway_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
-
     nef_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8888/")
     nef_gateway_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:8000")
     nef_username: str = "admin@my-email.com"
@@ -89,6 +96,8 @@ class Settings(BaseSettings):
     location: LocationSettings
     qod_provisioning: ProvisioningSettings
     qod: QodSettings
+
+    geofencing: GeofencingSettings
 
     @classmethod
     def settings_customise_sources(

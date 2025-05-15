@@ -1,8 +1,10 @@
+from datetime import datetime
 from enum import Enum
 from typing import Annotated, Optional, Self
-from pydantic import BaseModel, Field, SerializeAsAny, model_validator
-from datetime import datetime
 
+from pydantic import BaseModel, Field, SerializeAsAny, model_validator
+
+from app.schemas.common import Point
 from app.schemas.device import Device
 
 
@@ -13,19 +15,6 @@ class AreaType(Enum):
 
 class Area(BaseModel):
     areaType: AreaType
-
-
-Latitude = Annotated[
-    float, Field(ge=-90, le=90, description="Latitude component of a location")
-]
-Longitude = Annotated[
-    float, Field(ge=-90, le=90, description="Longitude component of a location")
-]
-
-
-class Point(BaseModel):
-    latitude: Latitude
-    longitude: Longitude
 
 
 PointList = Annotated[
@@ -58,7 +47,7 @@ class Location(BaseModel):
 
 
 class RetrievalLocationRequest(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     maxAge: Annotated[
         Optional[int],
         'Maximum age of the location information which is accepted for the location retrieval (in seconds). Absence of maxAge means "any age" and maxAge=0 means a fresh calculation.',
@@ -73,7 +62,7 @@ class RetrievalLocationRequest(BaseModel):
 
 
 class VerifyLocationRequest(BaseModel):
-    device: Device
+    device: Optional[Device] = None
     area: Circle
     maxAge: Annotated[
         Optional[int],

@@ -4,21 +4,43 @@ import os
 import base64
 from uuid import UUID
 
-
-class OTPNotFoundError(Exception):
-    pass
+from app.exceptions import ApiException
 
 
-class OTPInvalidCodeError(Exception):
-    pass
+class OTPNotFoundError(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="ONE_TIME_PASSWORD_SMS.INVALID_OTP",
+            message="The provided OTP is not valid for this authenticationId",
+        )
 
 
-class OTPExpiredCodeError(Exception):
-    pass
+class OTPInvalidCodeError(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="ONE_TIME_PASSWORD_SMS.INVALID_OTP",
+            message="The provided OTP is not valid for this authenticationId",
+        )
 
 
-class OTPTooManyAttemptsError(Exception):
-    pass
+class OTPExpiredCodeError(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="ONE_TIME_PASSWORD_SMS.VERIFICATION_EXPIRED",
+            message="The authenticationId is no longer valid",
+        )
+
+
+class OTPTooManyAttemptsError(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="ONE_TIME_PASSWORD_SMS.VERIFICATION_FAILED",
+            message="The maximum number of attempts for this authenticationId was exceeded without providing a valid OTP",
+        )
 
 
 class OTPInterface(ABC):

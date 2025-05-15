@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter
 
-from app.interfaces.qos_profiles import QoSProfileNotFound
+from app.exceptions import ResourceNotFound
 from app.schemas.qos_profiles import QosProfileDeviceRequest, QosProfile
 from app.drivers.qos_profiles import QoSProfilesInterfaceDep
 
@@ -26,6 +26,6 @@ async def retrieve_qos_profile_by_name(
     )
 
     if len(res) == 0:
-        raise QoSProfileNotFound
+        raise ResourceNotFound()
 
     return res[0]

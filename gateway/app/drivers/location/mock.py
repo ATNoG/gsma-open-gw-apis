@@ -1,9 +1,11 @@
 import logging
 from datetime import datetime
 from typing import Optional
+
 from app.interfaces.location import LocationInterface
-from app.schemas.location import Location, Circle, Point
+from app.schemas.common import Point
 from app.schemas.device import Device
+from app.schemas.location import Circle, Location
 
 
 class MockLocationDriver(LocationInterface):

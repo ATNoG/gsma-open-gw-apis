@@ -1,5 +1,6 @@
 from typing import Annotated
-from pydantic import Field
+
+from pydantic import BaseModel, Field
 
 PhoneNumber = Annotated[
     str,
@@ -19,3 +20,29 @@ NetworkAccessIdentifier = Annotated[
 ]
 
 Port = Annotated[int, Field(ge=0, le=65535, description="TCP or UDP port number")]
+
+Latitude = Annotated[
+    float,
+    Field(
+        ge=-90.0,
+        le=90.0,
+        description="Latitude component of a location.",
+        examples=[50.735851],
+    ),
+]
+
+Longitude = Annotated[
+    float,
+    Field(
+        ...,
+        ge=-180.0,
+        le=180.0,
+        description="Longitude component of location.",
+        examples=[7.10066],
+    ),
+]
+
+
+class Point(BaseModel):
+    latitude: Latitude
+    longitude: Longitude
