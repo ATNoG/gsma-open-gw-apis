@@ -15,21 +15,30 @@ from .commonData import (
 )
 
 
-class AsSessionWithQoSSubscription(BaseModel):
-    self: Optional[Link] = None
-    supportedFeatures: Optional[SupportedFeatures] = None
-    notificationDestination: Link
-    gpsi: Optional[Gpsi] = None
+class AsSessionWithQoSSubscriptionBase(BaseModel):
     flowInfo: Annotated[
         Optional[List[FlowInfo]],
         Field(description="Describe the data flow which requires QoS.", min_length=1),
     ] = None
+
     qosReference: Annotated[
         Optional[str], Field(description="Identifies a pre-defined QoS information")
     ] = None
+
+    usageThreshold: Optional[UsageThreshold] = None
+
+
+class AsSessionWithQoSSubscription(AsSessionWithQoSSubscriptionBase):
+    self: Optional[Link] = None
+    supportedFeatures: Optional[SupportedFeatures] = None
+    notificationDestination: Link
+    gpsi: Optional[Gpsi] = None
     ueIpv4Addr: Optional[IPv4Address] = None
     ueIpv6Addr: Optional[IPv6Address] = None
-    usageThreshold: Optional[UsageThreshold] = None
+
+
+class AsSessionWithQoSSubscriptionPatch(AsSessionWithQoSSubscriptionBase):
+    notificationDestination: Optional[Link] = None
 
 
 class UserPlaneEventReport(BaseModel):

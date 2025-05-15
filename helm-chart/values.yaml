@@ -90,6 +90,9 @@ gatewayConfig:
 
   reachability_status:
     backend: "nef"
+  
+  qod:
+    backend: "nef"
 
 redis:
   architecture: standalone

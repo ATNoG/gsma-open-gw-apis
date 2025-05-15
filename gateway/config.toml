@@ -29,6 +29,8 @@ backend = "nef"
 [qod_provisioning]
 backend = "nef"
 
+[qod]
+backend = "nef"
 
 [geofencing]
 backend = "nef"
@@ -37,6 +39,3 @@ backend = "nef"
 [reachability_status]
 backend = "nef"
 
-
-[qod]
-backend = "nef"

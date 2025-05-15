@@ -171,6 +171,16 @@ class ProvisioningSettings(BaseModel):
     nef: NEFSettings
 
 
+class QodBackend(str, Enum):
+    Nef = "nef"
+
+
+class QodSettings(BaseModel):
+    backend: QodBackend
+
+    nef: NEFSettings
+
+
 class GeofencingBackend(Enum):
     NEF = "nef"
 
@@ -195,15 +205,6 @@ class RedisSettings(BaseModel):
     url: RedisDsn = RedisDsn("redis://localhost:6379")
     username: Optional[str] = None
     password: Optional[str] = None
-
-
-class QodBackend(str, Enum):
-    Nef = "nef"
-
-
-class QodSettings(BaseModel):
-    qod_backend: QodProvisioningBackend
-    af_id: str
 
 
 class Settings(BaseSettings):

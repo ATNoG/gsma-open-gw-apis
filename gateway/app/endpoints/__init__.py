@@ -1,5 +1,6 @@
 from typing import Any, Union
 
+from app.endpoints import quality_on_demand
 from fastapi import APIRouter
 
 from app.schemas import ErrorInfo
@@ -25,6 +26,7 @@ router.include_router(smsotp.router, tags=["SMS OTP"])
 router.include_router(qos_profiles.router, tags=["QoS Profiles"])
 router.include_router(location.router, tags=["Location"])
 router.include_router(qodProvisioning.router, tags=["QoD Provisioning"])
+router.include_router(quality_on_demand.router, tags=["Quality On Demand"])
 router.include_router(
     geofencing_subscriptions.router, tags=["Geofencing Subscriptions"]
 )

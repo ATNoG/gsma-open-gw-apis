@@ -1,19 +1,19 @@
+from typing import List
 from fastapi import APIRouter
-from fastapi.exceptions import RequestValidationError
 
-from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 from app.drivers.quality_on_demand import QodInterfaceDep
+from app.exceptions import MissingDevice
 from app.schemas.quality_on_demand import RetrieveSessionsInput, SessionInfo
 
 router = APIRouter()
 
 
-@router.post("/retrieve-sessions", response_model_exclude_none=True)
-async def get_qod_information_by_id(
+@router.post("/retrieve-sessions", response_model_exclude_unset=True)
+async def get_qod_information_by_device(
     req: RetrieveSessionsInput,
     qod_interface: QodInterfaceDep,
-) -> SessionInfo:
+) -> List[SessionInfo]:
     if req.device is None:
-        raise RequestValidationError("Device must be set")
+        raise MissingDevice()
 
-    return await qod_provisioning_interface.get_qod_information_device(req.device)
+    return await qod_interface.get_qod_information_device(req.device)
