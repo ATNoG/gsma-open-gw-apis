@@ -7,7 +7,7 @@ from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 router = APIRouter()
 
 
-@router.post("/retrieve-device-qos", response_model_exclude_none=True)
+@router.post("/retrieve-device-qos", response_model_exclude_unset=True)
 async def get_qod_information_by_id(
     req: RetrieveProvisioningByDevice,
     qod_provisioning_interface: QodProvisioningInterfaceDep,
