@@ -1,0 +1,82 @@
+name: Build NEF Emulator artifacts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build-nef-emulator.yml"
+
+jobs:
+  backend:
+    name: Build backend container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: atnog-harbor.av.it.pt
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: "https://github.com/ATNoG/NEF_emulator.git#763109840d10d1606c33068c0e0136ee60cf44fe:backend"
+          tags: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-backend
+          file: "Dockerfile.backend"
+          build-args: |
+            INSTALL_DEV=false
+            INSTALL_JUPYTER=false
+
+  report:
+    name: Build report container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: atnog-harbor.av.it.pt
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: "https://github.com/ATNoG/NEF_emulator.git#763109840d10d1606c33068c0e0136ee60cf44fe:backend"
+          tags: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-report
+          file: "Dockerfile.report"
+          build-args: |
+            INSTALL_DEV=false
+            INSTALL_JUPYTER=false
+
+  helm:
+    name: Build Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout NEF Emulator
+        uses: actions/checkout@v4
+        with:
+          repository: "ATNoG/NEF_emulator"
+          ref: "763109840d10d1606c33068c0e0136ee60cf44fe"
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+
+      - name: Build and Publish Helm Chart
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          echo "$HARBOR_PASSWORD" | helm registry login atnog-harbor.av.it.pt -u "$HARBOR_USERNAME" --password-stdin
+          helm package helm-chart/
+          helm push nef-emulator-*.tgz oci://atnog-harbor.av.it.pt/gsma-open-gw-apis
