@@ -52,7 +52,6 @@ class RedisOTPInterface(OTPInterface):
                     # All redis functions return an union between the sync and async
                     # results making them impossible to typecheck
                     data = await p.hgetall(key)  # type: ignore [misc]
-                    print(data)
 
                     if data == {}:
                         LOG.debug(

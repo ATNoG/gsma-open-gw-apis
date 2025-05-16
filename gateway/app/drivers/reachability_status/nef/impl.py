@@ -9,7 +9,7 @@ import httpx
 from pydantic import AnyHttpUrl, AnyUrl
 from fastapi.encoders import jsonable_encoder
 
-from app.settings import settings
+from app.settings import NEFSettings
 from app.exceptions import ResourceNotFound
 from app.redis import get_redis
 from app.schemas.device import Device
@@ -58,14 +58,21 @@ class _ConnectivityStatus(enum.Enum):
 
 
 class NefReachabilityStatusInterface(ReachabilityStatusInterface):
-    def __init__(
-        self, nef_url: str, af_id: str, nef_auth: NEFAuth, source: str
-    ) -> None:
+    def __init__(self, nef_settings: NEFSettings, source: str) -> None:
         super().__init__()
-        self.af_id = af_id
-        self.httpx_client = httpx.AsyncClient(base_url=nef_url, auth=nef_auth)
+
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=nef_settings.get_base_url(), auth=nef_auth
+        )
         self.httpx_client_callback = httpx.AsyncClient()
+
+        self.af_id = nef_settings.gateway_af_id
         self.source = source
+        self.notification_url = nef_settings.get_notification_url()
+
         self.redis = get_redis()
 
     async def delete_nef_subscription(self, sub_url: AnyUrl | str) -> None:
@@ -236,7 +243,7 @@ class NefReachabilityStatusInterface(ReachabilityStatusInterface):
 
         body = MonitoringEventSubscription(
             notificationDestination=AnyUrl(
-                f"{settings.nef_gateway_url}callbacks/v1/reachability-status/{sub_id}"
+                f"{self.notification_url}/callbacks/v1/reachability-status/{sub_id}"
             ),
             monitoringType=monType,
             reachabilityType=reachabilityType,
@@ -303,7 +310,7 @@ class NefReachabilityStatusInterface(ReachabilityStatusInterface):
 
         res = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}geofencing-subscriptions/v0.4/{sub_id}",
+            source=self.source,
             type=NotificationEventType.v0_subscription_ends,
             time=datetime.now(
                 timezone.utc

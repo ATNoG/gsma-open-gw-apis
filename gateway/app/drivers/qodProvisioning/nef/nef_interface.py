@@ -3,7 +3,6 @@ import logging
 import uuid
 
 import httpx
-from pydantic import AnyHttpUrl
 
 from app.exceptions import ResourceNotFound
 from app.drivers.nef_auth import NEFAuth
@@ -28,13 +27,15 @@ from app.schemas.subscriptions import (
 )
 from app.schemas.qodProvisioning import (
     CloudEvent,
+    CloudEventData,
     NotificationEventType,
+    StatusChanged,
     TriggerProvisioning,
     ProvisioningInfo,
     Status,
     StatusInfo,
 )
-from app.settings import settings
+from app.settings import NEFSettings
 
 _prefix_info = "qodprovisioninginfo"
 _prefix_gateway_nef = "qodprovisioningnef"
@@ -43,10 +44,21 @@ LOG = logging.getLogger(__name__)
 
 
 class NEFQoDProvisioningInterface(QoDProvisioningInterface):
-    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
+    def __init__(self, nef_settings: NEFSettings, source: str) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=nef_settings.get_base_url(), auth=nef_auth
+        )
         self.httpx_client_callback = httpx.AsyncClient()
+
+        self.af_id = nef_settings.gateway_af_id
+        self.source = source
+        self.notification_url = nef_settings.get_notification_url()
+
         self.redis = get_redis()
 
     async def create_provisioning(
@@ -57,7 +69,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
         payload = AsSessionWithQoSSubscription(
             supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.nef_gateway_url}callbacks/v1/qos/{provisioning_id}"
+                f"{self.notification_url}/callbacks/v1/qos/{provisioning_id}"
             ),
             flowInfo=[
                 FlowInfo(
@@ -80,7 +92,7 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
             payload.gpsi = f"msisdn-{phone_number}"
 
         res = await self.httpx_client.post(
-            f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
+            f"/3gpp-as-session-with-qos/v1/{self.af_id}/subscriptions",
             content=payload.model_dump_json(exclude_unset=True),
             headers={"Content-Type": "application/json"},
         )
@@ -206,11 +218,16 @@ class NEFQoDProvisioningInterface(QoDProvisioningInterface):
 
         cloud_event = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}qod-provisioning/v0.2/device-qos/{id}",
+            source=self.source,
             type=NotificationEventType.org_camaraproject_qod_provisioning_v0_status_changed,
             specversion=Specversion.field_1_0,
             datacontenttype=Datacontenttype.application_json,
-            data=sub_info.model_dump(mode="json", exclude_unset=True),
+            data=CloudEventData(
+                provisioningId=sub_info.provisioningId,
+                status=StatusChanged.AVAILABLE
+                if sub_info.status == Status.AVAILABLE
+                else StatusChanged.UNAVAILABLE,
+            ),
             time=datetime.datetime.now(),
         )
 

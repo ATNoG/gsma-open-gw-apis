@@ -1,6 +1,15 @@
-gateway_url = "http://localhost:8000"
-nef_url = "http://localhost:8888"
-nef_gateway_url = "http://host.docker.internal:8000"
+gateway_public_url = "http://localhost:8000"
+
+[nef]
+url = "http://localhost:8888"
+base_path = "/nef/api/v1/"
+
+gateway_af_id = "camara"
+gateway_notification_url = "http://host.docker.internal:8000"
+
+username = "admin@my-email.com"
+password = "pass"
+
 
 [sms_otp]
 sms_backend = "mock"
@@ -8,21 +17,22 @@ otp_backend = "redis"
 smsc_url = "http://localhost:7090"
 sender_id = "1234"
 
+
 [qos_profiles]
 backend = "nef"
+
 
 [location]
 backend = "nef"
 
+
 [qod_provisioning]
-qod_provisioning_backend = "nef"
-af_id = "gateway"
+backend = "nef"
+
 
 [geofencing]
 backend = "nef"
-monitoring_base_path = "/nef/api/v1/3gpp-monitoring-event/v1/camara"
+
 
 [reachability_status]
 backend = "nef"
-af_id = "gateway"
-nef_base_path = "/nef/api/v1/"

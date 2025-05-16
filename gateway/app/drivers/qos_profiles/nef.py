@@ -2,7 +2,7 @@ from typing import List
 
 import math
 import httpx
-from pydantic import AnyHttpUrl, TypeAdapter
+from pydantic import TypeAdapter
 
 from app.drivers.nef_auth import NEFAuth
 from app.interfaces.qos_profiles import QoSProfilesInterface
@@ -16,6 +16,7 @@ from app.schemas.qos_profiles import (
     RateUnitEnum,
     TimeUnitEnum,
 )
+from app.settings import NEFSettings
 
 
 def _calculate_rates_table() -> List[tuple[int, RateUnitEnum]]:
@@ -63,9 +64,15 @@ def _convert_nef_profile(name: str, nef_profile: NEFQoSProfile) -> QosProfile:
 
 
 class NefQoSProfilesInterface(QoSProfilesInterface):
-    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
+    def __init__(self, nef_settings: NEFSettings) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=str(nef_settings.url), auth=nef_auth
+        )
 
     async def get_qos_profiles(self, req: QosProfileDeviceRequest) -> List[QosProfile]:
         if req.name is not None:
