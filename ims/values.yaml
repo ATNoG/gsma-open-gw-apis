@@ -1,7 +1,5 @@
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-# imagePullSecrets: []
-imagePullSecrets:
-  - name: regcred
+imagePullSecrets: []
 
 # This is to override the chart name.
 nameOverride: ""
@@ -22,8 +20,8 @@ pyhss:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/pyhss
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -39,8 +37,8 @@ scscf:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/scscf
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -56,8 +54,8 @@ icscf:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/icscf
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -75,8 +73,8 @@ pcscf:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/pcscf
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -93,8 +91,8 @@ smsc:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/smsc
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -114,8 +112,8 @@ rtpengine:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/rtpengine
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -131,8 +129,8 @@ dns:
 
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/ims-dns
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
   podAnnotations: {}
   podLabels: {}
@@ -146,8 +144,8 @@ dns:
 dnsPatcher:
   image:
     repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/ims-dns-patcher
-    pullPolicy: Always # IfNotPresent
-    tag: "latest"
+    pullPolicy: IfNotPresent
+    tag: ""
 
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
