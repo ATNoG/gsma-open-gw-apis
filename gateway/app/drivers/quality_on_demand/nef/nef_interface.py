@@ -7,11 +7,10 @@ import httpx
 from pydantic import AnyHttpUrl
 
 from app.drivers.nef_auth import NEFAuth
-from app.exceptions import BadRequest, ResourceNotFound
+from app.exceptions import BadRequest, ResourceNotFound, UnsupportedIdentifier
 from app.interfaces.quality_on_demand import (
     QoDInterface,
     SessionConflict,
-    UnprocessableContent,
 )
 from app.redis import get_redis
 from app.schemas.device import Device
@@ -356,5 +355,5 @@ class NEFQoDInterface(QoDInterface):
             )
 
         else:
-            raise UnprocessableContent()
+            raise UnsupportedIdentifier()
         return flow_description

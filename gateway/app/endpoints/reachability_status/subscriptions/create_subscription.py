@@ -3,10 +3,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body
 
-from app.drivers.geofencing import GeofencingSubscriptionInterfaceDep
-from app.exceptions import ApiException, MissingDevice
-from app.schemas.geofencing import Subscription, SubscriptionRequest
+from app.exceptions import ApiException, MissingDevice, UnsupportedIdentifier
 from app.schemas.subscriptions import Protocol
+from app.schemas.reachability_status import Subscription, SubscriptionRequest
+from app.drivers.reachability_status import ReachabilityStatusInterfaceDep
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.post("/subscriptions")
 async def post_subscriptions(
     req: Annotated[SubscriptionRequest, Body()],
-    geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,
+    reachability_status_subscription_interface: ReachabilityStatusInterfaceDep,
 ) -> Subscription:
     if req.protocol != Protocol.HTTP:
         raise ApiException(
@@ -28,10 +28,8 @@ async def post_subscriptions(
         raise MissingDevice()
 
     if device.networkAccessIdentifier is not None:
-        raise ApiException(
-            status=HTTPStatus.UNPROCESSABLE_ENTITY,
-            code="UNSUPPORTED_IDENTIFIER",
-            message="The identifier provided is not supported.",
-        )
+        raise UnsupportedIdentifier()
 
-    return await geofencing_subscription_interface.create_subscription(req, device)
+    return await reachability_status_subscription_interface.create_subscription(
+        req, device
+    )

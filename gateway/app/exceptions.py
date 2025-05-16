@@ -40,3 +40,12 @@ class BadRequest(ApiException):
             code="INVALID_ARGUMENT",
             message="Client specified an invalid argument, request body or query param.",
         )
+
+
+class UnsupportedIdentifier(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=HTTPStatus.UNPROCESSABLE_ENTITY,
+            code="UNSUPPORTED_IDENTIFIER",
+            message="The identifier provided is not supported.",
+        )

@@ -79,6 +79,16 @@ class GeofencingSettings(BaseModel):
     monitoring_base_path: str
 
 
+class ReachabilityStatusBackend(str, Enum):
+    Nef = "nef"
+
+
+class ReachabilityStatusSettings(BaseModel):
+    backend: ReachabilityStatusBackend
+    af_id: str
+    nef_base_path: str
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="config.toml")
 
@@ -96,6 +106,7 @@ class Settings(BaseSettings):
     location: LocationSettings
     qod_provisioning: ProvisioningSettings
     qod: QodSettings
+    reachability_status: ReachabilityStatusSettings
 
     geofencing: GeofencingSettings
 

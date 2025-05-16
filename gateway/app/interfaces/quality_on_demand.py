@@ -18,15 +18,6 @@ class SessionConflict(ApiException):
         )
 
 
-class UnprocessableContent(ApiException):
-    def __init__(self) -> None:
-        super().__init__(
-            status=422,
-            code="IDENTIFIER_MISMATCH",
-            message="Provided identifiers are not consistent.",
-        )
-
-
 class QoDInterface(ABC):
     @abstractmethod
     async def create_provisioning(

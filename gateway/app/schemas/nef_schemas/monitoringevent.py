@@ -12,6 +12,11 @@ class MonitoringType(str, Enum):
     UE_REACHABILITY = "UE_REACHABILITY"
 
 
+class ReachabilityType(str, Enum):
+    SMS = "SMS"
+    DATA = "DATA"
+
+
 class MonitoringEventSubscription(BaseModel):
     externalId: Optional[
         Annotated[
@@ -60,6 +65,9 @@ class MonitoringEventSubscription(BaseModel):
     self: Optional[AnyUrl] = None
 
     immediateRep: Optional[bool] = None
+
+    addnMonTypes: Optional[List[MonitoringType]] = None
+    reachabilityType: Optional[ReachabilityType] = None
 
     ipv4Addr: Optional[IPv4Address] = None
     ipv6Addr: Optional[IPv6Address] = None
@@ -110,6 +118,13 @@ class LocationInfo(BaseModel):
 class MonitoringEventReport(BaseModel):
     locationInfo: Optional[LocationInfo] = None
     monitoringType: MonitoringType
+    reachabilityType: Optional[ReachabilityType] = None
+    lossOfConnectReason: Annotated[
+        Optional[int],
+        Field(
+            description='If "monitoringType" is "LOSS_OF_CONNECTIVITY", this parameter shall be included if available to identify the reason why loss of connectivity is reported. Refer to 3GPP TS 29.336 clause 8.4.58.',
+        ),
+    ] = None
 
 
 class MonitoringNotification(BaseModel):
