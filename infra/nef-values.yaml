@@ -1,0 +1,30 @@
+imagePullSecrets:
+  - name: regcred
+
+# PgAdmin configuration
+pgadmin:
+  enabled: false
+
+# Mongo configuration
+mongoExpress:
+  enabled: false
+
+# Report configuration
+report:
+  enabled: true
+  deployment:
+    image: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-report:latest
+
+# Backend configuration
+backend:
+  enabled: true
+  deployment:
+    image: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-backend:latest
+    ports:
+      - containerPort: 80
+  service:
+    type: LoadBalancer
+    ports:
+      - port: 8888
+        targetPort: 80
+        protocol: TCP
