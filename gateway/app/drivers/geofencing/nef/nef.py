@@ -9,7 +9,7 @@ import geopy
 import geopy.distance
 import httpx
 from fastapi.encoders import jsonable_encoder
-from pydantic import AnyHttpUrl, AnyUrl
+from pydantic import AnyUrl
 
 from app.exceptions import ResourceNotFound
 from app.drivers.nef_auth import NEFAuth
@@ -41,7 +41,7 @@ from app.schemas.nef_schemas.monitoringevent import (
     MonitoringEventSubscription,
     MonitoringType,
 )
-from app.settings import settings
+from app.settings import NEFSettings
 
 LOG = logging.getLogger(__name__)
 
@@ -88,10 +88,21 @@ _handle_state_details: dict[
 
 
 class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
-    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
+    def __init__(self, nef_settings: NEFSettings, source: str) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=nef_settings.get_base_url(), auth=nef_auth
+        )
         self.httpx_client_callback = httpx.AsyncClient()
+
+        self.af_id = nef_settings.gateway_af_id
+        self.source = source
+        self.notification_url = nef_settings.get_notification_url()
+
         self.redis = get_redis()
 
     async def _clear_loop(self) -> Never:
@@ -153,7 +164,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         body = MonitoringEventSubscription(
             ipv6Addr=device.ipv6Address,
             notificationDestination=AnyUrl(
-                f"{settings.nef_gateway_url}callbacks/v1/geofencing/{sub_id}"
+                f"{self.notification_url}/callbacks/v1/geofencing/{sub_id}"
             ),
             monitoringType=MonitoringType.LOCATION_REPORTING,
             monitorExpireTime=req.config.subscriptionExpireTime or datetime.max,
@@ -167,7 +178,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             body.ipv4Addr = device.ipv4Address.publicAddress
 
         res = await self.httpx_client.post(
-            f"{settings.geofencing.monitoring_base_path}/subscriptions",
+            f"/3gpp-monitoring-event/v1/{self.af_id}/subscriptions",
             json=jsonable_encoder(body),
         )
 
@@ -224,7 +235,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
         res = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}geofencing-subscriptions/v0.4/{sub_id}",
+            source=self.source,
             type=NotificationEventType.v0_subscription_ends,
             time=datetime.now(
                 timezone.utc
@@ -331,7 +342,7 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
 
         res = CloudEvent(
             id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}geofencing-subscriptions/v0.4/{subscription.id}",
+            source=self.source,
             type=notif_event_type,
             time=datetime.now(
                 timezone.utc
