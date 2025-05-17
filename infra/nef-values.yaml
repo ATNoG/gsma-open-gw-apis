@@ -1,6 +1,17 @@
 imagePullSecrets:
   - name: regcred
 
+qosConfig:
+  slow:
+    uplinkBitRate: 150_000
+    downlinkBitRate: 450_000
+  medium:
+    uplinkBitRate: 250_000
+    downlinkBitRate: 750_000
+  fast:
+    uplinkBitRate: 3_000_000
+    downlinkBitRate: 4_000_000
+
 # PgAdmin configuration
 pgadmin:
   enabled: false

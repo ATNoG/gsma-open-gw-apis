@@ -94,6 +94,9 @@ gatewayConfig:
   qod:
     backend: "nef"
 
+  roaming_status:
+    backend: "nef"
+
 redis:
   architecture: standalone
   master:
