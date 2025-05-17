@@ -21,6 +21,7 @@
           pkgs.prettierd
           pkgs.vscode-langservers-extracted
           pkgs.nodePackages.typescript-language-server
+          pkgs.tailwindcss-language-server
 
           pkgs.uv
           pkgs.ruff
