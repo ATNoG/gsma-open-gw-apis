@@ -201,6 +201,16 @@ class ReachabilityStatusSettings(BaseModel):
     nef: NEFSettings
 
 
+class RoamingStatusBackend(str, Enum):
+    Nef = "nef"
+
+
+class RoamingStatusSettings(BaseModel):
+    backend: RoamingStatusBackend
+
+    nef: NEFSettings
+
+
 class RedisSettings(BaseModel):
     url: RedisDsn = RedisDsn("redis://localhost:6379")
     username: Optional[str] = None
@@ -230,6 +240,7 @@ class Settings(BaseSettings):
     reachability_status: ReachabilityStatusSettings
     geofencing: GeofencingSettings
     qod: QodSettings
+    roaming_status: RoamingStatusSettings
 
     @classmethod
     def settings_customise_sources(

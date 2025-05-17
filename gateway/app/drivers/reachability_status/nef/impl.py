@@ -13,7 +13,6 @@ from app.settings import NEFSettings
 from app.exceptions import ResourceNotFound
 from app.redis import get_redis
 from app.schemas.device import Device
-from app.drivers.nef_auth import NEFAuth
 from app.interfaces.reachability_status import ReachabilityStatusInterface
 from app.schemas.nef_schemas.monitoringevent import (
     MonitoringEventReport,
@@ -39,6 +38,7 @@ from app.schemas.subscriptions import (
     SubscriptionStatus,
     TerminationReason,
 )
+from app.utils.nef_driver_base import NefDriverBase
 
 _prefix_subscription = "reachability_status"
 _prefix_counter = "reachability_status_counter"
@@ -57,51 +57,16 @@ class _ConnectivityStatus(enum.Enum):
     Unknown = enum.auto()
 
 
-class NefReachabilityStatusInterface(ReachabilityStatusInterface):
+class NefReachabilityStatusInterface(ReachabilityStatusInterface, NefDriverBase):
     def __init__(self, nef_settings: NEFSettings, source: str) -> None:
-        super().__init__()
+        super().__init__(nef_settings)
 
-        nef_auth = NEFAuth(
-            nef_settings.url, nef_settings.username, nef_settings.password
-        )
-        self.httpx_client = httpx.AsyncClient(
-            base_url=nef_settings.get_base_url(), auth=nef_auth
-        )
         self.httpx_client_callback = httpx.AsyncClient()
 
-        self.af_id = nef_settings.gateway_af_id
         self.source = source
         self.notification_url = nef_settings.get_notification_url()
 
         self.redis = get_redis()
-
-    async def delete_nef_subscription(self, sub_url: AnyUrl | str) -> None:
-        res = await self.httpx_client.delete(str(sub_url))
-
-        if res.status_code == 404:
-            logging.warning("Subscription not found")
-            return
-
-        if not res.is_success:
-            logging.error(
-                "Failed to delete NEF subscription (code: {%d}): %s",
-                res.status_code,
-                res.text,
-            )
-
-    def _install_device_identifiers(
-        self, sub: MonitoringEventSubscription, device: Device
-    ) -> MonitoringEventSubscription:
-        if device.phoneNumber is not None:
-            sub.msisdn = device.phoneNumber.lstrip("+")
-        elif device.ipv4Address is not None:
-            sub.ipv4Addr = device.ipv4Address.publicAddress
-        elif device.ipv6Address is not None:
-            sub.ipv6Addr = device.ipv6Address
-        elif device.networkAccessIdentifier is not None:
-            sub.externalId = device.networkAccessIdentifier
-
-        return sub
 
     async def _check_connectivity(
         self, device: Device, type: ReachabilityType
@@ -114,7 +79,7 @@ class NefReachabilityStatusInterface(ReachabilityStatusInterface):
             reachabilityType=type,
         )
 
-        sub = self._install_device_identifiers(sub, device)
+        sub = self.install_device_identifiers(sub, device)
 
         res = await self.httpx_client.post(
             f"3gpp-monitoring-event/v1/{self.af_id}/subscriptions",
@@ -251,7 +216,7 @@ class NefReachabilityStatusInterface(ReachabilityStatusInterface):
             immediateRep=req.config.initialEvent,
         )
 
-        body = self._install_device_identifiers(body, device)
+        body = self.install_device_identifiers(body, device)
 
         res = await self.httpx_client.post(
             f"3gpp-monitoring-event/v1/{self.af_id}/subscriptions",
