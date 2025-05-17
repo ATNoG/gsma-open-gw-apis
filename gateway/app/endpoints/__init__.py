@@ -12,6 +12,7 @@ from . import (
     qos_profiles,
     smsotp,
     reachability_status,
+    roaming_status,
 )
 
 responses: dict[Union[int, str], dict[str, Any]] = {
@@ -34,3 +35,4 @@ router.include_router(reachability_status.router, tags=["Device Reachability Sta
 router.include_router(
     reachability_status.subscriptions_router, tags=["Device Reachability Status"]
 )
+router.include_router(roaming_status.router, tags=["Device Roaming Status"])
