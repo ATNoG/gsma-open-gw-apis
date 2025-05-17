@@ -1,0 +1,11 @@
+apiVersion: v2
+name: gsma-open-gateway
+version: 0.1.0
+description: Helm chart for deploying the GSMA Open Gateway
+type: application
+appVersion: "0.1.0"
+
+dependencies:
+  - name: redis
+    version: "21.1.3"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
