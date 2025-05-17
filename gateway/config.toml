@@ -39,3 +39,5 @@ backend = "nef"
 [reachability_status]
 backend = "nef"
 
+[roaming_status]
+backend = "nef"

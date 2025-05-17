@@ -10,6 +10,7 @@ class MonitoringType(str, Enum):
     LOCATION_REPORTING = "LOCATION_REPORTING"
     LOSS_OF_CONNECTIVITY = "LOSS_OF_CONNECTIVITY"
     UE_REACHABILITY = "UE_REACHABILITY"
+    ROAMING_STATUS = "ROAMING_STATUS"
 
 
 class ReachabilityType(str, Enum):
@@ -68,6 +69,12 @@ class MonitoringEventSubscription(BaseModel):
 
     addnMonTypes: Optional[List[MonitoringType]] = None
     reachabilityType: Optional[ReachabilityType] = None
+    plmnIndication: Annotated[
+        Optional[bool],
+        Field(
+            description='If "monitoringType" is "ROAMING_STATUS", this parameter may be included to indicate the notification of UE\'s Serving PLMN ID. Value "true" indicates enabling of notification; "false" indicates disabling of notification. Default value is "false" if omitted.',
+        ),
+    ] = None
 
     ipv4Addr: Optional[IPv4Address] = None
     ipv6Addr: Optional[IPv6Address] = None
@@ -115,10 +122,22 @@ class LocationInfo(BaseModel):
     geographicArea: Optional[GeographicArea] = None
 
 
+class PlmnId(BaseModel):
+    mcc: int
+    mnc: int
+
+
 class MonitoringEventReport(BaseModel):
     locationInfo: Optional[LocationInfo] = None
     monitoringType: MonitoringType
+    plmnId: Optional[PlmnId] = None
     reachabilityType: Optional[ReachabilityType] = None
+    roamingStatus: Annotated[
+        Optional[bool],
+        Field(
+            description='If "monitoringType" is "ROAMING_STATUS", this parameter shall be set to "true" if the new serving PLMN is different from the HPLMN. Set to false or omitted otherwise.',
+        ),
+    ] = None
     lossOfConnectReason: Annotated[
         Optional[int],
         Field(
