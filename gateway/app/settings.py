@@ -176,8 +176,9 @@ class QodBackend(str, Enum):
 
 
 class QodSettings(BaseModel):
-    qod_backend: QodProvisioningBackend
-    af_id: str
+    backend: QodBackend
+
+    nef: NEFSettings
 
 
 class GeofencingBackend(Enum):

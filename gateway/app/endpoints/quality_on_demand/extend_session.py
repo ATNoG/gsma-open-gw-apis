@@ -6,7 +6,7 @@ from app.schemas.quality_on_demand import ExtendSessionDuration, SessionInfo
 router = APIRouter()
 
 
-@router.post("/sessions/{sessionId}/extend", response_model_exclude_none=True)
+@router.post("/sessions/{sessionId}/extend", response_model_exclude_unset=True)
 async def extend_session_duration(
     sessionId: str, req: ExtendSessionDuration, qod_interface: QodInterfaceDep
 ) -> SessionInfo:

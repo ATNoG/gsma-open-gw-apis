@@ -42,6 +42,11 @@ class BadRequest(ApiException):
         )
 
 
+class InternalServerError(ApiException):
+    def __init__(self) -> None:
+        super().__init__()
+
+
 class UnsupportedIdentifier(ApiException):
     def __init__(self) -> None:
         super().__init__(

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from app.exceptions import ApiException
 from app.schemas.device import Device
@@ -38,5 +39,5 @@ class QoDInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_qod_information_device(self, device: Device) -> SessionInfo:
+    async def get_qod_information_device(self, device: Device) -> List[SessionInfo]:
         pass

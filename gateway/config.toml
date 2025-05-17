@@ -29,11 +29,8 @@ backend = "nef"
 [qod_provisioning]
 backend = "nef"
 
-
-
 [qod]
-qod_backend = "nef"
-af_id = "gateway"
+backend = "nef"
 
 [geofencing]
 backend = "nef"

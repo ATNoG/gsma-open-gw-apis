@@ -1,13 +1,17 @@
 import datetime
 import logging
-from typing import List
+from typing import Awaitable, List
 import uuid
 
 import httpx
-from pydantic import AnyHttpUrl
 
 from app.drivers.nef_auth import NEFAuth
-from app.exceptions import BadRequest, ResourceNotFound, UnsupportedIdentifier
+from app.exceptions import (
+    BadRequest,
+    InternalServerError,
+    ResourceNotFound,
+    UnsupportedIdentifier,
+)
 from app.interfaces.quality_on_demand import (
     QoDInterface,
     SessionConflict,
@@ -25,18 +29,21 @@ from app.schemas.nef_schemas.commonData import (
     UserPlaneEvent,
 )
 
+from app.schemas.qodProvisioning import (
+    Status,
+    StatusInfo,
+)
 from app.schemas.quality_on_demand import (
     CreateSession,
-    Datacontenttype,
+    Data,
+    EventQosStatus,
     ExtendSessionDuration,
-    QosStatus,
     SessionInfo,
+    NotificationEventType,
     CloudEvent,
-    Specversion,
-    StatusInfo,
-    Type,
 )
-from app.settings import settings
+from app.schemas.subscriptions import Datacontenttype, Specversion
+from app.settings import NEFSettings
 
 _prefix_info = "qodinfo"
 _prefix_gateway_nef = "qodnef"
@@ -45,10 +52,21 @@ LOG = logging.getLogger(__name__)
 
 
 class NEFQoDInterface(QoDInterface):
-    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
+    def __init__(self, nef_settings: NEFSettings, source: str) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=nef_settings.get_base_url(), auth=nef_auth
+        )
         self.httpx_client_callback = httpx.AsyncClient()
+
+        self.af_id = nef_settings.gateway_af_id
+        self.source = source
+        self.notification_url = nef_settings.get_notification_url()
+
         self.redis = get_redis()
 
     async def create_provisioning(
@@ -56,17 +74,28 @@ class NEFQoDInterface(QoDInterface):
     ) -> SessionInfo:
         qod_id = uuid.uuid4()
 
+        response = SessionInfo(
+            sessionId=qod_id,
+            device=device,
+            applicationServer=req.applicationServer,
+            devicePorts=req.devicePorts,
+            applicationServerPorts=req.applicationServerPorts,
+            qosProfile=req.qosProfile,
+            duration=req.duration,
+            sink=req.sink,
+            startedAt=datetime.datetime.now(),
+            expiresAt=datetime.datetime.now()
+            + datetime.timedelta(seconds=req.duration),
+            qosStatus=Status.REQUESTED,
+        )
+        await self._save_subscription_info(str(qod_id), response)
+
         payload = AsSessionWithQoSSubscription(
-            supportedFeatures="0",
+            supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.nef_gateway_url}callbacks/v1/qod/{qod_id}"
+                f"{self.notification_url}/callbacks/v1/qod/{qod_id}"
             ),
-            flowInfo=[
-                FlowInfo(
-                    flowId=0,
-                    flowDescriptions=self._get_flow_description(req),
-                )
-            ],
+            flowInfo=self._get_flow_description(req),
             qosReference=req.qosProfile,
             usageThreshold=UsageThreshold(
                 duration=req.duration, totalVolume=0, downlinkVolume=0, uplinkVolume=0
@@ -82,7 +111,7 @@ class NEFQoDInterface(QoDInterface):
             payload.gpsi = f"msisdn-{phone_number}"
 
         res = await self.httpx_client.post(
-            f"/nef/api/v1/3gpp-as-session-with-qos/v1/{settings.qod_provisioning.af_id}/subscriptions",
+            f"/3gpp-as-session-with-qos/v1/{self.af_id}/subscriptions",
             content=payload.model_dump_json(exclude_unset=True),
             headers={"Content-Type": "application/json"},
         )
@@ -93,8 +122,11 @@ class NEFQoDInterface(QoDInterface):
         if res.status_code == 409:
             raise SessionConflict()
 
-        if not res.is_success:
+        if res.status_code == 400:
             raise BadRequest()
+
+        if not res.is_success:
+            raise InternalServerError()
 
         subcription_result = AsSessionWithQoSSubscription.model_validate_json(
             res.content
@@ -102,40 +134,24 @@ class NEFQoDInterface(QoDInterface):
 
         nef_sub_id = str(subcription_result.self)
 
-        response = SessionInfo(
-            sessionId=qod_id,
-            device=device,
-            applicationServer=req.applicationServer,
-            devicePorts=req.devicePorts,
-            applicationServerPorts=req.applicationServerPorts,
-            qosProfile=req.qosProfile,
-            duration=req.duration,
-            sink=req.sink,
-            startedAt=datetime.datetime.now(),
-            expiresAt=datetime.datetime.now()
-            + datetime.timedelta(seconds=req.duration),
-            qosStatus=QosStatus.REQUESTED,
-        )
-        await self._save_subscription_info(str(qod_id), response)
-
         key = f"{_prefix_gateway_nef}:{str(qod_id)}"
         await self.redis.set(key, nef_sub_id)
 
         if device.phoneNumber:
             key = f"{_prefix_device}:{device.phoneNumber}"
-            await self.redis.set(key, str(qod_id))
+            await self._save_device(key, str(qod_id))
         if device.networkAccessIdentifier:
             key = f"{_prefix_device}:{device.networkAccessIdentifier}"
-            await self.redis.set(key, str(qod_id))
+            await self._save_device(key, str(qod_id))
         if device.ipv4Address and device.ipv4Address.privateAddress:
             key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
-            await self.redis.set(key, str(qod_id))
+            await self._save_device(key, str(qod_id))
         if device.ipv4Address and device.ipv4Address.publicPort:
             key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
-            await self.redis.set(key, str(qod_id))
+            await self._save_device(key, str(qod_id))
         if device.ipv6Address:
             key = f"{_prefix_device}:{device.ipv6Address.exploded}"
-            await self.redis.set(key, str(qod_id))
+            await self._save_device(key, str(qod_id))
 
         return response
 
@@ -152,7 +168,7 @@ class NEFQoDInterface(QoDInterface):
 
         sub_info = await self.get_qod_information_by_id(id)
 
-        if sub_info.statusInfo == StatusInfo.DELETE_REQUESTED:
+        if sub_info.qosStatus == Status.UNAVAILABLE:
             return sub_info
 
         res = await self.httpx_client.delete(nef_id)
@@ -164,36 +180,39 @@ class NEFQoDInterface(QoDInterface):
             raise BadRequest()
 
         if res.status_code == 204:
-            sub_info.qosStatus = QosStatus.UNAVAILABLE
+            sub_info.qosStatus = Status.UNAVAILABLE
             sub_info.statusInfo = StatusInfo.DELETE_REQUESTED
 
         await self._save_subscription_info(id, sub_info)
 
         return sub_info
 
-    async def get_qod_information_device(self, device: Device) -> SessionInfo:
-        id = ""
+    async def get_qod_information_device(self, device: Device) -> List[SessionInfo]:
+        id = []
 
         if device.phoneNumber:
             key = f"{_prefix_device}:{device.phoneNumber}"
-            id = await self.redis.get(key)
+            id = await self._get_device(key)
         elif device.networkAccessIdentifier:
             key = f"{_prefix_device}:{device.networkAccessIdentifier}"
-            id = await self.redis.get(key)
+            id = await self._get_device(key)
         elif device.ipv4Address and device.ipv4Address.privateAddress:
             key = f"{_prefix_device}:{device.ipv4Address.privateAddress}"
-            id = await self.redis.get(key)
+            id = await self._get_device(key)
         elif device.ipv4Address and device.ipv4Address.publicPort:
             key = f"{_prefix_device}:{device.ipv4Address.publicAddress}:{device.ipv4Address.publicPort}"
-            id = await self.redis.get(key)
+            id = await self._get_device(key)
         elif device.ipv6Address:
             key = f"{_prefix_device}:{device.ipv6Address.exploded}"
-            id = await self.redis.get(key)
+            id = await self._get_device(key)
 
-        if id == "" or id is None:
+        if len(id) == 0 or id is None:
             raise ResourceNotFound()
 
-        sub_info = await self.get_qod_information_by_id(id)
+        sub_info = []
+
+        for sub_id in id:
+            sub_info.append(await self.get_qod_information_by_id(sub_id))
 
         return sub_info
 
@@ -208,16 +227,11 @@ class NEFQoDInterface(QoDInterface):
 
         payload = AsSessionWithQoSSubscription(
             self=nef_id,
-            supportedFeatures="0",
+            supportedFeatures="800820",
             notificationDestination=Link(
-                f"{settings.nef_gateway_url}callbacks/v1/qod/{id}"
+                f"{self.notification_url}/callbacks/v1/qod/{id}"
             ),
-            flowInfo=[
-                FlowInfo(
-                    flowId=0,
-                    flowDescriptions=self._get_flow_description(sub_info),
-                )
-            ],
+            flowInfo=self._get_flow_description(sub_info),
             qosReference=sub_info.qosProfile,
             usageThreshold=UsageThreshold(
                 duration=sub_info.duration + req.requestedAdditionalDuration,
@@ -235,7 +249,7 @@ class NEFQoDInterface(QoDInterface):
             phone_number = sub_info.device.phoneNumber.lstrip("+")
             payload.gpsi = f"msisdn-{phone_number}"
 
-        res = await self.httpx_client.put(
+        res = await self.httpx_client.patch(
             nef_id,
             content=payload.model_dump_json(exclude_unset=True),
             headers={"Content-Type": "application/json"},
@@ -250,22 +264,15 @@ class NEFQoDInterface(QoDInterface):
         if sub_info.expiresAt is None:
             raise ResourceNotFound()
 
-        response = SessionInfo(
-            sessionId=sub_info.sessionId,
-            device=sub_info.device,
-            applicationServer=sub_info.applicationServer,
-            devicePorts=sub_info.devicePorts,
-            applicationServerPorts=sub_info.applicationServerPorts,
-            qosProfile=sub_info.qosProfile,
-            duration=sub_info.duration + req.requestedAdditionalDuration,
-            startedAt=sub_info.startedAt,
-            expiresAt=sub_info.expiresAt
-            + datetime.timedelta(seconds=req.requestedAdditionalDuration),
-            qosStatus=QosStatus.REQUESTED,
+        sub_info.expiresAt = sub_info.expiresAt + datetime.timedelta(
+            seconds=req.requestedAdditionalDuration
         )
-        await self._save_subscription_info(id, response)
 
-        return response
+        sub_info.duration = sub_info.duration + req.requestedAdditionalDuration
+
+        await self._save_subscription_info(id, sub_info)
+
+        return sub_info
 
     async def send_callback_message(
         self, body: UserPlaneNotificationData, id: str
@@ -279,27 +286,28 @@ class NEFQoDInterface(QoDInterface):
         if status is not None:
             sub_info.qosStatus = status
 
-        if sub_info.qosStatus == QosStatus.UNAVAILABLE:
-            sub_info.statusInfo = (
-                StatusInfo.NETWORK_TERMINATED
-                if sub_info.qosStatus == QosStatus.UNAVAILABLE
-                and sub_info.statusInfo != StatusInfo.DELETE_REQUESTED
-                else sub_info.statusInfo
-            )
-
-        cloud_event = CloudEvent(
-            id=str(uuid.uuid4()),
-            source=f"{settings.gateway_url}qod-provisioning/v0.2/device-qos/{id}",
-            type=Type.org_camaraproject_quality_on_demand_v1_qos_status_changed,
-            specversion=Specversion.field_1_0,
-            datacontenttype=Datacontenttype.application_json,
-            data=sub_info.model_dump(mode="json", exclude_unset=True),
-            time=datetime.datetime.now(),
-        )
+        if sub_info.qosStatus == Status.UNAVAILABLE:
+            sub_info.statusInfo = StatusInfo.NETWORK_TERMINATED
 
         sink = sub_info.sink
         if sink is None:
-            raise ResourceNotFound()
+            return
+
+        cloud_event = CloudEvent(
+            id=str(uuid.uuid4()),
+            source=self.source,
+            type=NotificationEventType.org_camaraproject_quality_on_demand_v1_qos_status_changed,
+            specversion=Specversion.field_1_0,
+            datacontenttype=Datacontenttype.application_json,
+            data=Data(
+                sessionId=sub_info.sessionId,
+                qosStatus=EventQosStatus.AVAILABLE
+                if sub_info.qosStatus == Status.AVAILABLE
+                else EventQosStatus.UNAVAILABLE,
+                statusInfo=sub_info.statusInfo,
+            ),
+            time=datetime.datetime.now(),
+        )
 
         await self.httpx_client_callback.post(
             str(sink),
@@ -308,19 +316,17 @@ class NEFQoDInterface(QoDInterface):
 
         await self._save_subscription_info(id, sub_info)
 
-    def _get_qod_status(
-        self, nef_response: UserPlaneNotificationData
-    ) -> QosStatus | None:
+    def _get_qod_status(self, nef_response: UserPlaneNotificationData) -> Status | None:
         status = None
         for report in nef_response.eventReports:
             if report.event == UserPlaneEvent.QOS_GUARANTEED:
-                status = QosStatus.AVAILABLE
+                status = Status.AVAILABLE
             elif report.event == UserPlaneEvent.FAILED_RESOURCES_ALLOCATION:
-                status = QosStatus.UNAVAILABLE
+                status = Status.UNAVAILABLE
             elif report.event == UserPlaneEvent.QOS_NOT_GUARANTEED:
-                status = QosStatus.REQUESTED
+                status = Status.REQUESTED
             elif report.event == UserPlaneEvent.SUCCESSFUL_RESOURCES_ALLOCATION:
-                status = QosStatus.AVAILABLE
+                status = Status.AVAILABLE
         return status
 
     async def _save_subscription_info(self, id: str, data: SessionInfo) -> None:
@@ -330,30 +336,94 @@ class NEFQoDInterface(QoDInterface):
             key, data.model_dump_json(exclude_unset=True, by_alias=True)
         )
 
-    def _get_flow_description(self, req: CreateSession | SessionInfo) -> List[str]:
-        flow_description = []
-        if req.applicationServerPorts is None or req.devicePorts is None:
-            raise ResourceNotFound()
+    def _get_flow_description(self, req: CreateSession | SessionInfo) -> List[FlowInfo]:
+        flow = []
 
-        if req.applicationServerPorts.ports is None or req.devicePorts.ports is None:
-            raise ResourceNotFound()
+        device_ports = ""
+        device_ports_range = ""
+        if req.devicePorts:
+            if req.devicePorts.ports:
+                device_ports = str(req.devicePorts.ports[0])
+                for port in req.devicePorts.ports[1:]:
+                    device_ports += f",{port}"
+            if req.devicePorts.ranges:
+                if device_ports:
+                    device_ports_range += ","
+                device_ports_range += (
+                    f"{req.devicePorts.ranges[0].from_}-{req.devicePorts.ranges[0].to}"
+                )
+                for ranges in req.devicePorts.ranges[1:]:
+                    device_ports_range += f",{ranges.from_}-{ranges.to}"
+
+        server_ports = ""
+        server_ports_range = ""
+
+        if req.applicationServerPorts:
+            if req.applicationServerPorts.ports:
+                server_ports = str(req.applicationServerPorts.ports[0])
+                for port in req.applicationServerPorts.ports[1:]:
+                    server_ports += f",{port}"
+            if req.applicationServerPorts.ranges:
+                if server_ports:
+                    server_ports_range += ","
+                server_ports_range += f"{req.applicationServerPorts.ranges[0].from_}-{req.applicationServerPorts.ranges[0].to}"
+                for ranges in req.applicationServerPorts.ranges[1:]:
+                    server_ports_range += f",{ranges.from_}-{ranges.to}"
+
+        dev_ips = []
+        app_ips = []
 
         if req.device and req.device.ipv4Address is not None:
-            flow_description.append(
-                f"permit in ip from {req.device.ipv4Address.publicAddress} {req.devicePorts.ports[0]} to {req.applicationServer.ipv4Address} {req.applicationServerPorts.ports[0]}"
-            )
-            flow_description.append(
-                f"permit in ip from {req.applicationServer.ipv4Address} {req.applicationServerPorts.ports[0]} to {req.device.ipv4Address.publicAddress} {req.devicePorts.ports[0]}"
-            )
+            dev_ips.append(str(req.device.ipv4Address.publicAddress))
+            app_ips.append(req.applicationServer.ipv4Address)
 
-        elif req.device and req.device.ipv6Address:
-            flow_description.append(
-                f"permit in ip from {req.device.ipv6Address.exploded} to {req.applicationServer.ipv6Address}"
-            )
-            flow_description.append(
-                f"permit in ip from {req.applicationServer.ipv6Address} to {req.device.ipv6Address.exploded}"
-            )
+        if req.device and req.device.ipv6Address:
+            dev_ips.append(req.device.ipv6Address.exploded)
+            app_ips.append(req.applicationServer.ipv6Address)
 
-        else:
+        if len(dev_ips) == 0:
             raise UnsupportedIdentifier()
-        return flow_description
+
+        for i, dev_ip in enumerate(dev_ips):
+            src_to_dst = f"permit in ip from {dev_ip} "
+            if device_ports != "":
+                src_to_dst += f"{device_ports}"
+            if device_ports_range != "":
+                src_to_dst += f"{device_ports_range}"
+            src_to_dst += f" to {app_ips[i]} "
+            if server_ports != "":
+                src_to_dst += f"{server_ports}"
+            if server_ports_range != "":
+                src_to_dst += f"{server_ports_range}"
+
+            dst_to_src = f"permit in ip from {app_ips[i]} "
+            if server_ports != "":
+                dst_to_src += f"{server_ports}"
+            if server_ports_range != "":
+                dst_to_src += f"{server_ports_range}"
+            dst_to_src += f" to {dev_ip} "
+            if device_ports != "":
+                dst_to_src += f"{device_ports}"
+            if device_ports_range != "":
+                dst_to_src += f"{device_ports_range}"
+
+            flow.append(
+                FlowInfo(
+                    flowId=i,
+                    flowDescriptions=[src_to_dst, dst_to_src],
+                )
+            )
+
+        return flow
+
+    async def _save_device(self, key: str, id: str) -> None:
+        res = self.redis.rpush(key, id)
+        if isinstance(res, Awaitable):
+            res = await res
+
+    async def _get_device(self, key: str) -> List[str]:
+        res = self.redis.lrange(key, 0, -1)
+        if isinstance(res, Awaitable):
+            res = await res
+
+        return res
