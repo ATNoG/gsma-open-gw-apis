@@ -1,0 +1,98 @@
+replicaCount: 1
+
+image:
+  repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/gateway
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  rules: []
+  tls: []
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+extraVolumes: []
+extraVolumeMounts: []
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+nefSecret: {}
+#  name: nef-emulator-creds
+#  usernameKey: username
+#  passwordKey: password
+
+gatewayConfig:
+  gateway_public_url: "http://localhost:8000"
+
+  nef:
+    url: "http://localhost:8888"
+    base_path: "/nef/api/v1/"
+
+    gateway_af_id: "camara"
+
+    username: "admin@my-email.com"
+    password: "pass"
+
+  sms_otp:
+    sms_backend: "mock"
+    otp_backend: "redis"
+
+  qos_profiles:
+    backend: "nef"
+
+  location:
+    backend: "nef"
+
+  qod_provisioning:
+    backend: "nef"
+
+  geofencing:
+    backend: "nef"
+
+  reachability_status:
+    backend: "nef"
+
+redis:
+  architecture: standalone
+  master:
+    persistence:
+      size: 1Gi

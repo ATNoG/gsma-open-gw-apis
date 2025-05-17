@@ -8,7 +8,11 @@ from app.settings import settings
 # This function isn't typed
 # mypy: ignore-errors
 _client: redis.Redis = redis.from_url(
-    settings.redis_url, encoding="utf-8", decode_responses=True
+    str(settings.redis.url),
+    encoding="utf-8",
+    decode_responses=True,
+    username=settings.redis.username,
+    password=settings.redis.password,
 )
 
 

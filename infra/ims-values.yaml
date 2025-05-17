@@ -1,0 +1,42 @@
+imagePullSecrets:
+  - name: regcred
+
+pyhss:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+scscf:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+icscf:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+pcscf:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+smsc:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+rtpengine:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+dns:
+  image:
+    pullPolicy: Always
+    tag: "latest"
+
+dnsPatcher:
+  image:
+    pullPolicy: Always
+    tag: "latest"

@@ -7,7 +7,7 @@ from app.drivers.qodProvisioning import QodProvisioningInterfaceDep
 router = APIRouter()
 
 
-@router.post("/device-qos", response_model_exclude_none=True)
+@router.post("/device-qos", response_model_exclude_unset=True)
 async def create_provisioning(
     req: TriggerProvisioning,
     qod_provisioning_interface: QodProvisioningInterfaceDep,

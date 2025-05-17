@@ -8,7 +8,7 @@ from app.interfaces.qodProvisioning import QoDProvisioningInterface
 qod_provisioning_interface: QoDProvisioningInterface
 
 
-match settings.qod_provisioning.qod_provisioning_backend:
+match settings.qod_provisioning.backend:
     case QodProvisioningBackend.Nef:
         from .nef import nef_qod_provisioning_interface
 

@@ -11,7 +11,7 @@ from app.schemas.subscriptions import Protocol
 router = APIRouter()
 
 
-@router.post("/subscriptions")
+@router.post("/subscriptions", response_model_exclude_unset=True)
 async def post_subscriptions(
     req: Annotated[SubscriptionRequest, Body()],
     geofencing_subscription_interface: GeofencingSubscriptionInterfaceDep,

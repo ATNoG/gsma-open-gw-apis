@@ -1,15 +1,16 @@
-from collections.abc import Awaitable, Callable
 from typing import Any
+from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.requests import Request
 from fastapi.responses import Response
 
-from app import drivers, endpoints
+from app import drivers, endpoints, probes
 from app.exception_handlers import install_exception_handlers
 
 app = FastAPI()
+app.include_router(probes.router)
 app.include_router(endpoints.router)
 app.include_router(drivers.router, include_in_schema=False)
 

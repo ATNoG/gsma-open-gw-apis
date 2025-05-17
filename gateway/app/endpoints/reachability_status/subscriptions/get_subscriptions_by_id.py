@@ -6,7 +6,7 @@ from app.drivers.reachability_status import ReachabilityStatusInterfaceDep
 router = APIRouter()
 
 
-@router.get("/subscriptions/{subscriptionId}")
+@router.get("/subscriptions/{subscriptionId}", response_model_exclude_unset=True)
 async def get_subscriptions_by_id(
     subscriptionId: str,
     reachability_status_subscription_interface: ReachabilityStatusInterfaceDep,

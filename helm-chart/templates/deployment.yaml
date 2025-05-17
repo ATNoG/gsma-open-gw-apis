@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gsma-open-gateway.fullname" . }}
+  labels:
+    {{- include "gsma-open-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gsma-open-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "gsma-open-gateway.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "gsma-open-gateway.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: GATEWAY_REDIS__URL
+              value: "redis://{{ printf "%s-headless" (include "common.names.fullname" .Subcharts.redis) }}"
+
+            - name: GATEWAY_REDIS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "redis.secretName" .Subcharts.redis }}
+                  key: {{ template "redis.secretPasswordKey" .Subcharts.redis }}
+
+            {{- if not (hasKey .Values.gatewayConfig.nef "gateway_notification_url") }}
+            - name: GATEWAY_NEF__GATEWAY_NOTIFICATION_URL
+              value: "http://{{ include "gsma-open-gateway.fullname" . }}.{{ .Release.Namespace }}.svc"
+            {{- end }}
+
+            {{- if .Values.nefSecret.name }}
+            - name: GATEWAY_NEF__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nefSecret.name }}
+                  key: {{ .Values.nefSecret.passwordKey }}
+
+            {{- if .Values.nefSecret.usernameKey }}
+            - name: GATEWAY_NEF__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nefSecret.name }}
+                  key: {{ .Values.nefSecret.usernameKey }}
+            {{- end }}
+
+            {{- end }}
+              
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              subPath: "config.toml"
+              mountPath: "/app/config.toml"
+              readOnly: true
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "gsma-open-gateway.fullname" . }}-config
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

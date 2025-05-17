@@ -11,7 +11,7 @@ from app.drivers.reachability_status import ReachabilityStatusInterfaceDep
 router = APIRouter()
 
 
-@router.post("/subscriptions")
+@router.post("/subscriptions", response_model_exclude_unset=True)
 async def post_subscriptions(
     req: Annotated[SubscriptionRequest, Body()],
     reachability_status_subscription_interface: ReachabilityStatusInterfaceDep,

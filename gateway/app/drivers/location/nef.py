@@ -4,19 +4,24 @@ from typing import Optional
 
 import httpx
 from fastapi import HTTPException
-from pydantic import AnyHttpUrl
 
 from app.drivers.nef_auth import NEFAuth
 from app.interfaces.location import LocationInterface
 from app.schemas.common import Point
 from app.schemas.device import Device
 from app.schemas.location import Circle, Location, Polygon
+from app.settings import NEFSettings
 
 
 class NEFDriver(LocationInterface):
-    def __init__(self, nef_url: AnyHttpUrl, nef_auth: NEFAuth) -> None:
+    def __init__(self, nef_settings: NEFSettings) -> None:
         super().__init__()
-        self.httpx_client = httpx.AsyncClient(base_url=str(nef_url), auth=nef_auth)
+        nef_auth = NEFAuth(
+            nef_settings.url, nef_settings.username, nef_settings.password
+        )
+        self.httpx_client = httpx.AsyncClient(
+            base_url=nef_settings.get_base_url(), auth=nef_auth
+        )
 
     async def retrieve_location(
         self, device: Device, max_age: Optional[int], max_surface: Optional[int]
@@ -37,7 +42,7 @@ class NEFDriver(LocationInterface):
         elif device.networkAccessIdentifier is not None:
             data["externalId"] = device.networkAccessIdentifier
 
-        url = "/nef/api/v1/3gpp-monitoring-event/v1/myNetApp/subscriptions"
+        url = "/3gpp-monitoring-event/v1/myNetApp/subscriptions"
 
         logging.debug("Querying the NEF Emulator at %s with data %s", url, data)
 

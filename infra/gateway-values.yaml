@@ -1,0 +1,29 @@
+imagePullSecrets:
+  - name: regcred
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+ingress:
+  enabled: true
+  rules:
+    - paths:
+        - path: /
+          pathType: Prefix
+
+nefSecret:
+  name: nef-emulator-creds
+  usernameKey: username
+  passwordKey: password
+
+gatewayConfig:
+  gateway_public_url: "http://10.255.28.143"
+
+  nef:
+    url: "http://nef-emulator-backend.nef-emulator.svc:8888"
+
+  sms_otp:
+    sms_backend: "smsc"
+    smsc_url: "http://ims-smsc.default.svc:7090"
+    sender_id: "GATEWAY"
