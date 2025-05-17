@@ -3,7 +3,7 @@ import logging
 from enum import Enum
 from typing import Annotated, Any, Literal, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt
+from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt, RedisDsn
 from pydantic.fields import FieldInfo
 from pydantic_settings import (
     BaseSettings,
@@ -191,6 +191,12 @@ class ReachabilityStatusSettings(BaseModel):
     nef: NEFSettings
 
 
+class RedisSettings(BaseModel):
+    url: RedisDsn = RedisDsn("redis://localhost:6379")
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file="config.toml",
@@ -200,7 +206,8 @@ class Settings(BaseSettings):
     )
 
     log_level: LogLevel = "INFO"
-    redis_url: str = "redis://localhost:6379"
+
+    redis: RedisSettings
 
     gateway_public_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
 
