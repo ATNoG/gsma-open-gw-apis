@@ -33,6 +33,20 @@ class ResourceNotFound(ApiException):
         )
 
 
+class BadRequest(ApiException):
+    def __init__(self) -> None:
+        super().__init__(
+            status=400,
+            code="INVALID_ARGUMENT",
+            message="Client specified an invalid argument, request body or query param.",
+        )
+
+
+class InternalServerError(ApiException):
+    def __init__(self) -> None:
+        super().__init__()
+
+
 class UnsupportedIdentifier(ApiException):
     def __init__(self) -> None:
         super().__init__(

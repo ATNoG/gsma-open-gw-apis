@@ -171,6 +171,16 @@ class ProvisioningSettings(BaseModel):
     nef: NEFSettings
 
 
+class QodBackend(str, Enum):
+    Nef = "nef"
+
+
+class QodSettings(BaseModel):
+    backend: QodBackend
+
+    nef: NEFSettings
+
+
 class GeofencingBackend(Enum):
     NEF = "nef"
 
@@ -217,6 +227,7 @@ class Settings(BaseSettings):
     qos_profiles: QoSProfilesSettings
     location: LocationSettings
     qod_provisioning: ProvisioningSettings
+    qod: QodSettings
     reachability_status: ReachabilityStatusSettings
     geofencing: GeofencingSettings
 

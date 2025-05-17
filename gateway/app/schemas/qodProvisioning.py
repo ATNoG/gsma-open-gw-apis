@@ -32,6 +32,7 @@ class NotificationEventType(str, Enum):
 
 
 class StatusInfo(Enum):
+    DURATION_EXPIRED = "DURATION_EXPIRED"
     NETWORK_TERMINATED = "NETWORK_TERMINATED"
     DELETE_REQUESTED = "DELETE_REQUESTED"
 

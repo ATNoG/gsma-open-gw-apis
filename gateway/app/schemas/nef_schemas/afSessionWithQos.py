@@ -10,6 +10,7 @@ from .commonData import (
     Link,
     Gpsi,
     FlowInfo,
+    UsageThreshold,
     UserPlaneEvent,
 )
 
@@ -28,6 +29,7 @@ class AsSessionWithQoSSubscription(BaseModel):
     ] = None
     ueIpv4Addr: Optional[IPv4Address] = None
     ueIpv6Addr: Optional[IPv6Address] = None
+    usageThreshold: Optional[UsageThreshold] = None
 
 
 class UserPlaneEventReport(BaseModel):
