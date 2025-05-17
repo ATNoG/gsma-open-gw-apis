@@ -30,4 +30,10 @@ On this milestone, we were required to present a brief overview of our project, 
 
 - [Presentation M2](/documents/Milestone2%20-%20GSMA%20Open%20Gateway.pdf)
 
-### Feedback and Improvements
+## Milestone 3
+
+On this milestone, we were tasked in presenting some of the prior information, such as the context of the project and the architecture, due to the previous checkpoint we also presented the calendar changes we had to make, because of some problems we were facing. However, the main point of this milestone was presenting a demonstration of our work until that point, where we showed our working IMS, SMS One Time Passwords(OTP) and finally the Location APIs working.
+
+### Milestone's File
+
+- [Presentation M3](/documents/Milestone3.pdf)
