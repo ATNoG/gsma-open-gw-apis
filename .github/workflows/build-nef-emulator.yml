@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          context: "https://github.com/ATNoG/NEF_emulator.git#763109840d10d1606c33068c0e0136ee60cf44fe:backend"
+          context: "https://github.com/ATNoG/NEF_emulator.git#7a0fe17788e68bded5a2dceccceeccc5ce4cda0c:backend"
           tags: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-backend
           file: "Dockerfile.backend"
           build-args: |
@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          context: "https://github.com/ATNoG/NEF_emulator.git#763109840d10d1606c33068c0e0136ee60cf44fe:backend"
+          context: "https://github.com/ATNoG/NEF_emulator.git#7a0fe17788e68bded5a2dceccceeccc5ce4cda0c:backend"
           tags: atnog-harbor.av.it.pt/gsma-open-gw-apis/nef-emulator-report
           file: "Dockerfile.report"
           build-args: |
@@ -66,7 +66,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "ATNoG/NEF_emulator"
-          ref: "763109840d10d1606c33068c0e0136ee60cf44fe"
+          ref: "7a0fe17788e68bded5a2dceccceeccc5ce4cda0c"
           fetch-depth: 0
 
       - name: Install Helm
