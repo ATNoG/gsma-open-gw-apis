@@ -4,16 +4,9 @@ from typing import Annotated, Optional, List, Union
 
 from pydantic import Field, BaseModel, TypeAdapter
 
-from .device import Device
+from app.schemas.device import Device
+from app.schemas.common import LastStatusTime
 import app.schemas.subscriptions as subscriptions
-
-LastStatusTime = Annotated[
-    datetime,
-    Field(
-        description="Last time that the associated device reachability status was updated",
-        examples=["2024-02-20T10:41:38.657Z"],
-    ),
-]
 
 
 class ConnectivityType(Enum):

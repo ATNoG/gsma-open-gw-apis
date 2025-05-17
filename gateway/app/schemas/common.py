@@ -1,4 +1,5 @@
 from typing import Annotated
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -46,3 +47,12 @@ Longitude = Annotated[
 class Point(BaseModel):
     latitude: Latitude
     longitude: Longitude
+
+
+LastStatusTime = Annotated[
+    datetime,
+    Field(
+        description="Last time that the associated device reachability status was updated",
+        examples=["2024-02-20T10:41:38.657Z"],
+    ),
+]
