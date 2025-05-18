@@ -1,12 +1,12 @@
-name: Build Helm Chart
+name: Build Gateway Helm Chart
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/build-helm-chart.yml"
-      - "helm-chart/**"
+      - ".github/workflows/build-gateway-chart.yml"
+      - "charts/gateway/**"
 
 jobs:
   helm:
@@ -27,5 +27,5 @@ jobs:
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
           echo "$HARBOR_PASSWORD" | helm registry login atnog-harbor.av.it.pt -u "$HARBOR_USERNAME" --password-stdin
-          helm package -u helm-chart/
+          helm package -u charts/gateway/
           helm push gsma-open-gateway-*.tgz oci://atnog-harbor.av.it.pt/gsma-open-gw-apis

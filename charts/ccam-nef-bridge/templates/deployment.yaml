@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ccam-nef-bridge.fullname" . }}
+  labels:
+    {{- include "ccam-nef-bridge.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ccam-nef-bridge.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ccam-nef-bridge.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ccam-nef-bridge.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if .Values.nefSecret.name }}
+            - name: CCAM_BRIDGE_NEF__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nefSecret.name }}
+                  key: {{ .Values.nefSecret.passwordKey }}
+
+            {{- if .Values.nefSecret.usernameKey }}
+            - name: CCAM_BRIDGE_NEF__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.nefSecret.name }}
+                  key: {{ .Values.nefSecret.usernameKey }}
+            {{- end }}
+            {{- end }}
+              
+            {{- if .Values.ccamSecret.name }}
+            - name: CCAM_BRIDGE_BROKER__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ccamSecret.name }}
+                  key: {{ .Values.ccamSecret.passwordKey }}
+
+            {{- if .Values.ccamSecret.usernameKey }}
+            - name: CCAM_BRIDGE_BROKER__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ccamSecret.name }}
+                  key: {{ .Values.ccamSecret.usernameKey }}
+            {{- end }}
+            {{- end }}
+
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              subPath: "config.toml"
+              mountPath: "/app/config.toml"
+              readOnly: true
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "ccam-nef-bridge.fullname" . }}-config
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

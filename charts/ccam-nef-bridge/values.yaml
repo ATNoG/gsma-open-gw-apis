@@ -1,0 +1,40 @@
+image:
+  repository: atnog-harbor.av.it.pt/gsma-open-gw-apis/ccam-nef-bridge-app
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+extraVolumes: []
+extraVolumeMounts: []
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+ccamSecret: {}
+#  name: ccam-creds
+#  usernameKey: username
+#  passwordKey: password
+
+nefSecret: {}
+#  name: nef-emulator-creds
+#  usernameKey: username
+#  passwordKey: password
+
+bridgeConfig:
+  vehicle_supis: {}

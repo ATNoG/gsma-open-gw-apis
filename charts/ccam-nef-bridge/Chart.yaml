@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ccam-nef-bridge
+version: 0.1.0
+description: Helm chart for deploying the CCAM to NEF bridge
+type: application
+appVersion: "0.1.0"
