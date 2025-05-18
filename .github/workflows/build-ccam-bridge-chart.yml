@@ -1,0 +1,31 @@
+name: Build CCAM NEF Bridge Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build-ccam-bridge-chart.yml"
+      - "charts/ccam-nef-bridge/**"
+
+jobs:
+  helm:
+    name: Build Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+
+      - name: Build and Publish Helm Chart
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          echo "$HARBOR_PASSWORD" | helm registry login atnog-harbor.av.it.pt -u "$HARBOR_USERNAME" --password-stdin
+          helm package -u charts/ccam-nef-bridge/
+          helm push ccam-nef-bridge-*.tgz oci://atnog-harbor.av.it.pt/ccam-nef-bridge

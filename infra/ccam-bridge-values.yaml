@@ -1,0 +1,23 @@
+imagePullSecrets:
+  - name: regcred
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+ccamSecret:
+  name: ccam-creds
+  usernameKey: username
+  passwordKey: password
+
+nefSecret:
+  name: nef-emulator-creds
+  usernameKey: username
+  passwordKey: password
+
+bridgeConfig:
+  nef:
+    url: "http://nef-emulator-backend.nef-emulator.svc:8888"
+
+  vehicle_supis:
+    22: "202010000000001"
