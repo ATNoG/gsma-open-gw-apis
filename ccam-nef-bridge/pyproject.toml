@@ -1,0 +1,29 @@
+[project]
+name = "ccam-nef-bridge"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "paho-mqtt>=2.1.0",
+    "pydantic>=2.11.4",
+    "pydantic-settings>=2.9.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "ruff>=0.11.10",
+]
+
+[tool.mypy]
+strict = true
+plugins = ['pydantic.mypy']
+
+[[tool.mypy.overrides]]
+module = ["geopy", "geopy.distance"]
+ignore_missing_imports = true
+
+[tool.ruff.lint]
+extend-select = ["T20"]
