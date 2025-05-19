@@ -137,7 +137,9 @@ function App() {
           <CircleCheckBig
             className={cn("inline-block text-green-600", {
               "opacity-0":
-                isPending || verifyLocationData?.verificationResult === "FALSE",
+                verifyLocationData === undefined ||
+                isPending ||
+                verifyLocationData?.verificationResult === "FALSE",
             })}
           />
           <LoaderCircle
@@ -148,7 +150,9 @@ function App() {
           <CircleX
             className={cn("absolute inset-0 text-red-600", {
               "opacity-0":
-                isPending || verifyLocationData?.verificationResult === "TRUE",
+                verifyLocationData === undefined ||
+                isPending ||
+                verifyLocationData.verificationResult === "TRUE",
             })}
           />
         </span>
