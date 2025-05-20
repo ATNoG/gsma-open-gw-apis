@@ -3,20 +3,35 @@ from fastapi import Depends
 from typing import Annotated
 
 from app.settings import RoamingStatusBackend, settings
-from app.interfaces.roaming_status import RoamingStatusInterface
+from app.interfaces.roaming_status import (
+    RoamingStatusInterface,
+    RoamingStatusSubscriptionInterface,
+)
 
 roaming_status_interface: RoamingStatusInterface
+roaming_status_subscription_interface: RoamingStatusSubscriptionInterface
 match settings.roaming_status.backend:
     case RoamingStatusBackend.Nef:
         from .nef import nef_roaming_status_interface
 
         roaming_status_interface = nef_roaming_status_interface
+        roaming_status_subscription_interface = nef_roaming_status_interface
 
 
 async def get_roaming_status_driver() -> RoamingStatusInterface:
     return roaming_status_interface
 
 
+async def get_roaming_status_subscription_driver() -> (
+    RoamingStatusSubscriptionInterface
+):
+    return roaming_status_subscription_interface
+
+
 RoamingStatusInterfaceDep = Annotated[
     RoamingStatusInterface, Depends(get_roaming_status_driver)
+]
+
+RoamingStatusSubscriptionInterfaceDep = Annotated[
+    RoamingStatusSubscriptionInterface, Depends(get_roaming_status_subscription_driver)
 ]
