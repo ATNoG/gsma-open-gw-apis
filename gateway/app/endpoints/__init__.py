@@ -36,3 +36,6 @@ router.include_router(
     reachability_status.subscriptions_router, tags=["Device Reachability Status"]
 )
 router.include_router(roaming_status.router, tags=["Device Roaming Status"])
+router.include_router(
+    roaming_status.subscriptions_router, tags=["Device Roaming Status"]
+)

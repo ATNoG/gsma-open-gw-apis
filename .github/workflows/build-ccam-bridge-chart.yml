@@ -28,4 +28,4 @@ jobs:
         run: |
           echo "$HARBOR_PASSWORD" | helm registry login atnog-harbor.av.it.pt -u "$HARBOR_USERNAME" --password-stdin
           helm package -u charts/ccam-nef-bridge/
-          helm push ccam-nef-bridge-*.tgz oci://atnog-harbor.av.it.pt/ccam-nef-bridge
+          helm push ccam-nef-bridge-*.tgz oci://atnog-harbor.av.it.pt/gsma-open-gw-apis

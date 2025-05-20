@@ -5,7 +5,10 @@ from app.schemas.roaming_status import RoamingStatusRequest, RoamingStatusRespon
 from app.drivers.roaming_status import RoamingStatusInterfaceDep
 from app.utils.mcc_to_country_code import get_country_names
 
+from .subscriptions import router as sub_router_internal
+
 router = APIRouter(prefix="/device-roaming-status/v1")
+subscriptions_router = sub_router_internal
 
 
 @router.post(

@@ -88,7 +88,7 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
         )
 
         for sub_type in subscription.types:
-            type: NotificationEventType
+            notif_type: NotificationEventType
             data: CloudEventData
 
             if SubscriptionEventType.v0_roaming_status == sub_type:
@@ -98,30 +98,44 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
                 ):
                     continue
 
-                type = NotificationEventType.v0_roaming_status
+                notif_type = NotificationEventType.v0_roaming_status
                 data = RoamingStatus(
                     device=subscription.config.subscriptionDetail.device,
                     roaming=report.roamingStatus,
                     subscriptionId=subscription.id,
                 )
             elif SubscriptionEventType.v0_roaming_on == sub_type:
-                if not isinstance(last_state, UnknownRoamingState) and (
-                    last_state is not None or not report.roamingStatus
+                if not (
+                    # If this is an initial event and the device is roaming we want to send a notification
+                    (
+                        isinstance(last_state, UnknownRoamingState)
+                        and subscription.config.initialEvent
+                        and report.roamingStatus
+                    )
+                    # Otherwise we only send it when the previous state was not roaming and now it's roaming
+                    or (last_state is None and report.roamingStatus)
                 ):
                     continue
 
-                type = NotificationEventType.v0_roaming_on
+                notif_type = NotificationEventType.v0_roaming_on
                 data = BasicDeviceEventData(
                     device=subscription.config.subscriptionDetail.device,
                     subscriptionId=subscription.id,
                 )
             elif SubscriptionEventType.v0_roaming_off == sub_type:
-                if not isinstance(last_state, UnknownRoamingState) and (
-                    last_state is None or report.roamingStatus
+                if not (
+                    # If this is an initial event and the device is not roaming we want to send a notification
+                    (
+                        isinstance(last_state, UnknownRoamingState)
+                        and subscription.config.initialEvent
+                        and not report.roamingStatus
+                    )
+                    # Otherwise we only send it when the previous state was roaming and it isn't roaming
+                    or (type(last_state) is int and not report.roamingStatus)
                 ):
                     continue
 
-                type = NotificationEventType.v0_roaming_off
+                notif_type = NotificationEventType.v0_roaming_off
                 data = BasicDeviceEventData(
                     device=subscription.config.subscriptionDetail.device,
                     subscriptionId=subscription.id,
@@ -139,7 +153,7 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
                 after_countries = get_country_names(report.plmnId.mcc)
 
                 if before_countries != after_countries:
-                    type = NotificationEventType.v0_roaming_change_country
+                    notif_type = NotificationEventType.v0_roaming_change_country
                     data = RoamingChangeCountry(
                         device=subscription.config.subscriptionDetail.device,
                         subscriptionId=subscription.id,
@@ -154,7 +168,7 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
 
             await nef_roaming_status_interface.send_report(
                 subscription,
-                type,
+                notif_type,
                 data,
                 nef_subscription_url=str(notification.subscription),
             )
