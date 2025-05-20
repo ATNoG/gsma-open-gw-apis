@@ -235,9 +235,32 @@ class CloudEvent[NotificationEventType: str, CloudEventData](BaseModel):
     time: DateTime
 
 
-class BaseSubscription[SubscriptionEventType: str, SubscriptionConfig](BaseModel):
-    protocol: Annotated[Protocol, Field(frozen=True)]
+class SubscriptionConfig[SubscriptionDetails](BaseModel):
+    subscriptionDetail: SubscriptionDetails
+    subscriptionExpireTime: Annotated[
+        Optional[datetime],
+        Field(
+            description="The subscription expiration time (in date-time format) requested by the API consumer. Up to API project decision to keep it.",
+            examples=["2023-01-17T13:18:23.682Z"],
+        ),
+    ] = None
+    subscriptionMaxEvents: Annotated[
+        Optional[int],
+        Field(
+            ge=1,
+            description="Identifies the maximum number of event reports to be generated (>=1) requested by the API consumer - Once this number is reached, the subscription ends. Up to API project decision to keep it.",
+            examples=[5],
+        ),
+    ] = None
+    initialEvent: Annotated[
+        Optional[bool],
+        Field(
+            description="Set to `true` by API consumer if consumer wants to get an event as soon as the subscription is created and current situation reflects event request.Up to API project decision to keep it.\nExample: Consumer request Roaming event. If consumer sets initialEvent to true and device is in roaming situation, an event is triggered\nUp to API project decision to keep it.",
+        ),
+    ] = None
 
+
+class BaseSubscription[SubscriptionEventType: str, SubscriptionDetails](BaseModel):
     sink: Annotated[
         str,
         Field(
@@ -255,7 +278,7 @@ class BaseSubscription[SubscriptionEventType: str, SubscriptionConfig](BaseModel
         ),
     ]
 
-    config: SubscriptionConfig
+    config: SubscriptionConfig[SubscriptionDetails]
 
     id: SubscriptionId
 
@@ -283,57 +306,56 @@ class BaseSubscription[SubscriptionEventType: str, SubscriptionConfig](BaseModel
     ] = None
 
 
-class HTTPSubscriptionResponse[SubscriptionEventType: str, SubscriptionConfig](
-    BaseSubscription[SubscriptionEventType, SubscriptionConfig]
+class HTTPSubscriptionResponse[SubscriptionEventType: str, SubscriptionDetail](
+    BaseSubscription[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.HTTP]
     protocolSettings: Optional[HTTPSettings] = None
 
 
-class MQTTSubscriptionResponse[SubscriptionEventType: str, SubscriptionConfig](
-    BaseSubscription[SubscriptionEventType, SubscriptionConfig]
+class MQTTSubscriptionResponse[SubscriptionEventType: str, SubscriptionDetail](
+    BaseSubscription[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Union[Literal[Protocol.MQTT3], Literal[Protocol.MQTT5]]
     protocolSettings: Optional[MQTTSettings] = None
 
 
-class AMQPSubscriptionResponse[SubscriptionEventType: str, SubscriptionConfig](
-    BaseSubscription[SubscriptionEventType, SubscriptionConfig]
+class AMQPSubscriptionResponse[SubscriptionEventType: str, SubscriptionDetail](
+    BaseSubscription[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.AMQP]
     protocolSettings: Optional[AMQPSettings] = None
 
 
-class ApacheKafkaSubscriptionResponse[SubscriptionEventType: str, SubscriptionConfig](
-    BaseSubscription[SubscriptionEventType, SubscriptionConfig]
+class ApacheKafkaSubscriptionResponse[SubscriptionEventType: str, SubscriptionDetail](
+    BaseSubscription[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.KAFKA]
     protocolSettings: Optional[ApacheKafkaSettings] = None
 
 
-class NATSSubscriptionResponse[SubscriptionEventType: str, SubscriptionConfig](
-    BaseSubscription[SubscriptionEventType, SubscriptionConfig]
+class NATSSubscriptionResponse[SubscriptionEventType: str, SubscriptionDetail](
+    BaseSubscription[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.NATS]
     protocolSettings: Optional[NATSSettings] = None
 
 
-type Subscription[SubscriptionEventType: str, SubscriptionConfig] = Annotated[
+type Subscription[SubscriptionEventType: str, SubscriptionDetail] = Annotated[
     Union[
-        HTTPSubscriptionResponse[SubscriptionEventType, SubscriptionConfig],
-        MQTTSubscriptionResponse[SubscriptionEventType, SubscriptionConfig],
-        AMQPSubscriptionResponse[SubscriptionEventType, SubscriptionConfig],
-        ApacheKafkaSubscriptionResponse[SubscriptionEventType, SubscriptionConfig],
-        NATSSubscriptionResponse[SubscriptionEventType, SubscriptionConfig],
+        HTTPSubscriptionResponse[SubscriptionEventType, SubscriptionDetail],
+        MQTTSubscriptionResponse[SubscriptionEventType, SubscriptionDetail],
+        AMQPSubscriptionResponse[SubscriptionEventType, SubscriptionDetail],
+        ApacheKafkaSubscriptionResponse[SubscriptionEventType, SubscriptionDetail],
+        NATSSubscriptionResponse[SubscriptionEventType, SubscriptionDetail],
     ],
     Field(discriminator="protocol"),
 ]
 
 
-class SubscriptionRequestBase[SubscriptionEventType: str, SubscriptionConfig](
+class SubscriptionRequestBase[SubscriptionEventType: str, SubscriptionDetail](
     BaseModel
 ):
-    protocol: Annotated[Protocol, Field(frozen=True)]
     sink: Annotated[
         str,
         Field(
@@ -350,51 +372,51 @@ class SubscriptionRequestBase[SubscriptionEventType: str, SubscriptionConfig](
             min_length=1,
         ),
     ]
-    config: SubscriptionConfig
+    config: SubscriptionConfig[SubscriptionDetail]
 
 
-class HTTPSubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig](
-    SubscriptionRequestBase[SubscriptionEventType, SubscriptionConfig]
+class HTTPSubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail](
+    SubscriptionRequestBase[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.HTTP]
     protocolSettings: Optional[HTTPSettings] = None
 
 
-class MQTTSubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig](
-    SubscriptionRequestBase[SubscriptionEventType, SubscriptionConfig]
+class MQTTSubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail](
+    SubscriptionRequestBase[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Union[Literal[Protocol.MQTT3], Literal[Protocol.MQTT5]]
     protocolSettings: Optional[MQTTSettings] = None
 
 
-class AMQPSubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig](
-    SubscriptionRequestBase[SubscriptionEventType, SubscriptionConfig]
+class AMQPSubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail](
+    SubscriptionRequestBase[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.AMQP]
     protocolSettings: Optional[AMQPSettings] = None
 
 
-class ApacheKafkaSubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig](
-    SubscriptionRequestBase[SubscriptionEventType, SubscriptionConfig]
+class ApacheKafkaSubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail](
+    SubscriptionRequestBase[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.KAFKA]
     protocolSettings: Optional[ApacheKafkaSettings] = None
 
 
-class NATSSubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig](
-    SubscriptionRequestBase[SubscriptionEventType, SubscriptionConfig]
+class NATSSubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail](
+    SubscriptionRequestBase[SubscriptionEventType, SubscriptionDetail]
 ):
     protocol: Literal[Protocol.NATS]
     protocolSettings: Optional[NATSSettings] = None
 
 
-type SubscriptionRequest[SubscriptionEventType: str, SubscriptionConfig] = Annotated[
+type SubscriptionRequest[SubscriptionEventType: str, SubscriptionDetail] = Annotated[
     Union[
-        HTTPSubscriptionRequest[SubscriptionEventType, SubscriptionConfig],
-        MQTTSubscriptionRequest[SubscriptionEventType, SubscriptionConfig],
-        AMQPSubscriptionRequest[SubscriptionEventType, SubscriptionConfig],
-        ApacheKafkaSubscriptionRequest[SubscriptionEventType, SubscriptionConfig],
-        NATSSubscriptionRequest[SubscriptionEventType, SubscriptionConfig],
+        HTTPSubscriptionRequest[SubscriptionEventType, SubscriptionDetail],
+        MQTTSubscriptionRequest[SubscriptionEventType, SubscriptionDetail],
+        AMQPSubscriptionRequest[SubscriptionEventType, SubscriptionDetail],
+        ApacheKafkaSubscriptionRequest[SubscriptionEventType, SubscriptionDetail],
+        NATSSubscriptionRequest[SubscriptionEventType, SubscriptionDetail],
     ],
     Field(discriminator="protocol"),
 ]

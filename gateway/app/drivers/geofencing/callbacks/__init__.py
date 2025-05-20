@@ -12,7 +12,7 @@ from .nef import router as nef_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    task = asyncio.create_task(nef_geofencing_subscription_interface._clear_loop())
+    task = asyncio.create_task(nef_geofencing_subscription_interface.clear_loop())
 
     yield
 

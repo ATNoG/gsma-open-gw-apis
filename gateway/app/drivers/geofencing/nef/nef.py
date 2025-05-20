@@ -1,39 +1,32 @@
-import asyncio
 import logging
-import uuid
-from datetime import datetime, timezone
+import asyncio
 from enum import Enum
-from typing import Never, Optional, Union
+from typing import Optional, Union
+from datetime import datetime
 
 import geopy
 import geopy.distance
-import httpx
 from fastapi.encoders import jsonable_encoder
 from pydantic import AnyUrl
 
-from app.exceptions import ResourceNotFound
-from app.drivers.nef_auth import NEFAuth
 from app.exceptions import ApiException
 from app.interfaces.geofencing_subscriptions import (
     GeofencingSubscriptionInterface,
 )
-from app.redis import get_redis
 from app.schemas.device import Device
 from app.schemas.geofencing import (
     AreaEntered,
     AreaLeft,
-    CloudEvent,
+    CloudEventData,
     NotificationEventType,
     Subscription,
+    SubscriptionDetail,
     SubscriptionEventType,
     SubscriptionRequest,
     SubscriptionTypeAdapter,
     SubscriptionEnds,
 )
 from app.schemas.subscriptions import (
-    HTTPSubscriptionResponse,
-    Protocol,
-    SubscriptionStatus,
     TerminationReason,
 )
 from app.schemas.nef_schemas.monitoringevent import (
@@ -42,12 +35,12 @@ from app.schemas.nef_schemas.monitoringevent import (
     MonitoringType,
 )
 from app.settings import NEFSettings
+from app.utils.nef_driver_base import NefDriverBase
+from app.utils.subscription_driver_redis import SubscriptionDriverRedis
 
 LOG = logging.getLogger(__name__)
 
-_prefix_subscription = "geofencing"
 _prefix_last_state = "geofencing_state"
-_prefix_counter = "geofencing_counter"
 _prefix_nef_url = "geofencing_nef_url"
 
 
@@ -55,18 +48,6 @@ class State(Enum):
     INSIDE = "INSIDE"
     OUTSIDE = "OUTSIDE"
 
-
-def _handle_post_error(res: httpx.Response) -> None:
-    raise ApiException(
-        message="Error comunicating with the core",
-    )
-
-
-_termination_reason_to_status = {
-    TerminationReason.SUBSCRIPTION_DELETED: SubscriptionStatus.DELETED,
-    TerminationReason.SUBSCRIPTION_EXPIRED: SubscriptionStatus.EXPIRED,
-    TerminationReason.MAX_EVENTS_REACHED: SubscriptionStatus.EXPIRED,
-}
 
 _handle_state_details: dict[
     State,
@@ -87,162 +68,104 @@ _handle_state_details: dict[
 }
 
 
-class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
+class NefGeofencingSubscriptionInterface(
+    GeofencingSubscriptionInterface,
+    NefDriverBase,
+    SubscriptionDriverRedis[
+        SubscriptionEventType,
+        SubscriptionDetail,
+        NotificationEventType,
+        CloudEventData,
+    ],
+):
     def __init__(self, nef_settings: NEFSettings, source: str) -> None:
-        super().__init__()
-
-        nef_auth = NEFAuth(
-            nef_settings.url, nef_settings.username, nef_settings.password
+        NefDriverBase.__init__(self, nef_settings)
+        SubscriptionDriverRedis.__init__(
+            self, source, "geofencing", SubscriptionTypeAdapter
         )
-        self.httpx_client = httpx.AsyncClient(
-            base_url=nef_settings.get_base_url(), auth=nef_auth
-        )
-        self.httpx_client_callback = httpx.AsyncClient()
 
-        self.af_id = nef_settings.gateway_af_id
-        self.source = source
         self.notification_url = nef_settings.get_notification_url()
-
-        self.redis = get_redis()
-
-    async def _clear_loop(self) -> Never:
-        while True:
-            try:
-                LOG.debug("Clearing expired subscriptions")
-                await self._clear_expired_subscriptions()
-                await asyncio.sleep(5)
-            except Exception as e:
-                LOG.error(e)
-
-    async def _clear_expired_subscriptions(self) -> None:
-        keys = await self.redis.keys(f"{_prefix_nef_url}:*")
-
-        for key in keys:
-            sub_key = f"{_prefix_subscription}:{key.split(':')[1]}"
-            sub = await self.redis.get(sub_key)
-            if sub is None:
-                continue
-
-            sub = SubscriptionTypeAdapter.validate_json(sub)
-            if (
-                sub.status != SubscriptionStatus.ACTIVE
-                or sub.config.subscriptionExpireTime is None
-                or datetime.now(sub.config.subscriptionExpireTime.tzinfo)
-                < sub.config.subscriptionExpireTime
-            ):
-                continue
-
-            await self.delete_subscription(
-                sub.id, termination_reason=TerminationReason.SUBSCRIPTION_EXPIRED
-            )
 
     async def create_subscription(
         self, req: SubscriptionRequest, device: Device
     ) -> Subscription:
         # Store subscription
         req.config.subscriptionDetail.device = device
-        sub_id = str(uuid.uuid4())
-        sub: Subscription = HTTPSubscriptionResponse(
-            protocol=Protocol.HTTP,
-            sink=req.sink,
-            types=req.types,
-            config=req.config,
-            startsAt=datetime.now(
-                timezone.utc
-                if req.config.subscriptionExpireTime is None
-                else req.config.subscriptionExpireTime.tzinfo
-            ),
-            id=sub_id,
-            expiresAt=req.config.subscriptionExpireTime,
-            status=SubscriptionStatus.ACTIVE,
-        )
+        sub = await self.create_gateway_subscription(req)
 
-        sub_key = f"{_prefix_subscription}:{sub_id}"
-        await self.redis.set(sub_key, sub.model_dump_json())
-
-        # Create monitoring event subscription
-        body = MonitoringEventSubscription(
-            ipv6Addr=device.ipv6Address,
-            notificationDestination=AnyUrl(
-                f"{self.notification_url}/callbacks/v1/geofencing/{sub_id}"
-            ),
-            monitoringType=MonitoringType.LOCATION_REPORTING,
-            monitorExpireTime=req.config.subscriptionExpireTime or datetime.max,
-            immediateRep=req.config.initialEvent,
-        )
-
-        if device.phoneNumber is not None:
-            body.msisdn = device.phoneNumber[1:]
-
-        if device.ipv4Address is not None:
-            body.ipv4Addr = device.ipv4Address.publicAddress
-
-        res = await self.httpx_client.post(
-            f"/3gpp-monitoring-event/v1/{self.af_id}/subscriptions",
-            json=jsonable_encoder(body),
-        )
-
-        # Check success of monitoring event subscription
-        if not res.is_success:
-            await self.redis.delete(sub_key)
-            _handle_post_error(res)
-
-        subscription_result = MonitoringEventSubscription.model_validate_json(
-            res.content
-        )
-
-        if subscription_result.self is None:
-            LOG.error("No 'self' in monitoring subscription response")
-            await self.redis.delete(sub_key)
-            raise ApiException(
-                message="Error comunicating with the core",
+        try:
+            # Create monitoring event subscription
+            body = MonitoringEventSubscription(
+                ipv6Addr=device.ipv6Address,
+                notificationDestination=AnyUrl(
+                    f"{self.notification_url}/callbacks/v1/geofencing/{sub.id}"
+                ),
+                monitoringType=MonitoringType.LOCATION_REPORTING,
+                monitorExpireTime=req.config.subscriptionExpireTime or datetime.max,
+                immediateRep=req.config.initialEvent,
             )
 
-        self_key = f"{_prefix_nef_url}:{sub_id}"
-        await self.redis.set(self_key, subscription_result.self.unicode_string())
+            body = self.install_device_identifiers(body, device)
 
-        return sub
+            res = await self.httpx_client.post(
+                f"/3gpp-monitoring-event/v1/{self.af_id}/subscriptions",
+                json=jsonable_encoder(body),
+            )
+
+            # Check success of monitoring event subscription
+            if not res.is_success:
+                raise ApiException(
+                    message="Error comunicating with the core",
+                )
+
+            subscription_result = MonitoringEventSubscription.model_validate_json(
+                res.content
+            )
+
+            if subscription_result.self is None:
+                LOG.error("No 'self' in monitoring subscription response")
+                raise ApiException(
+                    message="Error comunicating with the core",
+                )
+
+            self_key = f"{_prefix_nef_url}:{sub.id}"
+            await self.redis.set(self_key, subscription_result.self.unicode_string())
+
+            return sub
+        except BaseException as e:
+            await self.permanently_delete_subscription(sub)
+            raise e
 
     async def delete_subscription(
         self,
         sub_id: str,
         *,
-        endpoint: Optional[str] = None,
+        nef_subscription_url: Optional[str] = None,
         termination_reason: TerminationReason = TerminationReason.SUBSCRIPTION_DELETED,
     ) -> None:
-        subscription_key = f"{_prefix_subscription}:{sub_id}"
+        subscription = await self.delete_gateway_subscription(
+            sub_id, termination_reason
+        )
+
+        if subscription is None:
+            return
+
         last_state_key = f"{_prefix_last_state}:{sub_id}"
-        counter_key = f"{_prefix_counter}:{sub_id}"
         nef_url_key = f"{_prefix_nef_url}:{sub_id}"
 
-        subscription = await self.redis.get(subscription_key)
-        if subscription is None:
-            raise ResourceNotFound()
-
-        nef_subscription_url: str
-        if endpoint is None:
+        if nef_subscription_url is None:
             nef_subscription_url = await self.redis.get(nef_url_key)
-        else:
-            nef_subscription_url = endpoint
 
-        await self.httpx_client.delete(nef_subscription_url)
+        if nef_subscription_url is not None:
+            # Schedule the deletion of the NEF subscription
+            asyncio.create_task(self.delete_nef_subscription(nef_subscription_url))
 
-        await self.redis.delete(last_state_key, counter_key, nef_url_key)
+        await self.redis.delete(last_state_key, nef_url_key)
 
-        subscription = SubscriptionTypeAdapter.validate_json(subscription)
-        subscription.status = _termination_reason_to_status[termination_reason]
-        await self.redis.set(subscription_key, subscription.model_dump_json())
-
-        res = CloudEvent(
-            id=str(uuid.uuid4()),
-            source=self.source,
-            type=NotificationEventType.v0_subscription_ends,
-            time=datetime.now(
-                timezone.utc
-                if subscription.config.subscriptionExpireTime is None
-                else subscription.config.subscriptionExpireTime.tzinfo
-            ),
-            data=SubscriptionEnds(
+        await self.notify_sink(
+            subscription,
+            NotificationEventType.v0_subscription_ends,
+            SubscriptionEnds(
                 terminationReason=termination_reason,
                 device=subscription.config.subscriptionDetail.device,
                 area=subscription.config.subscriptionDetail.area,
@@ -250,40 +173,19 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
             ),
         )
 
-        await self.httpx_client_callback.post(
-            subscription.sink,
-            json=jsonable_encoder(res),
-        )
-
     async def get_subscription(self, sub_id: str) -> Subscription:
-        key = f"{_prefix_subscription}:{sub_id}"
-
-        result = await self.redis.get(key)
-
-        if result is None:
-            raise ResourceNotFound()
-
-        return SubscriptionTypeAdapter.validate_json(result)
+        return await SubscriptionDriverRedis.get_subscription(self, sub_id)
 
     async def get_subscriptions(self) -> list[Subscription]:
-        keys = await self.redis.keys(f"{_prefix_subscription}:*")
-        subscriptions: list[Subscription] = []
+        return await SubscriptionDriverRedis.get_subscriptions(self)
 
-        for key in keys:
-            result = await self.redis.get(key)
-            if result is None:
-                continue
-            subscriptions.append(SubscriptionTypeAdapter.validate_json(result))
-
-        return subscriptions
-
-    async def _notify_location(
+    async def notify_location(
         self,
         subscription: Subscription,
         location: GeographicalCoordinates,
         *,
-        endpoint: Optional[str] = None,
-    ) -> bool:
+        nef_subscription_url: Optional[str] = None,
+    ) -> None:
         """Returns bool indicating whether the subscription was deleted or not."""
         device_location = geopy.Point(latitude=location.lat, longitude=location.lon)
 
@@ -296,67 +198,49 @@ class NefGeofencingSubscriptionInterface(GeofencingSubscriptionInterface):
         radius = geofencing_area.radius
         distance = geopy.distance.geodesic(center, device_location).m
 
-        notified = False
-
+        state: State
         if distance < radius:
-            notified = await self._handle_area(subscription, State.INSIDE)
+            state = State.INSIDE
         elif distance > radius:
-            notified = await self._handle_area(subscription, State.OUTSIDE)
+            state = State.OUTSIDE
+        else:
+            return
 
-        if notified:
-            key = f"{_prefix_counter}:{subscription.id}"
-            res = await self.redis.get(key)
-            counter = 0 if res is None else int(res)
-            counter += 1
-            if counter == subscription.config.subscriptionMaxEvents:
-                await self.delete_subscription(
-                    subscription.id,
-                    endpoint=endpoint,
-                    termination_reason=TerminationReason.MAX_EVENTS_REACHED,
-                )
-                return True
-            await self.redis.set(key, counter)
-        return False
+        await self._handle_area(subscription, state, nef_subscription_url)
 
-    async def _handle_area(self, subscription: Subscription, state: State) -> bool:
+    async def _handle_area(
+        self,
+        subscription: Subscription,
+        state: State,
+        nef_subscription_url: Optional[str],
+    ) -> None:
         LOG.debug("Device %s area", state)
 
         key = f"{_prefix_last_state}:{subscription.id}"
         last_state = await self.redis.get(key)
 
-        if last_state is None and not subscription.config.initialEvent:
-            await self.redis.set(key, state.value)
-            return False
-
         if last_state == state.value:
-            return False
+            return
 
         await self.redis.set(key, state.value)
+
+        if last_state is None and not subscription.config.initialEvent:
+            return
 
         sub_event_type, notif_event_type, notif_data_class = _handle_state_details[
             state
         ]
 
         if sub_event_type not in subscription.types:
-            return False
+            return
 
-        res = CloudEvent(
-            id=str(uuid.uuid4()),
-            source=self.source,
-            type=notif_event_type,
-            time=datetime.now(
-                timezone.utc
-                if subscription.config.subscriptionExpireTime is None
-                else subscription.config.subscriptionExpireTime.tzinfo
-            ),
-            data=notif_data_class(
+        await self.send_report(
+            subscription,
+            notif_event_type,
+            notif_data_class(
                 device=subscription.config.subscriptionDetail.device,
                 area=subscription.config.subscriptionDetail.area,
                 subscriptionId=subscription.id,
             ),
+            nef_subscription_url=nef_subscription_url,
         )
-
-        await self.httpx_client_callback.post(
-            subscription.sink, json=jsonable_encoder(res)
-        )
-        return True

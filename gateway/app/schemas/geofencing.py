@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 from typing import Annotated, Literal, Optional, Union
 
@@ -71,43 +70,10 @@ class SubscriptionDetail(BaseModel):
     area: Circle
 
 
-class Config(BaseModel):
-    subscriptionDetail: SubscriptionDetail
-
-    subscriptionExpireTime: Optional[
-        Annotated[
-            datetime,
-            Field(
-                description="The subscription expiration time (in date-time format) requested by the API consumer.",
-                examples=["2023-01-17T13:18:23.682Z"],
-            ),
-        ]
-    ] = None
-
-    subscriptionMaxEvents: Optional[
-        Annotated[
-            int,
-            Field(
-                ge=1,
-                description="Identifies the maximum number of event reports to be generated (>=1) requested by the API consumer - Once this number is reached, the subscription ends.\nNote on combined usage of `initialEvent` and `subscriptionMaxEvents`:\nIf an event is triggered following `initialEvent` set to `true`, this event will be counted towards `subscriptionMaxEvents`.",
-                examples=[5],
-            ),
-        ]
-    ] = None
-
-    initialEvent: Optional[
-        Annotated[
-            bool,
-            Field(
-                description="Set to `true` by API consumer if consumer wants to get an event as soon as the subscription is created and current situation reflects event request.\nExample: Consumer request area entered event. If consumer sets initialEvent to true and device is already in the geofence, an event is triggered.\n"
-            ),
-        ]
-    ] = None
-
-
-CloudEvent = subscriptions.CloudEvent[
-    NotificationEventType, Union[AreaEntered, AreaLeft, SubscriptionEnds]
-]
-Subscription = subscriptions.Subscription[SubscriptionEventType, Config]
+CloudEventData = Union[AreaEntered, AreaLeft, SubscriptionEnds]
+CloudEvent = subscriptions.CloudEvent[NotificationEventType, CloudEventData]
+Subscription = subscriptions.Subscription[SubscriptionEventType, SubscriptionDetail]
 SubscriptionTypeAdapter: TypeAdapter[Subscription] = TypeAdapter(Subscription)
-SubscriptionRequest = subscriptions.SubscriptionRequest[SubscriptionEventType, Config]
+SubscriptionRequest = subscriptions.SubscriptionRequest[
+    SubscriptionEventType, SubscriptionDetail
+]

@@ -13,7 +13,10 @@ from app.schemas.nef_schemas.monitoringevent import (
     MonitoringType,
     ReachabilityType,
 )
-from app.schemas.reachability_status import NotificationEventType
+from app.schemas.reachability_status import (
+    NotificationEventType,
+    ReachabilityDataSmsDisconnected,
+)
 from app.schemas.subscriptions import SubscriptionStatus
 
 
@@ -81,6 +84,12 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
             )
             continue
 
-        await nef_reachability_status_interface.notify_sink(
-            subscription, notification.subscription.unicode_string(), type
+        await nef_reachability_status_interface.send_report(
+            subscription,
+            type,
+            ReachabilityDataSmsDisconnected(
+                device=subscription.config.subscriptionDetail.device,
+                subscriptionId=subscription.id,
+            ),
+            nef_subscription_url=str(notification.subscription),
         )

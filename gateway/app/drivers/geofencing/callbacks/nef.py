@@ -43,6 +43,8 @@ async def webhook(sub_id: str, notification: MonitoringNotification) -> None:
         LOG.warning("Received notification for non exisiting subscription")
         return
 
-    await nef_geofencing_subscription_interface._notify_location(
-        subscription, point, endpoint=notification.subscription.unicode_string()
+    await nef_geofencing_subscription_interface.notify_location(
+        subscription,
+        point,
+        nef_subscription_url=notification.subscription.unicode_string(),
     )
