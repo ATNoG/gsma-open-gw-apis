@@ -11,8 +11,6 @@ from app.schemas.nef_schemas.monitoringevent import MonitoringEventSubscription
 
 class NefDriverBase:
     def __init__(self, nef_settings: NEFSettings) -> None:
-        super().__init__()
-
         nef_auth = NEFAuth(
             nef_settings.url, nef_settings.username, nef_settings.password
         )
