@@ -11,7 +11,7 @@ export const Route = createRootRoute({
         content: "Demo for GSMA Open Gateway APIs",
       },
     ],
-    links: [{ rel: "icon", href: "" }],
+    links: [{ rel: "icon" }],
   }),
   notFoundComponent: () => "404 Not Found",
 });
