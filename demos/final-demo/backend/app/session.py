@@ -1,6 +1,5 @@
-import logging
-from sqlmodel import create_engine, SQLModel, Session
 from sqlalchemy.pool import StaticPool
+from sqlmodel import Session, SQLModel, create_engine
 
 sqlite_url = "sqlite://"
 
