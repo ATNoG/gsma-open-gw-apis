@@ -1,0 +1,30 @@
+[project]
+name = "final-demo-backend"
+version = "0.1.0"
+description = "The backend for the final GSMA Open Gateway project demo"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+    "fastapi-socketio>=0.0.10",
+    "sqlmodel>=0.0.24",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.9.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0",
+    "mypy>=1.15.0",
+    "pyright>=1.1.400",
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.mypy]
+strict = true
+plugins = ['pydantic.mypy']
+
+[tool.ruff.lint]
+extend-select = ["T20"]
