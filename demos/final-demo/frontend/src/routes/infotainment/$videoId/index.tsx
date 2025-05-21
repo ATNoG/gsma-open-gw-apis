@@ -1,12 +1,17 @@
+<<<<<<< HEAD
 import { videosById } from "@/data/videos";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import YouTube from "react-youtube";
+=======
+import { createFileRoute } from "@tanstack/react-router";
+>>>>>>> 1772d87e (demo: changed directory structure)
 
 export const Route = createFileRoute("/infotainment/$videoId/")({
   component: RouteComponent,
 });
 
+<<<<<<< HEAD
 // const YT_EMBED_BASE_URL = "https://www.youtube.com/embed";
 //
 const aspect = 16 / 9;
@@ -54,4 +59,8 @@ function RouteComponent() {
       />
     </main>
   );
+=======
+function RouteComponent() {
+  return <div>Video</div>;
+>>>>>>> 1772d87e (demo: changed directory structure)
 }

@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+=======
+>>>>>>> 1772d87e (demo: changed directory structure)
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -8,6 +11,7 @@ export const Route = createFileRoute("/")({
 
 function RouteComponent() {
   return (
+<<<<<<< HEAD
     <main className="container mx-auto my-20 px-4">
       <h1 className="mb-2 text-center text-6xl font-extrabold">Final Demo</h1>
       <p className="text-foreground/65 mb-12 text-center text-lg font-semibold">
@@ -47,5 +51,18 @@ function RouteComponent() {
         </li>
       </ul>
     </main>
+=======
+    <div>
+      Final demo
+      <ul className="ml-2 list-inside list-disc">
+        <li>
+          <Link to="/infotainment">Infotainment</Link>
+        </li>
+        <li>
+          <Link to="/management">Fleet Management</Link>
+        </li>
+      </ul>
+    </div>
+>>>>>>> 1772d87e (demo: changed directory structure)
   );
 }
