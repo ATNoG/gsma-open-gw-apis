@@ -55,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trucks/{id}": {
+    "/trucks/{truckId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -63,7 +63,7 @@ export interface paths {
             cookie?: never;
         };
         /** Info Truck */
-        get: operations["info_truck_trucks__id__get"];
+        get: operations["info_truck_trucks__truckId__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -106,10 +106,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notification/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Notification */
+        post: operations["notification_notification__id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CloudEvent */
+        CloudEvent: {
+            /** Type */
+            type: components["schemas"]["ReachabilityEventType"] | components["schemas"]["GeofencingEventType"] | string;
+        };
         /** DetailedTruckResponse */
         DetailedTruckResponse: {
             /** Id */
@@ -122,6 +144,11 @@ export interface components {
             isReachable: boolean;
             coords: components["schemas"]["Point"];
         };
+        /**
+         * GeofencingEventType
+         * @enum {string}
+         */
+        GeofencingEventType: "org.camaraproject.geofencing-subscriptions.v0.area-entered" | "org.camaraproject.geofencing-subscriptions.v0.area-left";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -134,6 +161,11 @@ export interface components {
             /** Longitude */
             longitude: number;
         };
+        /**
+         * ReachabilityEventType
+         * @enum {string}
+         */
+        ReachabilityEventType: "org.camaraproject.device-reachability-status-subscriptions.v0.reachability-data" | "org.camaraproject.device-reachability-status-subscriptions.v0.reachability-sms" | "org.camaraproject.device-reachability-status-subscriptions.v0.reachability-disconnected";
         /** Truck */
         Truck: {
             /** Id */
@@ -240,12 +272,12 @@ export interface operations {
             };
         };
     };
-    info_truck_trucks__id__get: {
+    info_truck_trucks__truckId__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                truck_id: number;
+                truckId: number;
             };
             cookie?: never;
         };
@@ -323,6 +355,39 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Truck"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    notification_notification__id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloudEvent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
