@@ -29,15 +29,17 @@ async def notification(
             ReachabilityEventType.v0_reachability_data
             | ReachabilityEventType.v0_reachability_sms
         ):
-            truck.isReachable = True
-            await sio.emit(
-                "reachability", json.dumps({"id": truck.id, "isReachable": True})
-            )
+            if not truck.isReachable:
+                truck.isReachable = True
+                await sio.emit(
+                    "reachability", json.dumps({"id": truck.id, "isReachable": True})
+                )
         case ReachabilityEventType.v0_reachability_disconnected:
-            truck.isReachable = False
-            await sio.emit(
-                "reachability", json.dumps({"id": truck.id, "isReachable": False})
-            )
+            if truck.isReachable:
+                truck.isReachable = False
+                await sio.emit(
+                    "reachability", json.dumps({"id": truck.id, "isReachable": False})
+                )
         case GeofencingEventType.v0_area_entered:
             truck.isQueued = True
             await sio.emit("queue", json.dumps({"id": truck.id, "isQueued": True}))
