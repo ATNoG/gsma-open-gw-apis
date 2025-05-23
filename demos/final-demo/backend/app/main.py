@@ -1,11 +1,9 @@
-import contextlib
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
 from socketio import ASGIApp
-from starlette.types import Lifespan
 
 from app import endpoints
 from app.models.truck import Truck
@@ -13,6 +11,7 @@ from app.schemas.location import Point
 from app.services.location import location_service
 from app.services.reachability import reachability_service
 from app.session import create_db_and_tables, get_session
+from app.settings import settings
 from app.socketio import sio
 
 logging.basicConfig(level="DEBUG")
@@ -33,7 +32,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         for truck in trucks:
             reachability = await reachability_service.reachability_retrieve(truck)
             in_queue = await location_service.location_verification(
-                truck, Point(latitude=0, longitude=0), radius=10
+                truck,
+                Point(
+                    latitude=settings.queue_geofencing.latitude,
+                    longitude=settings.queue_geofencing.longitude,
+                ),
+                radius=settings.queue_geofencing.radius,
             )
             truck.isQueued = in_queue
             truck.isReachable = reachability
@@ -46,7 +50,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             )
             geofencing_subscriptions.extend(
                 await location_service.geofencing_subscription(
-                    truck, Point(latitude=0, longitude=0), radius=10
+                    truck,
+                    Point(
+                        latitude=settings.queue_geofencing.latitude,
+                        longitude=settings.queue_geofencing.longitude,
+                    ),
+                    radius=settings.queue_geofencing.radius,
                 )
             )
 
