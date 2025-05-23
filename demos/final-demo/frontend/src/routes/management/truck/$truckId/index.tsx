@@ -1,4 +1,5 @@
 import { $api } from "@/api/client";
+import { useNotification } from "@/components/notification-provider";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -15,6 +16,7 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 import { z } from "zod";
@@ -43,6 +45,34 @@ function RouteComponent() {
   } = $api.useQuery("get", "/trucks/{truckId}", {
     params: { path: { truckId } },
   });
+  const [reachStatus, setReachStatus] = useState<boolean>(null!);
+  const [queueStatus, setQueueStatus] = useState<boolean>(null!);
+
+  const { reachabilityNotification, queueNotification } = useNotification();
+
+  useEffect(() => {
+    if (truck === undefined) return;
+
+    setReachStatus(truck.isReachable);
+    setQueueStatus(truck.isQueued);
+  }, [truck]);
+
+  useEffect(() => {
+    if (
+      reachabilityNotification === null ||
+      reachabilityNotification.id !== truckId
+    )
+      return;
+
+    setReachStatus(reachabilityNotification.isReachable);
+  }, [reachabilityNotification]);
+
+  useEffect(() => {
+    if (queueNotification === null || queueNotification.id !== truckId) return;
+
+    setQueueStatus(queueNotification.isQueued);
+  }, [queueNotification]);
+
   if (isLoading)
     return (
       <div className="grid h-screen place-items-center">
@@ -88,33 +118,33 @@ function RouteComponent() {
           <span className="text-foreground/60 flex items-center gap-4 font-semibold">
             <Tooltip>
               <TooltipTrigger>
-                {truck.isQueued ? (
+                {queueStatus ? (
                   <Clock8 className="text-yellow-600" />
                 ) : (
                   <Truck className="text-blue-600" />
                 )}
               </TooltipTrigger>
               <TooltipContent>
-                {truck.isQueued ? "Waiting" : "Driving "}
+                {queueStatus ? "Waiting" : "Driving "}
               </TooltipContent>
             </Tooltip>
-            {truck.isQueued ? "Waiting" : "Driving "}
+            {queueStatus ? "Waiting" : "Driving "}
           </span>
           <Separator orientation="vertical" />
           <span className="text-foreground/60 flex items-center gap-4 font-semibold">
             <Tooltip>
               <TooltipTrigger>
-                {truck.isReachable ? (
+                {reachStatus ? (
                   <Wifi className="text-green-600" />
                 ) : (
                   <WifiOff className="text-red-600" />
                 )}
               </TooltipTrigger>
               <TooltipContent>
-                {truck.isReachable ? "" : "Not "}Reachable
+                {reachStatus ? "" : "Not "}Reachable
               </TooltipContent>
             </Tooltip>
-            {truck.isReachable ? "" : "Not "}Reachable
+            {reachStatus ? "" : "Not "}Reachable
           </span>
         </div>
       </section>
