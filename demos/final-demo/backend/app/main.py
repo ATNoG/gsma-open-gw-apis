@@ -13,6 +13,7 @@ from app.services.reachability import reachability_service
 from app.session import create_db_and_tables, get_session
 from app.settings import settings
 from app.socketio import sio
+from app.settings import settings
 
 logging.basicConfig(level="DEBUG")
 
@@ -20,10 +21,11 @@ logging.basicConfig(level="DEBUG")
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     logging.warning("Initializing the tables")
+    logging.warning("The Gateway is located at %s", settings.gateway_url)
     create_db_and_tables()
     trucks = [
-        Truck(phoneNumber="+900000000"),
-        Truck(phoneNumber="+900000001"),
+        Truck(phoneNumber="+9076543211"),
+        Truck(phoneNumber="+9076543213"),
     ]
     reachability_subscriptions = []
     geofencing_subscriptions = []
