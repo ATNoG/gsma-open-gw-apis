@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register */
+        post: operations["register_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify */
+        post: operations["verify_auth_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -21,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/register": {
+    "/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -30,8 +64,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register */
-        post: operations["register_auth_register_post"];
+        /** Me */
+        post: operations["me_auth_me_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -106,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/increase-bandwidth/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Increase Bandwidth */
+        post: operations["increase_bandwidth_increase_bandwidth__id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notification/{id}": {
         parameters: {
             query?: never;
@@ -132,6 +183,22 @@ export interface components {
             /** Type */
             type: components["schemas"]["ReachabilityEventType"] | components["schemas"]["GeofencingEventType"] | string;
         };
+        /** CreateUserRequest */
+        CreateUserRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+            /** Phonenumber */
+            phoneNumber: string;
+        };
+        /** CreateUserResponse */
+        CreateUserResponse: {
+            /** Id */
+            id: number;
+            /** Username */
+            username: string;
+        };
         /** DetailedTruckResponse */
         DetailedTruckResponse: {
             /** Id */
@@ -154,6 +221,25 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+        };
+        /** LoginResponse */
+        LoginResponse: {
+            /** Token */
+            token: string;
+        };
+        /** OtpRequest */
+        OtpRequest: {
+            /** Id */
+            id: number;
+            /** Code */
+            code: string;
+        };
         /** Point */
         Point: {
             /** Latitude */
@@ -169,7 +255,7 @@ export interface components {
         /** Truck */
         Truck: {
             /** Id */
-            id?: number | null;
+            id?: number;
             /** Phonenumber */
             phoneNumber: string;
             /**
@@ -194,6 +280,18 @@ export interface components {
             /** Isreachable */
             isReachable: boolean;
         };
+        /** UserRequest */
+        UserRequest: {
+            /** Token */
+            token: string;
+        };
+        /** UserResponse */
+        UserResponse: {
+            /** Username */
+            username: string;
+            /** Phonenumber */
+            phoneNumber: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -212,26 +310,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    login_auth_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
     register_auth_register_post: {
         parameters: {
             query?: never;
@@ -239,7 +317,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -247,7 +329,113 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CreateUserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_auth_verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_auth_me_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -355,6 +543,35 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Truck"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    increase_bandwidth_increase_bandwidth__id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
