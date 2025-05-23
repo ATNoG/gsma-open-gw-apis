@@ -1,1 +1,1 @@
-gateway_url: "http://localhost:8001"
+gateway_url = "http://10.255.28.143"
