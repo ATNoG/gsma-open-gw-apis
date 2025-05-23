@@ -7,7 +7,8 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     username: str = Field(index=True)
     password: str
-    is_staff: bool
+    otpId: str
+    isVerified: bool = Field(default=False)
 
 
 class Logged(SQLModel, table=True):

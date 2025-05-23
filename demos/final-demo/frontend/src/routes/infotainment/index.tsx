@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { videoData } from "@/data/videos";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { userStore } from "../infotainment";
@@ -58,14 +57,4 @@ function RouteComponent() {
       </ul>
     </main>
   );
-=======
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/infotainment/")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
-  return <div>List of videos</div>;
->>>>>>> 1772d87e (demo: changed directory structure)
 }

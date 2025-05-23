@@ -11,16 +11,16 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-<<<<<<< HEAD
 import { Route as ManagementImport } from './routes/management'
 import { Route as InfotainmentImport } from './routes/infotainment'
-=======
->>>>>>> 1772d87e (demo: changed directory structure)
 import { Route as IndexImport } from './routes/index'
 import { Route as ManagementIndexImport } from './routes/management/index'
 import { Route as InfotainmentIndexImport } from './routes/infotainment/index'
 import { Route as InfotainmentVideoIdIndexImport } from './routes/infotainment/$videoId/index'
-<<<<<<< HEAD
+import { Route as authValidateIndexImport } from './routes/(auth)/validate/index'
+import { Route as authRegisterIndexImport } from './routes/(auth)/register/index'
+import { Route as authLoginIndexImport } from './routes/(auth)/login/index'
+import { Route as ManagementTruckTruckIdImport } from './routes/management/truck/$truckId'
 import { Route as ManagementTruckTruckIdIndexImport } from './routes/management/truck/$truckId/index'
 import { Route as InfotainmentauthRegisterIndexImport } from './routes/infotainment/(auth)/register/index'
 import { Route as InfotainmentauthLoginIndexImport } from './routes/infotainment/(auth)/login/index'
@@ -39,15 +39,6 @@ const InfotainmentRoute = InfotainmentImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-=======
-import { Route as authValidateIndexImport } from './routes/(auth)/validate/index'
-import { Route as authRegisterIndexImport } from './routes/(auth)/register/index'
-import { Route as authLoginIndexImport } from './routes/(auth)/login/index'
-import { Route as ManagementTruckTruckIdImport } from './routes/management/truck/$truckId'
-
-// Create/Update Routes
-
->>>>>>> 1772d87e (demo: changed directory structure)
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
@@ -55,7 +46,6 @@ const IndexRoute = IndexImport.update({
 } as any)
 
 const ManagementIndexRoute = ManagementIndexImport.update({
-<<<<<<< HEAD
   id: '/',
   path: '/',
   getParentRoute: () => ManagementRoute,
@@ -71,45 +61,6 @@ const InfotainmentVideoIdIndexRoute = InfotainmentVideoIdIndexImport.update({
   id: '/$videoId/',
   path: '/$videoId/',
   getParentRoute: () => InfotainmentRoute,
-} as any)
-
-const ManagementTruckTruckIdIndexRoute =
-  ManagementTruckTruckIdIndexImport.update({
-    id: '/truck/$truckId/',
-    path: '/truck/$truckId/',
-    getParentRoute: () => ManagementRoute,
-  } as any)
-
-const InfotainmentauthRegisterIndexRoute =
-  InfotainmentauthRegisterIndexImport.update({
-    id: '/(auth)/register/',
-    path: '/register/',
-    getParentRoute: () => InfotainmentRoute,
-  } as any)
-
-const InfotainmentauthLoginIndexRoute = InfotainmentauthLoginIndexImport.update(
-  {
-    id: '/(auth)/login/',
-    path: '/login/',
-    getParentRoute: () => InfotainmentRoute,
-  } as any,
-)
-=======
-  id: '/management/',
-  path: '/management/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const InfotainmentIndexRoute = InfotainmentIndexImport.update({
-  id: '/infotainment/',
-  path: '/infotainment/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const InfotainmentVideoIdIndexRoute = InfotainmentVideoIdIndexImport.update({
-  id: '/infotainment/$videoId/',
-  path: '/infotainment/$videoId/',
-  getParentRoute: () => rootRoute,
 } as any)
 
 const authValidateIndexRoute = authValidateIndexImport.update({
@@ -131,11 +82,32 @@ const authLoginIndexRoute = authLoginIndexImport.update({
 } as any)
 
 const ManagementTruckTruckIdRoute = ManagementTruckTruckIdImport.update({
-  id: '/management/truck/$truckId',
-  path: '/management/truck/$truckId',
-  getParentRoute: () => rootRoute,
+  id: '/truck/$truckId',
+  path: '/truck/$truckId',
+  getParentRoute: () => ManagementRoute,
 } as any)
->>>>>>> 1772d87e (demo: changed directory structure)
+
+const ManagementTruckTruckIdIndexRoute =
+  ManagementTruckTruckIdIndexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ManagementTruckTruckIdRoute,
+  } as any)
+
+const InfotainmentauthRegisterIndexRoute =
+  InfotainmentauthRegisterIndexImport.update({
+    id: '/(auth)/register/',
+    path: '/register/',
+    getParentRoute: () => InfotainmentRoute,
+  } as any)
+
+const InfotainmentauthLoginIndexRoute = InfotainmentauthLoginIndexImport.update(
+  {
+    id: '/(auth)/login/',
+    path: '/login/',
+    getParentRoute: () => InfotainmentRoute,
+  } as any,
+)
 
 // Populate the FileRoutesByPath interface
 
@@ -148,7 +120,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-<<<<<<< HEAD
     '/infotainment': {
       id: '/infotainment'
       path: '/infotainment'
@@ -177,54 +148,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManagementIndexImport
       parentRoute: typeof ManagementImport
     }
-    '/infotainment/$videoId/': {
-      id: '/infotainment/$videoId/'
-      path: '/$videoId'
-      fullPath: '/infotainment/$videoId'
-      preLoaderRoute: typeof InfotainmentVideoIdIndexImport
-      parentRoute: typeof InfotainmentImport
-    }
-    '/infotainment/(auth)/login/': {
-      id: '/infotainment/(auth)/login/'
-      path: '/login'
-      fullPath: '/infotainment/login'
-      preLoaderRoute: typeof InfotainmentauthLoginIndexImport
-      parentRoute: typeof InfotainmentImport
-    }
-    '/infotainment/(auth)/register/': {
-      id: '/infotainment/(auth)/register/'
-      path: '/register'
-      fullPath: '/infotainment/register'
-      preLoaderRoute: typeof InfotainmentauthRegisterIndexImport
-      parentRoute: typeof InfotainmentImport
-    }
-    '/management/truck/$truckId/': {
-      id: '/management/truck/$truckId/'
-      path: '/truck/$truckId'
-      fullPath: '/management/truck/$truckId'
-      preLoaderRoute: typeof ManagementTruckTruckIdIndexImport
-      parentRoute: typeof ManagementImport
-=======
-    '/infotainment/': {
-      id: '/infotainment/'
-      path: '/infotainment'
-      fullPath: '/infotainment'
-      preLoaderRoute: typeof InfotainmentIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/management/': {
-      id: '/management/'
-      path: '/management'
-      fullPath: '/management'
-      preLoaderRoute: typeof ManagementIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/management/truck/$truckId': {
       id: '/management/truck/$truckId'
-      path: '/management/truck/$truckId'
+      path: '/truck/$truckId'
       fullPath: '/management/truck/$truckId'
       preLoaderRoute: typeof ManagementTruckTruckIdImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof ManagementImport
     }
     '/(auth)/login/': {
       id: '/(auth)/login/'
@@ -249,18 +178,37 @@ declare module '@tanstack/react-router' {
     }
     '/infotainment/$videoId/': {
       id: '/infotainment/$videoId/'
-      path: '/infotainment/$videoId'
+      path: '/$videoId'
       fullPath: '/infotainment/$videoId'
       preLoaderRoute: typeof InfotainmentVideoIdIndexImport
-      parentRoute: typeof rootRoute
->>>>>>> 1772d87e (demo: changed directory structure)
+      parentRoute: typeof InfotainmentImport
+    }
+    '/infotainment/(auth)/login/': {
+      id: '/infotainment/(auth)/login/'
+      path: '/login'
+      fullPath: '/infotainment/login'
+      preLoaderRoute: typeof InfotainmentauthLoginIndexImport
+      parentRoute: typeof InfotainmentImport
+    }
+    '/infotainment/(auth)/register/': {
+      id: '/infotainment/(auth)/register/'
+      path: '/register'
+      fullPath: '/infotainment/register'
+      preLoaderRoute: typeof InfotainmentauthRegisterIndexImport
+      parentRoute: typeof InfotainmentImport
+    }
+    '/management/truck/$truckId/': {
+      id: '/management/truck/$truckId/'
+      path: '/'
+      fullPath: '/management/truck/$truckId/'
+      preLoaderRoute: typeof ManagementTruckTruckIdIndexImport
+      parentRoute: typeof ManagementTruckTruckIdImport
     }
   }
 }
 
 // Create and export the route tree
 
-<<<<<<< HEAD
 interface InfotainmentRouteChildren {
   InfotainmentIndexRoute: typeof InfotainmentIndexRoute
   InfotainmentVideoIdIndexRoute: typeof InfotainmentVideoIdIndexRoute
@@ -279,14 +227,28 @@ const InfotainmentRouteWithChildren = InfotainmentRoute._addFileChildren(
   InfotainmentRouteChildren,
 )
 
+interface ManagementTruckTruckIdRouteChildren {
+  ManagementTruckTruckIdIndexRoute: typeof ManagementTruckTruckIdIndexRoute
+}
+
+const ManagementTruckTruckIdRouteChildren: ManagementTruckTruckIdRouteChildren =
+  {
+    ManagementTruckTruckIdIndexRoute: ManagementTruckTruckIdIndexRoute,
+  }
+
+const ManagementTruckTruckIdRouteWithChildren =
+  ManagementTruckTruckIdRoute._addFileChildren(
+    ManagementTruckTruckIdRouteChildren,
+  )
+
 interface ManagementRouteChildren {
   ManagementIndexRoute: typeof ManagementIndexRoute
-  ManagementTruckTruckIdIndexRoute: typeof ManagementTruckTruckIdIndexRoute
+  ManagementTruckTruckIdRoute: typeof ManagementTruckTruckIdRouteWithChildren
 }
 
 const ManagementRouteChildren: ManagementRouteChildren = {
   ManagementIndexRoute: ManagementIndexRoute,
-  ManagementTruckTruckIdIndexRoute: ManagementTruckTruckIdIndexRoute,
+  ManagementTruckTruckIdRoute: ManagementTruckTruckIdRouteWithChildren,
 }
 
 const ManagementRouteWithChildren = ManagementRoute._addFileChildren(
@@ -299,62 +261,44 @@ export interface FileRoutesByFullPath {
   '/management': typeof ManagementRouteWithChildren
   '/infotainment/': typeof InfotainmentIndexRoute
   '/management/': typeof ManagementIndexRoute
-  '/infotainment/$videoId': typeof InfotainmentVideoIdIndexRoute
-  '/infotainment/login': typeof InfotainmentauthLoginIndexRoute
-  '/infotainment/register': typeof InfotainmentauthRegisterIndexRoute
-  '/management/truck/$truckId': typeof ManagementTruckTruckIdIndexRoute
-=======
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/infotainment': typeof InfotainmentIndexRoute
-  '/management': typeof ManagementIndexRoute
-  '/management/truck/$truckId': typeof ManagementTruckTruckIdRoute
+  '/management/truck/$truckId': typeof ManagementTruckTruckIdRouteWithChildren
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/validate': typeof authValidateIndexRoute
   '/infotainment/$videoId': typeof InfotainmentVideoIdIndexRoute
->>>>>>> 1772d87e (demo: changed directory structure)
+  '/infotainment/login': typeof InfotainmentauthLoginIndexRoute
+  '/infotainment/register': typeof InfotainmentauthRegisterIndexRoute
+  '/management/truck/$truckId/': typeof ManagementTruckTruckIdIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/infotainment': typeof InfotainmentIndexRoute
   '/management': typeof ManagementIndexRoute
-<<<<<<< HEAD
-  '/infotainment/$videoId': typeof InfotainmentVideoIdIndexRoute
-  '/infotainment/login': typeof InfotainmentauthLoginIndexRoute
-  '/infotainment/register': typeof InfotainmentauthRegisterIndexRoute
-  '/management/truck/$truckId': typeof ManagementTruckTruckIdIndexRoute
-=======
-  '/management/truck/$truckId': typeof ManagementTruckTruckIdRoute
   '/login': typeof authLoginIndexRoute
   '/register': typeof authRegisterIndexRoute
   '/validate': typeof authValidateIndexRoute
   '/infotainment/$videoId': typeof InfotainmentVideoIdIndexRoute
->>>>>>> 1772d87e (demo: changed directory structure)
+  '/infotainment/login': typeof InfotainmentauthLoginIndexRoute
+  '/infotainment/register': typeof InfotainmentauthRegisterIndexRoute
+  '/management/truck/$truckId': typeof ManagementTruckTruckIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-<<<<<<< HEAD
   '/infotainment': typeof InfotainmentRouteWithChildren
   '/management': typeof ManagementRouteWithChildren
   '/infotainment/': typeof InfotainmentIndexRoute
   '/management/': typeof ManagementIndexRoute
-  '/infotainment/$videoId/': typeof InfotainmentVideoIdIndexRoute
-  '/infotainment/(auth)/login/': typeof InfotainmentauthLoginIndexRoute
-  '/infotainment/(auth)/register/': typeof InfotainmentauthRegisterIndexRoute
-  '/management/truck/$truckId/': typeof ManagementTruckTruckIdIndexRoute
-=======
-  '/infotainment/': typeof InfotainmentIndexRoute
-  '/management/': typeof ManagementIndexRoute
-  '/management/truck/$truckId': typeof ManagementTruckTruckIdRoute
+  '/management/truck/$truckId': typeof ManagementTruckTruckIdRouteWithChildren
   '/(auth)/login/': typeof authLoginIndexRoute
   '/(auth)/register/': typeof authRegisterIndexRoute
   '/(auth)/validate/': typeof authValidateIndexRoute
   '/infotainment/$videoId/': typeof InfotainmentVideoIdIndexRoute
->>>>>>> 1772d87e (demo: changed directory structure)
+  '/infotainment/(auth)/login/': typeof InfotainmentauthLoginIndexRoute
+  '/infotainment/(auth)/register/': typeof InfotainmentauthRegisterIndexRoute
+  '/management/truck/$truckId/': typeof ManagementTruckTruckIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -363,26 +307,24 @@ export interface FileRouteTypes {
     | '/'
     | '/infotainment'
     | '/management'
-<<<<<<< HEAD
     | '/infotainment/'
     | '/management/'
-    | '/infotainment/$videoId'
-    | '/infotainment/login'
-    | '/infotainment/register'
-    | '/management/truck/$truckId'
-=======
     | '/management/truck/$truckId'
     | '/login'
     | '/register'
     | '/validate'
     | '/infotainment/$videoId'
->>>>>>> 1772d87e (demo: changed directory structure)
+    | '/infotainment/login'
+    | '/infotainment/register'
+    | '/management/truck/$truckId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/infotainment'
     | '/management'
-<<<<<<< HEAD
+    | '/login'
+    | '/register'
+    | '/validate'
     | '/infotainment/$videoId'
     | '/infotainment/login'
     | '/infotainment/register'
@@ -392,21 +334,6 @@ export interface FileRouteTypes {
     | '/'
     | '/infotainment'
     | '/management'
-    | '/infotainment/'
-    | '/management/'
-    | '/infotainment/$videoId/'
-    | '/infotainment/(auth)/login/'
-    | '/infotainment/(auth)/register/'
-    | '/management/truck/$truckId/'
-=======
-    | '/management/truck/$truckId'
-    | '/login'
-    | '/register'
-    | '/validate'
-    | '/infotainment/$videoId'
-  id:
-    | '__root__'
-    | '/'
     | '/infotainment/'
     | '/management/'
     | '/management/truck/$truckId'
@@ -414,40 +341,28 @@ export interface FileRouteTypes {
     | '/(auth)/register/'
     | '/(auth)/validate/'
     | '/infotainment/$videoId/'
->>>>>>> 1772d87e (demo: changed directory structure)
+    | '/infotainment/(auth)/login/'
+    | '/infotainment/(auth)/register/'
+    | '/management/truck/$truckId/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-<<<<<<< HEAD
   InfotainmentRoute: typeof InfotainmentRouteWithChildren
   ManagementRoute: typeof ManagementRouteWithChildren
-=======
-  InfotainmentIndexRoute: typeof InfotainmentIndexRoute
-  ManagementIndexRoute: typeof ManagementIndexRoute
-  ManagementTruckTruckIdRoute: typeof ManagementTruckTruckIdRoute
   authLoginIndexRoute: typeof authLoginIndexRoute
   authRegisterIndexRoute: typeof authRegisterIndexRoute
   authValidateIndexRoute: typeof authValidateIndexRoute
-  InfotainmentVideoIdIndexRoute: typeof InfotainmentVideoIdIndexRoute
->>>>>>> 1772d87e (demo: changed directory structure)
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-<<<<<<< HEAD
   InfotainmentRoute: InfotainmentRouteWithChildren,
   ManagementRoute: ManagementRouteWithChildren,
-=======
-  InfotainmentIndexRoute: InfotainmentIndexRoute,
-  ManagementIndexRoute: ManagementIndexRoute,
-  ManagementTruckTruckIdRoute: ManagementTruckTruckIdRoute,
   authLoginIndexRoute: authLoginIndexRoute,
   authRegisterIndexRoute: authRegisterIndexRoute,
   authValidateIndexRoute: authValidateIndexRoute,
-  InfotainmentVideoIdIndexRoute: InfotainmentVideoIdIndexRoute,
->>>>>>> 1772d87e (demo: changed directory structure)
 }
 
 export const routeTree = rootRoute
@@ -461,24 +376,16 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-<<<<<<< HEAD
         "/infotainment",
-        "/management"
-=======
-        "/infotainment/",
-        "/management/",
-        "/management/truck/$truckId",
+        "/management",
         "/(auth)/login/",
         "/(auth)/register/",
-        "/(auth)/validate/",
-        "/infotainment/$videoId/"
->>>>>>> 1772d87e (demo: changed directory structure)
+        "/(auth)/validate/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-<<<<<<< HEAD
     "/infotainment": {
       "filePath": "infotainment.tsx",
       "children": [
@@ -492,7 +399,7 @@ export const routeTree = rootRoute
       "filePath": "management.tsx",
       "children": [
         "/management/",
-        "/management/truck/$truckId/"
+        "/management/truck/$truckId"
       ]
     },
     "/infotainment/": {
@@ -502,6 +409,22 @@ export const routeTree = rootRoute
     "/management/": {
       "filePath": "management/index.tsx",
       "parent": "/management"
+    },
+    "/management/truck/$truckId": {
+      "filePath": "management/truck/$truckId.tsx",
+      "parent": "/management",
+      "children": [
+        "/management/truck/$truckId/"
+      ]
+    },
+    "/(auth)/login/": {
+      "filePath": "(auth)/login/index.tsx"
+    },
+    "/(auth)/register/": {
+      "filePath": "(auth)/register/index.tsx"
+    },
+    "/(auth)/validate/": {
+      "filePath": "(auth)/validate/index.tsx"
     },
     "/infotainment/$videoId/": {
       "filePath": "infotainment/$videoId/index.tsx",
@@ -517,29 +440,7 @@ export const routeTree = rootRoute
     },
     "/management/truck/$truckId/": {
       "filePath": "management/truck/$truckId/index.tsx",
-      "parent": "/management"
-=======
-    "/infotainment/": {
-      "filePath": "infotainment/index.tsx"
-    },
-    "/management/": {
-      "filePath": "management/index.tsx"
-    },
-    "/management/truck/$truckId": {
-      "filePath": "management/truck/$truckId.tsx"
-    },
-    "/(auth)/login/": {
-      "filePath": "(auth)/login/index.tsx"
-    },
-    "/(auth)/register/": {
-      "filePath": "(auth)/register/index.tsx"
-    },
-    "/(auth)/validate/": {
-      "filePath": "(auth)/validate/index.tsx"
-    },
-    "/infotainment/$videoId/": {
-      "filePath": "infotainment/$videoId/index.tsx"
->>>>>>> 1772d87e (demo: changed directory structure)
+      "parent": "/management/truck/$truckId"
     }
   }
 }

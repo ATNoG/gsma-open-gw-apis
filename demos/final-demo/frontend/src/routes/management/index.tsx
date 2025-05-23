@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { $api } from "@/api/client";
 import { useNotification } from "@/components/notification-provider";
 import {
@@ -17,15 +16,11 @@ import {
   WifiOff,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-=======
-import { createFileRoute } from "@tanstack/react-router";
->>>>>>> 1772d87e (demo: changed directory structure)
 
 export const Route = createFileRoute("/management/")({
   component: RouteComponent,
 });
 
-<<<<<<< HEAD
 type StatusMemory = Record<number, boolean>;
 
 function RouteComponent() {
@@ -163,8 +158,4 @@ function RouteComponent() {
       )}
     </main>
   );
-=======
-function RouteComponent() {
-  return <div>Truck list</div>;
->>>>>>> 1772d87e (demo: changed directory structure)
 }
