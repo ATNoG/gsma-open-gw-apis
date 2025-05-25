@@ -1,4 +1,4 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from fastapi import APIRouter, Depends
 from http import HTTPStatus
 
@@ -12,9 +12,11 @@ router = APIRouter()
 @router.post("/increase-bandwidth/{id}", status_code=HTTPStatus.NO_CONTENT)
 async def increase_bandwidth(id: int, db: Session = Depends(get_session)):
     service = QosService()
-    truck = db.get(Truck, id)
+    stmt = select(Truck)
+    trucks = db.exec(stmt)
 
-    if truck is None:
-        return
-
-    await service.increase_bandwidth(truck)
+    for truck in trucks:
+        if truck.id == id:
+            await service.increase_bandwidth(truck)
+        else:
+            await service.decrease_bandwidth(truck)
