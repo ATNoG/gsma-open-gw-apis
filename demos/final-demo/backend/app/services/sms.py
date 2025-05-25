@@ -1,7 +1,6 @@
-from logging import error
-from fastapi import HTTPException, status
 import httpx
-from app.models import auth
+from fastapi import HTTPException
+
 from app.settings import settings
 
 

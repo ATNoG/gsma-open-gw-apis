@@ -20,3 +20,16 @@ class OtpRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class LoginResponse(BaseModel):
+    token: str
+
+
+class UserRequest(BaseModel):
+    token: str
+
+
+class UserResponse(BaseModel):
+    username: str
+    phoneNumber: str
