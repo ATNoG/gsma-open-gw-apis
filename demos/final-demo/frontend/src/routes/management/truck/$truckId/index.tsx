@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import YouTube from "react-youtube";
 
 import { z } from "zod";
 
@@ -128,7 +129,7 @@ function RouteComponent() {
                 {queueStatus ? "Waiting" : "Driving "}
               </TooltipContent>
             </Tooltip>
-            {queueStatus ? "Waiting" : "Driving "}
+            {queueStatus ? "In queue" : "Driving "}
           </span>
           <Separator orientation="vertical" />
           <span className="text-foreground/60 flex items-center gap-4 font-semibold">
@@ -148,7 +149,7 @@ function RouteComponent() {
           </span>
         </div>
       </section>
-      <div className="h-full">
+      <div className="grid h-full grid-cols-2">
         <MapContainer center={position} zoom={16} className="z-0 h-full w-full">
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -165,6 +166,12 @@ function RouteComponent() {
             </Popup>
           </Marker>
         </MapContainer>
+        <YouTube
+          className="h-full w-full"
+          iframeClassName="h-full w-full"
+          videoId="9cxlCvXE9-4"
+          opts={{ playerVars: { controls: 0, autoplay: 1, mute: 1 } }}
+        />
       </div>
     </main>
   );
