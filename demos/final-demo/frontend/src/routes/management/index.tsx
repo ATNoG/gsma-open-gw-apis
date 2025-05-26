@@ -114,10 +114,10 @@ function RouteComponent() {
                         )}
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isQueued ? "Waiting" : "Driving "}
+                        {isQueued ? "In queue" : "Driving "}
                       </TooltipContent>
                     </Tooltip>
-                    {isQueued ? "Waiting" : "Driving "}
+                    {isQueued ? "In queue" : "Driving "}
                   </span>
                   <span className="text-foreground/60 flex items-center gap-4 font-semibold">
                     <Tooltip>

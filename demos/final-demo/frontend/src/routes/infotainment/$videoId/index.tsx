@@ -49,9 +49,7 @@ function RouteComponent() {
       <YouTube
         style={{ width: `${vidWidth}px`, height: `${vidHeight}px` }}
         iframeClassName="w-full h-full focus:outline-none"
-        onPlaybackQualityChange={(event) => {
-          console.log(event.target.setPlaybackQuality("hd1080"));
-        }}
+        opts={{ playerVars: { autoplay: 1 } }}
         videoId={videoId}
       />
     </main>
