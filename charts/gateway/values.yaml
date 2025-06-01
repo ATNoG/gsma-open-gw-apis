@@ -63,40 +63,6 @@ nefSecret: {}
 gatewayConfig:
   gateway_public_url: "http://localhost:8000"
 
-  nef:
-    url: "http://localhost:8888"
-    base_path: "/nef/api/v1/"
-
-    gateway_af_id: "camara"
-
-    username: "admin@my-email.com"
-    password: "pass"
-
-  sms_otp:
-    sms_backend: "mock"
-    otp_backend: "redis"
-
-  qos_profiles:
-    backend: "nef"
-
-  location:
-    backend: "nef"
-
-  qod_provisioning:
-    backend: "nef"
-
-  geofencing:
-    backend: "nef"
-
-  reachability_status:
-    backend: "nef"
-  
-  qod:
-    backend: "nef"
-
-  roaming_status:
-    backend: "nef"
-
 redis:
   architecture: standalone
   master:

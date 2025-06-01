@@ -22,8 +22,31 @@ gatewayConfig:
 
   nef:
     url: "http://nef-emulator-backend.nef-emulator.svc:8888"
+    base_path: "/nef/api/v1/"
+    gateway_af_id: "camara"
 
   sms_otp:
     sms_backend: "smsc"
     smsc_url: "http://ims-smsc.default.svc:7090"
     sender_id: "GATEWAY"
+
+  qos_profiles:
+    backend: "nef"
+
+  location:
+    backend: "nef"
+
+  qod_provisioning:
+    backend: "nef"
+
+  geofencing:
+    backend: "nef"
+
+  reachability_status:
+    backend: "nef"
+
+  qod:
+    backend: "nef"
+
+  roaming_status:
+    backend: "nef"
