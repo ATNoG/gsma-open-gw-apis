@@ -7,12 +7,10 @@ from app.settings import QodBackend, settings
 
 qod_interface: QoDInterface
 
+if settings.qod.backend == QodBackend.Nef:
+    from .nef import nef_qod_interface
 
-match settings.qod.backend:
-    case QodBackend.Nef:
-        from .nef import nef_qod_interface
-
-        qod_interface = nef_qod_interface
+    qod_interface = nef_qod_interface
 
 
 def get_qod_interface() -> QoDInterface:

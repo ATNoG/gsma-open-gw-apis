@@ -5,15 +5,17 @@ from typing import Annotated
 from app.settings import SMSBackend, settings
 from app.interfaces.sms import SMSInterface
 
-from .mock import MockSMSInterface
-from .smsc import SMSCSMSInterface
-
 sms_interface: SMSInterface
-match settings.sms_otp.sms_backend:
-    case SMSBackend.Mock:
-        sms_interface = MockSMSInterface()
-    case SMSBackend.SMSC:
-        sms_interface = SMSCSMSInterface(settings.sms_otp.smsc_url)
+if settings.sms_otp.sms_backend == SMSBackend.Mock:
+    from .mock import MockSMSInterface
+
+    sms_interface = MockSMSInterface()
+elif settings.sms_otp.sms_backend == SMSBackend.SMSC:
+    from .smsc import SMSCSMSInterface
+
+    sms_interface = SMSCSMSInterface(
+        settings.sms_otp.smsc_url, settings.sms_otp.sender_id
+    )
 
 
 async def get_sms_driver() -> SMSInterface:

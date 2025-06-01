@@ -1,7 +1,10 @@
+import asyncio
 import logging
 from http import HTTPStatus
+from typing import AsyncIterator
+from contextlib import asynccontextmanager
 
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 
 from app.exceptions import ResourceNotFound
 from app.drivers.geofencing.nef import nef_geofencing_subscription_interface
@@ -11,9 +14,19 @@ from app.schemas.nef_schemas.monitoringevent import (
     SupportedGADShapes,
 )
 
-router = APIRouter()
-
 LOG = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    task = asyncio.create_task(nef_geofencing_subscription_interface.clear_loop())
+
+    yield
+
+    task.cancel()
+
+
+router = APIRouter(lifespan=lifespan)
 
 
 @router.post("/geofencing/{sub_id}", status_code=HTTPStatus.NO_CONTENT)
