@@ -1,7 +1,9 @@
+import types
 import typing
 import logging
 from enum import Enum
-from typing import Annotated, Any, Literal, Optional, Union
+from collections.abc import Generator
+from typing import Annotated, Any, Literal, Optional, TypeAliasType, Union
 
 from pydantic import AnyHttpUrl, BaseModel, Field, PositiveInt, RedisDsn
 from pydantic.fields import FieldInfo
@@ -73,12 +75,35 @@ class NEFSettingsHierachySettingsSource(PydanticBaseSettingsSource):
             if self._is_nef_settings(hint):
                 existing_values = values.get(field_name, {})
                 values[field_name] = nef_settings | existing_values
-            elif issubclass(hint, BaseModel):
-                values[field_name] = self._process_model(
-                    hint, values.get(field_name, {}), nef_settings
-                )
+                continue
+
+            hint = self._resolve_type(hint)
+
+            for ty in self._walk_type(hint):
+                if issubclass(hint, BaseModel):
+                    values[field_name] = self._process_model(
+                        ty, values.get(field_name, {}), nef_settings
+                    )
 
         return values
+
+    def _resolve_type(self, hint: type) -> type:
+        while True:
+            if isinstance(hint, TypeAliasType):
+                hint = hint.__value__
+            elif typing.get_origin(hint) is Annotated:
+                hint = typing.get_args(hint)[0]
+            else:
+                return hint
+
+    def _walk_type(self, hint: type) -> Generator[type]:
+        origin = typing.get_origin(hint)
+        if origin is Union or origin is types.UnionType:
+            type_args = typing.get_args(hint)
+            for ty in type_args:
+                yield ty
+        else:
+            yield type
 
     def __call__(self) -> dict[str, Any]:
         values = self.current_state
@@ -110,105 +135,227 @@ class NEFSettingsHierachySettingsSource(PydanticBaseSettingsSource):
             if hint is None:
                 continue
 
-            if issubclass(hint, BaseModel) and not self._is_nef_settings(hint):
-                values[field_name] = self._process_model(
-                    hint, values.get(field_name, {}), nef_settings
-                )
+            hint = self._resolve_type(hint)
+
+            for ty in self._walk_type(hint):
+                if issubclass(ty, BaseModel) and not self._is_nef_settings(ty):
+                    values[field_name] = self._process_model(
+                        ty, values.get(field_name, {}), nef_settings
+                    )
 
         return values
 
 
-class SMSBackend(Enum):
+class SMSBackend(str, Enum):
+    Disabled = "disabled"
     Mock = "mock"
     SMSC = "smsc"
 
 
-class OTPBackend(Enum):
+class OTPBackend(str, Enum):
     Memory = "memory"
     Redis = "redis"
 
 
-class SMSOTPSettings(BaseModel):
-    sms_backend: SMSBackend
-    otp_backend: OTPBackend
+class BaseSMSOTPSettings(BaseModel):
+    otp_backend: OTPBackend = OTPBackend.Memory
 
     otp_code_size: PositiveInt = 6
     max_attempts: PositiveInt = 5
     otp_expiry_secs: PositiveInt = 1800
 
+
+class DisabledSMSSettings(BaseSMSOTPSettings):
+    sms_backend: Literal[SMSBackend.Disabled] = SMSBackend.Disabled
+
+
+class MockSMSSettings(BaseSMSOTPSettings):
+    sms_backend: Literal[SMSBackend.Mock] = SMSBackend.Mock
+
+
+class SMSCSMSSettings(BaseSMSOTPSettings):
+    sms_backend: Literal[SMSBackend.SMSC] = SMSBackend.SMSC
+
     smsc_url: AnyHttpUrl
     sender_id: Annotated[str, Field(max_length=11)]
 
 
-class QoSProfilesBackend(Enum):
+type SMSOTPSettings = Annotated[
+    DisabledSMSSettings | MockSMSSettings | SMSCSMSSettings,
+    Field(discriminator="sms_backend"),
+]
+
+
+class QoSProfilesBackend(str, Enum):
+    Disabled = "disabled"
     NEF = "nef"
 
 
-class QoSProfilesSettings(BaseModel):
-    backend: QoSProfilesBackend
+class BaseQoSProfilesSettings(BaseModel):
+    pass
 
+
+class DisabledQoSProfilesSettings(BaseQoSProfilesSettings):
+    backend: Literal[QoSProfilesBackend.Disabled] = QoSProfilesBackend.Disabled
+
+
+class NEFQoSProfilesSettings(BaseQoSProfilesSettings):
+    backend: Literal[QoSProfilesBackend.NEF] = QoSProfilesBackend.NEF
     nef: NEFSettings
 
 
+type QoSProfilesSettings = Annotated[
+    DisabledQoSProfilesSettings | NEFQoSProfilesSettings, Field(discriminator="backend")
+]
+
+
 class LocationBackend(str, Enum):
+    Disabled = "disabled"
     Mock = "mock"
     Nef = "nef"
 
 
-class LocationSettings(BaseModel):
-    backend: LocationBackend
+class BaseLocationSettings(BaseModel):
+    pass
 
+
+class DisabledLocationSettings(BaseLocationSettings):
+    backend: Literal[LocationBackend.Disabled] = LocationBackend.Disabled
+
+
+class MockLocationSettings(BaseLocationSettings):
+    backend: Literal[LocationBackend.Mock] = LocationBackend.Mock
+
+
+class NEFLocationSettings(BaseLocationSettings):
+    backend: Literal[LocationBackend.Nef] = LocationBackend.Nef
     nef: NEFSettings
+
+
+type LocationSettings = Annotated[
+    DisabledLocationSettings | MockLocationSettings | NEFLocationSettings,
+    Field(discriminator="backend"),
+]
 
 
 class QodProvisioningBackend(str, Enum):
+    Disabled = "disabled"
     Nef = "nef"
 
 
-class ProvisioningSettings(BaseModel):
-    backend: QodProvisioningBackend
+class BaseProvisioningSettings(BaseModel):
+    pass
 
+
+class DisabledProvisioningSettings(BaseProvisioningSettings):
+    backend: Literal[QodProvisioningBackend.Disabled] = QodProvisioningBackend.Disabled
+
+
+class NEFProvisioningSettings(BaseProvisioningSettings):
+    backend: Literal[QodProvisioningBackend.Nef] = QodProvisioningBackend.Nef
     nef: NEFSettings
+
+
+type ProvisioningSettings = Annotated[
+    DisabledProvisioningSettings | NEFProvisioningSettings,
+    Field(discriminator="backend"),
+]
 
 
 class QodBackend(str, Enum):
+    Disabled = "disabled"
     Nef = "nef"
 
 
-class QodSettings(BaseModel):
-    backend: QodBackend
+class BaseQodSettings(BaseModel):
+    pass
 
+
+class DisabledQodSettings(BaseQodSettings):
+    backend: Literal[QodBackend.Disabled] = QodBackend.Disabled
+
+
+class NEFQodSettings(BaseQodSettings):
+    backend: Literal[QodBackend.Nef] = QodBackend.Nef
     nef: NEFSettings
 
 
-class GeofencingBackend(Enum):
+type QodSettings = Annotated[
+    DisabledQodSettings | NEFQodSettings, Field(discriminator="backend")
+]
+
+
+class GeofencingBackend(str, Enum):
+    Disabled = "disabled"
     NEF = "nef"
 
 
-class GeofencingSettings(BaseModel):
-    backend: GeofencingBackend
+class BaseGeofencingSettings(BaseModel):
+    pass
 
+
+class DisabledGeofencingSettings(BaseGeofencingSettings):
+    backend: Literal[GeofencingBackend.Disabled] = GeofencingBackend.Disabled
+
+
+class NefGeofencingSettings(BaseGeofencingSettings):
+    backend: Literal[GeofencingBackend.NEF] = GeofencingBackend.NEF
     nef: NEFSettings
+
+
+type GeofencingSettings = Annotated[
+    DisabledGeofencingSettings | NefGeofencingSettings, Field(discriminator="backend")
+]
 
 
 class ReachabilityStatusBackend(str, Enum):
+    Disabled = "disabled"
     Nef = "nef"
 
 
-class ReachabilityStatusSettings(BaseModel):
-    backend: ReachabilityStatusBackend
+class BaseReachabilityStatusSettings(BaseModel):
+    pass
 
+
+class DisabledReachabilityStatusSettings(BaseReachabilityStatusSettings):
+    backend: Literal[ReachabilityStatusBackend.Disabled] = (
+        ReachabilityStatusBackend.Disabled
+    )
+
+
+class NefReachabilityStatusSettings(BaseReachabilityStatusSettings):
+    backend: Literal[ReachabilityStatusBackend.Nef] = ReachabilityStatusBackend.Nef
     nef: NEFSettings
+
+
+type ReachabilityStatusSettings = Annotated[
+    DisabledReachabilityStatusSettings | NefReachabilityStatusSettings,
+    Field(discriminator="backend"),
+]
 
 
 class RoamingStatusBackend(str, Enum):
+    Disabled = "disabled"
     Nef = "nef"
 
 
-class RoamingStatusSettings(BaseModel):
-    backend: RoamingStatusBackend
+class BaseRoamingStatusSettings(BaseModel):
+    pass
 
+
+class DisabledRoamingStatusSettings(BaseRoamingStatusSettings):
+    backend: Literal[RoamingStatusBackend.Disabled] = RoamingStatusBackend.Disabled
+
+
+class NefRoamingStatusSettings(BaseRoamingStatusSettings):
+    backend: Literal[RoamingStatusBackend.Nef] = RoamingStatusBackend.Nef
     nef: NEFSettings
+
+
+type RoamingStatusSettings = Annotated[
+    DisabledRoamingStatusSettings | NefRoamingStatusSettings,
+    Field(discriminator="backend"),
+]
 
 
 class RedisSettings(BaseModel):
@@ -227,20 +374,22 @@ class Settings(BaseSettings):
 
     log_level: LogLevel = "INFO"
 
-    redis: RedisSettings
+    redis: RedisSettings = RedisSettings()
 
     gateway_public_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
 
     nef: Optional[NEFSettings] = None
 
-    sms_otp: SMSOTPSettings
-    qos_profiles: QoSProfilesSettings
-    location: LocationSettings
-    qod_provisioning: ProvisioningSettings
-    reachability_status: ReachabilityStatusSettings
-    geofencing: GeofencingSettings
-    qod: QodSettings
-    roaming_status: RoamingStatusSettings
+    sms_otp: SMSOTPSettings = DisabledSMSSettings()
+    qos_profiles: QoSProfilesSettings = DisabledQoSProfilesSettings()
+    location: LocationSettings = DisabledLocationSettings()
+    qod_provisioning: ProvisioningSettings = DisabledProvisioningSettings()
+    reachability_status: ReachabilityStatusSettings = (
+        DisabledReachabilityStatusSettings()
+    )
+    geofencing: GeofencingSettings = DisabledGeofencingSettings()
+    qod: QodSettings = DisabledQodSettings()
+    roaming_status: RoamingStatusSettings = DisabledRoamingStatusSettings()
 
     @classmethod
     def settings_customise_sources(
