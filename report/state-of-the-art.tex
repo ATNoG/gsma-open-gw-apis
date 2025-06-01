@@ -8,26 +8,22 @@ between these other projects and ours, and how they compare.
 
 \subsection{3GPP OpenAPIs}\label{sec:related_work_3gpp}
 
-\emph{3GPP}, the body responsible for the norms that define the
-5G protocol, designed not only the radio interface to be used by
-5G Networks (designated \emph{5G New Radio}, shortened as
-\emph{5G-NR}), but also the architecture of the network's
-\emph{Core}. This new architecture is a \emph{Service-Based
-Architecture}, with each service denominated as \emph{Network
-Functions} (\emph{NFs}). These consist of applications that run
-on generic hardware, such as the one offered by Cloud
-Infrastructure.
+\emph{3GPP}, the body responsible for the norms that define the 5G protocol,
+designed not only the radio interface to be used by 5G Networks (designated
+\emph{5G New Radio}, shortened as \emph{5G-NR}), but also the architecture of
+the network's \emph{Core}. This new architecture is a \emph{Service-Based
+	Architecture}, with each service denominated as \emph{Network Functions}
+(\emph{NFs}). These consist of applications that run on generic hardware, such
+as the one offered by Cloud Infrastructure.
 
-These services communicate between them by \emph{APIs} defined by
-\emph{3GPP} and described in \emph{OpenAPIs}, a documentation
-standard. However, these \emph{APIs} are designed for use only
-inside the MNO's network \emph{core}, and not to be used by third
-parties, exception being made to the \emph{Network Exposure
-Function} (\emph{NEF}). The latter, is an \emph{NF} specifically
-designed to allow third-party access to the MNO's network
-capabilities securely. The \emph{APIs} that are offered are
-designated as \emph{Northbound Interfaces}, and their clients are
-denominated of \emph{Application Functions} (\emph{AFs}).
+These services communicate between them by \emph{APIs} defined by \emph{3GPP}
+and described in \emph{OpenAPIs}, a documentation standard. However, these
+\emph{APIs} are designed for use only inside the MNO's network \emph{core}, and
+not to be used by third parties, exception being made to the \emph{NEF}. The
+latter, is an \emph{NF} specifically designed to allow third-party access to
+the MNO's network capabilities securely. The \emph{APIs} that are offered are
+designated as \emph{Northbound Interfaces}, and their clients are denominated
+of \emph{Application Functions} (\emph{AFs}).
 
 In conclusion, 3GPP OpenAPIs operate only in the operator's
 domain and do not expose the operator's network capabilities to
@@ -39,31 +35,28 @@ not be capable of using them, since these are limited to the
 scope of the network, therefore using them requires extensive
 domain-specific knowledge.
 
-\subsection{CAMARA}
+\subsection{CAMARA}\label{sec:camara}
 
-The \emph{CAMARA} initiative's main objectives are the
-definition, development and validation of
-\emph{Network-as-a-Service} (\emph{NaaS}) \emph{APIs}. These are
-being developed with focus on rapid implementation, in order to
-achieve one of \emph{CAMARA}'s big objectives, which is MNO
-adoption, as a way to ensure an unified interface that is not
-supplier dependent and that is able to give third-parties the
-opportunity to interact with 5G services without the need to
-contact the MNO.
+The \emph{CAMARA} initiative's main objectives are the definition, development
+and validation of \emph{Network-as-a-Service} (\emph{NaaS}) \emph{APIs}. These
+are being developed with focus on rapid implementation, in order to achieve one
+of \emph{CAMARA}'s big objectives, which is MNO adoption, as a way to ensure a
+unified interface that is not supplier dependent \cite{5gamericas} and that is
+able to give third-parties the opportunity to interact with 5G services without
+the need to contact the MNO.
 
 Another of \emph{CAMARA}'s big objectives is the accessibility of
 all its APIs to software developers without any experience in the
 5G/Telecom domain, that is, to ensure that the developers are
 able to utilize these services simply and without the need to
 interact directly with network operators or learn the details of
-telecommunications to be able to use these \emph{APIs} 
+telecommunications to be able to use these \emph{APIs}
 
-This initiative is heavily related with \emph{GSMA Open Gateway},
-which we will talk about in the next section, since it is these
-\emph{APIs} that will be published through \emph{CAMARA}. In
-addition, the GSMA Open Gateway, CAMARA and TMF are aligned to
-bring 5G capabilities to the market in a more accessible and
-standardized way.
+This initiative is heavily related with \emph{GSMA Open Gateway}, which we will
+address in the next section, since it is these \emph{APIs} that will be
+published through \emph{CAMARA}. In addition, the GSMA Open Gateway, CAMARA and
+TM Forum (TMF) are aligned to bring 5G capabilities to the market in a more
+accessible, interoperable, portable and standardized way.
 
 
 \subsection{GSMA Open Gateway}
@@ -71,104 +64,97 @@ standardized way.
 Similarly to the \emph{NEF}, the \emph{GSMA Open Gateway} aims to
 expose the various capabilities of network operators to third
 parties. However, there are advantages to using the \emph{GSMA
-Open Gateway}:
+	Open Gateway}:
 
-\begin{itemize} \item \textbf{Simplification}, the NEF exposes
-      quite complex interfaces with various details of the
-      operator's  of the operator's network, requiring knowledge
-      of mobile networks and 5G, increasing the cost of adopting
-      these APIs.
+\begin{itemize}
+	\item \textbf{Simplification}, the NEF exposes quite complex interfaces with
+	      various details of the operator's network, requiring in-depth knowledge of
+	      mobile networks and 5G, increasing the cost of adopting these APIs.
 
-    \item \textbf{Aggregation}, the NEF only exposes access to
-      the operator's network, while the GSMA Open Gateway
-      provides for the existence of aggregators that offer the
-      APIs to various operators in an unified manner, requiring
-      contact with only one aggregator rather than multiple
-      operators.
+	\item \textbf{Aggregation}, the NEF only exposes access to
+	      the operator's network, while the GSMA Open Gateway
+	      provides for the existence of aggregators that offer the
+	      APIs to various operators in a unified manner, requiring
+	      contact with only one aggregator rather than multiple
+	      operators.
 
-\item \textbf{Privacy management}, the GSMA Open Gateway includes
-mechanisms for the end-user consent, which in many cases is
-necessary for legal reasons.\end{itemize}
+	\item \textbf{Privacy management}, the GSMA Open Gateway includes
+	      mechanisms for the end-user consent, which in many cases is
+	      necessary for legal reasons.\end{itemize}
 
-This does not imply that \emph{NEF} is an inferior interface; it
-offers greater integration with operators' networks. In reality,
-\emph{NEF} and \emph{GSMA Open Gateway} are complementary
-technologies. Still, it's important to note that \emph{GSMA Open
-Gateway} is a more convenient interface for most third-party
-application developers because, unlike direct interaction with
-\emph{NEF},  it does not require knowledge of mobile networks.
-The \emph{NEF} is also important, on the one hand because it
-offers greater integration with the operator's network, but also
-because it is possible to implement a \emph{GSMA Open Gateway}
-over it, modelling it as an \emph{AF}.
+This does not imply that \emph{NEF} is an inferior interface; it offers greater
+integration with operators' networks. In reality, \emph{NEF} and \emph{GSMA
+	Open Gateway} are complementary technologies. Still, it's important to note
+that \emph{GSMA Open Gateway} is a more convenient interface for most
+third-party application developers because, unlike direct interaction with
+\emph{NEF},  it does not require knowledge of mobile networks, allowing
+operators to expose capabilities to third-party (external) service providers in
+a programmatic manner \cite{5gamericas}. The \emph{NEF} is also important. On
+the one hand because it offers greater integration with the operator's network.
+On the other hand because it is possible to implement a \emph{GSMA Open Gateway} over
+it, modelling it as an \emph{AF}.
 
 \subsection{TMF Open Digital Architecture}
 
-The \emph{Open Digital Architecture} (\emph{ODA}) is a framework
-created by the \emph{TM Forum} (\emph{TMF}) to help service
-providers transition to open and interoperable solutions. This
-framework spans several areas, touching not only on the technical
-side but also on the company's processes. In our project, the
-most relevant are the \emph{OpenAPIs} defined in this framework,
-which define domain-independent interfaces for offering resources
-and services. Of particular interest are the interfaces that make
-it possible to obtain a service catalog, acquire these services
-and control their life cycle.
+The \emph{Open Digital Architecture} (\emph{ODA}) is a framework created by the
+\emph{TMF} to help service providers transition to open and interoperable
+solutions. This framework spans several areas, focusing not only on the
+technical side but also on the company's processes. In our project, the most
+relevant are the \emph{OpenAPIs} defined in this framework, which define
+domain-independent interfaces for offering resources and services. Of
+particular interest are the interfaces that make it possible to obtain a
+service catalog, acquire these services and control their life cycle.
 
-The \emph{TMF APIs} are more generic than those offered by the
-\emph{GSMA Open Gateway}, offering more operations, but also
-increasing the complexity of their use compared to those offered
-by the \emph{GSMA Open Gateway}. The \emph{GSMA Open Gateway}
-also has the advantage of accommodating the multiple gateway
-aggregation scenario, allowing an aggregator to offer access to
-\emph{GSMA Open Gateway APIs} from several operators in an unified
-way, without the customer having to maintain contact with each
-operator individually. An interesting case in the collaboration
-of these two projects is the use of \emph{TMF APIs} to allow
-operators and aggregators to offer \emph{GSMA Open Gateway} as a
-service. In this scenario, the \emph{TMF APIs} would be used to
-offer the customer the opportunity to purchase a service that
-would provide a \emph{GSMA Open Gateway}. This would be
-orchestrated and made available in an automated way, reinforcing
-the operator/aggregator's offer and simplifying the developer's
-process of gaining access to the \emph{GSMA Open Gateway}.
+The \emph{TMF APIs}, which are domain-agnostic APIs, are more generic than
+those offered by the \emph{GSMA Open Gateway}, offering more operations, but
+also increasing the complexity of their use compared to those offered by the
+\emph{GSMA Open Gateway}. The \emph{GSMA Open Gateway} also has the advantage
+of accommodating the multiple gateway aggregation scenario, allowing an
+aggregator to offer access to \emph{GSMA Open Gateway APIs} from several
+operators in a unified way, without the customer having to maintain contact
+with each operator individually. An interesting case in the collaboration of
+these two projects is the use of \emph{TMF APIs} to allow operators and
+aggregators to offer \emph{GSMA Open Gateway} as a service. In this scenario,
+the \emph{TMF APIs} would be used to offer the customer the opportunity to
+acquire a service that would provide a \emph{GSMA Open Gateway}. This would be
+orchestrated and made available in an automated way, reinforcing the
+operator/aggregator's offer and simplifying the developer's process of gaining
+access to the \emph{GSMA Open Gateway}.
 
 
 \section{\emph{API} Adoption} Although these initiatives are
 relatively new, there are already operators implementing the
 \emph{APIs} defined by \emph{CAMARA} and the \emph{GSMA Open
-Gateway}.
+	Gateway}.
 
 \emph{Ericsson}, a multinational telecommunications company, has
-started to implement the \emph{APIs} defined by the \emph{CAMARA}\footnote{\url{https://www.fierce-network.com/wireless/ericsson-leads-top-operators-new-global-api-venture}} project, along with companies such as \emph{Google Cloud},
+started to implement the \emph{APIs} defined by the \emph{CAMARA}\cite{alleven_2024} project, along with companies such as \emph{Google Cloud},
 \emph{Deutsche Telekom}, \emph{Reliance Jio} and
-\emph{T-Mobile}\footnote{\url{https://adunaglobal.com/\#mission}},
+\emph{T-Mobile}\cite{aduna},
 participating in an initiative called \emph{Aduna}, which is
 developing and adopting a set of CAMARA APIs. The first APIs to
 be supported will be focused mainly on fraud prevention, with the
 aim of verifying numbers assigned to customers and an API that
 aims to facilitate the SIM Swapping
-process\footnote{\url{https://www.fierce-network.com/wireless/what-will-aduna-ericssons-massive-api-venture-release-first}}.
+process\cite{jones_2025}.
 
 Similarly, in the Middle East and North Africa region, an
 operator, \emph{Ooredoo}, recently implemented \emph{CAMARA
-APIs}, allowing the offer of new opportunities to businesses
-(customers)\footnote{\url{https://www.ooredoo.com/en/media/news_view/ooredoo-group-leads-mena-with-gsma-camara-api-implementation/}}.
+	APIs}, allowing the offer of new opportunities to businesses
+(customers)\cite{ooredoo}.
 
 This reaffirms the commitment that the various operators have
 made to the \emph{GSMA Open Gateway} and the \emph{CAMARA}
 initiative.
 
-Like \emph{Aduna}, \emph{Ooredoo} has also started to offer
-programmatic \emph{SIM Swapping}, as well as providing the
-necessary support for implementing One Time Password (OTP) via
-SMS. Finally, the four main mobile operators in France
-(\emph{Bouygues Telecom}, \emph{Free}, \emph{Orange} and
-\emph{SFR}) announced a partnership to launch network \emph{APIs}
-to help fight online fraud and protect digital identities. As
-part of the \emph{GSMA Open Gateway} global initiative, they will
-make three APIs available on the French market, namely \emph{Know
-Your Customer (KYC) Match}, \emph{SIM Swapping} and \emph{Number
-Verification}. These have been tested with banks and companies in
+Like \emph{Aduna}, \emph{Ooredoo} has also started to offer programmatic
+\emph{SIM Swapping}, as well as providing the necessary support for
+implementing OTP via SMS. Finally, the four main mobile operators in France
+(\emph{Bouygues Telecom}, \emph{Free}, \emph{Orange} and \emph{SFR}) announced
+a partnership to launch network \emph{APIs} to help fight online fraud and
+protect digital identities. As part of the \emph{GSMA Open Gateway} global
+initiative, they will make three APIs available on the French market, namely
+\emph{Know Your Costumer} (\emph{KYC}) \emph{match}, \emph{SIM Swapping} and
+\emph{Number Verification}. These have been tested with banks and companies in
 France and should be launched commercially in the first half of
-2025\footnote{\url{https://www.gsma.com/newsroom/press-release/french-mobile-industry-accelerates-deployment-of-network-apis-through-gsma-open-gateway-initiative/}}.
+2025\cite{gsma}.
