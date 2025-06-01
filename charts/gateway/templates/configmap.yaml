@@ -6,4 +6,6 @@ metadata:
     {{- include "gsma-open-gateway.labels" . | nindent 4 }}
 data:
   config.toml: |
+    {{- if .Values.gatewayConfig }}
     {{- toToml .Values.gatewayConfig | nindent 4 }}
+    {{- end }}

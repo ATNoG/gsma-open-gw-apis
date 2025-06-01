@@ -52,9 +52,13 @@ spec:
                   name: {{ template "redis.secretName" .Subcharts.redis }}
                   key: {{ template "redis.secretPasswordKey" .Subcharts.redis }}
 
+            {{- if .Values.gatewayConfig }}
+            {{- if .Values.gatewayConfig.nef }}
             {{- if not (hasKey .Values.gatewayConfig.nef "gateway_notification_url") }}
             - name: GATEWAY_NEF__GATEWAY_NOTIFICATION_URL
               value: "http://{{ include "gsma-open-gateway.fullname" . }}.{{ .Release.Namespace }}.svc"
+            {{- end }}
+            {{- end }}
             {{- end }}
 
             {{- if .Values.nefSecret.name }}
