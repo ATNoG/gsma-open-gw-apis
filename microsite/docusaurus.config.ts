@@ -1,5 +1,6 @@
 import type * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
+import { ScalarOptions } from "@scalar/docusaurus";
 import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -94,6 +95,20 @@ Copyright © ${new Date().getFullYear()}. Built with Docusaurus.`,
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+
+  plugins: [
+    [
+      "@scalar/docusaurus",
+      {
+        label: "API Documentation",
+        route: "/gsma-open-gw-apis/api/docs",
+        configuration: {
+          url: "openapi.json",
+          hideClientButton: true,
+        },
+      } as ScalarOptions,
+    ],
+  ],
 };
 
 export default config;

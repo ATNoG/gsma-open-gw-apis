@@ -8,10 +8,9 @@ sidebar-position: 5
 
 <!--toc:start-->
 
-- [Architecture](#architecture)
-  - [Ideal Architecture](#ideal-architecture)
-  - [Real Architecture](#real-architecture)
-  <!--toc:end-->
+- [Ideal Architecture](#ideal-architecture)
+- [Real Architecture](#real-architecture)
+<!--toc:end-->
 
 In this section, our project's architecture will be presented as well as a
 brief explanation on the decisions made and the current landscape that lead to

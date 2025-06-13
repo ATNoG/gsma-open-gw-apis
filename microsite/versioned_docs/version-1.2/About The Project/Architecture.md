@@ -8,10 +8,9 @@ sidebar-position: 5
 
 <!--toc:start-->
 
-- [Architecture](#architecture)
-  - [Ideal Architecture](#ideal-architecture)
-  - [Real Architecture](#real-architecture)
-  <!--toc:end-->
+- [Ideal Architecture](#ideal-architecture)
+- [Real Architecture](#real-architecture)
+<!--toc:end-->
 
 In this section, our project's architecture will be presented as well as a
 brief explanation on the decisions made and the current landscape that lead to
@@ -21,7 +20,7 @@ those decisions.
 
 In an ideal world, our architecture would look something like the following:
 
-![](../../../static/img/IdealArchitecture.png)
+![Ideal Architecture](../../../static/img/IdealArchitecture.png)
 
 Here the existing infrastructure would provide a 5G core that is compliant with
 the 3GPP standards, providing APIs to interact with the relevant network
@@ -65,7 +64,7 @@ architecture:
 
 To address these problems, the following architecture was devised.
 
-![](../../../static/img/RealArchitecture.png)
+![Real Architecture](../../../static/img/RealArchitecture.png)
 
 Now, a NEF Emulator will be deployed to emulate functionality that isn't provided by the cores currently available at IT Aveiro, mainly location APIs. Furthermore, it will also be used to communicate with the different cores through different drivers, each for their respective core. One could interface standards compliant cores, others could support proprietary APIs exposed by the cores (as seen in the case of CumuCore), and finally there could be implementations that talk to middlewares that wrap the interfaces of cores that don't have APIs (as is the case for the Huawei implementation).
 
