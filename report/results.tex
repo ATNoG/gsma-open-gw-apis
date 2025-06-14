@@ -1,2 +1,41 @@
-
 \chapter{Results}
+
+The development of our gateway resulted in some small demos for the endpoints
+we developed over time and one final comprehensive demo that used many of the
+developed features in one unified story. The scenario for the demo was a truck
+fleet management system and an infotainment system within the trucks. There
+were two trucks in the region of a port, one in standby in the waiting area and
+another approaching said waiting area.
+
+The first truck is shown to be creating an account in the infotainment system
+where we demonstrate a real life case of the use of the OTP SMS API since a
+phone number is necessary to validate the account. Following this we show the
+driver watching a video with good quality on the infotainment system.
+
+Moving to the fleet managers view, we can see him looking at a dashboard where
+he can associate trucks and their phone numbers with their current state, that
+is wether they are or aren't in the queue region and wether they are or aren't
+reachable by the network.
+
+Initially the second truck is not reachable by network since the network
+conenctivity only appears closer to the port itself, but as soon as the truck
+becomes reachable the fleet manager is notified. This is an example of a
+situation where the Device Reachability Subscription API is used. Following
+this the fleet manager then moves to a view of the details of the truck that is
+approaching the port. Here he can see the current position of the truck along
+with a dashcam that is streaming with low quality. Once again here we show a
+use case for the Location Retrieval API with the realtime position of the
+truck.
+
+Following this the truck enters the waiting area for the port, at which point
+the fleet manager receives a notification and an increase in bandwidth for the
+dashcam is made with a noticeable increase in quality, this happens at the same
+time as the first truck receives a decrease in bandwidth, which results in a
+big reduction in quality for the video on the infotainment system. This shows
+how two of the developed APIs can be used together to give priority to a more
+critical device, in this case the moving truck. Here we utilize the Geofencing
+Subscription API to issue the notification and to change the bandwidth on both
+trucks, which is done using a different API, in this case the QoD Provisioning
+API.
+
+\section{Implementation}
