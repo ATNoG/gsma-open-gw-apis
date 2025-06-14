@@ -22,6 +22,7 @@
       default = pkgs.mkShell {
         packages = [
           pkgs.texlab
+          pkgs.texliveFull
         ];
       };
     });
