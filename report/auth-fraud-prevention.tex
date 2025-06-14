@@ -1,0 +1,33 @@
+\section{Authentication and Fraud Prevention}
+
+This group of APIs specializes in authenticating devices and preventing fraud.
+Here we identified one API that was achievable with the available
+infrastructure, (even though we had to complete it), and that was the One Time
+Password SMS API.
+
+\subsection{One Time Password SMS}
+
+This API consists of two main steps, sending a One Time Password (OTP) via SMS
+and verifying wether the result was correct or not, therefore we have two
+endpoints, one for each action.
+
+When calling the send OTP endpoint a couple things happen. First an
+authentication ID is generated in order to be able to verify the code, since it
+is required to use this authentication ID in the verification step to be able
+to associate the code stored with the code received by the device. Then the
+code itself is generated. At this point we store the code and replace the
+placeholder in the message to be sent with the real code. The code is not
+stored in plain text for security reasons, instead a hash of the code is
+stored. The final step is to send the actual SMS with the message and the code,
+this is done by calling an SMSC's endpoint.
+
+At this stage in the process the code has been sent to the desired device and
+all information has been stored. In order to complete the verification the
+verification endpoint must be called with the code received on the device. The
+endpoint must also be called with the authentication ID in order to be able to
+associate the received code with an authentication attempt. From here two
+possibilities arise, either the code is correct and the authentication succeeds
+or the code is incorrect and after some number of failed attempts the code gets
+removed and a new authentication cycle needs to start. The verification step
+requires the code that is being verified to be hashed, and for security reasons
+the comparison is done in constant time to prevent timing attacks.
