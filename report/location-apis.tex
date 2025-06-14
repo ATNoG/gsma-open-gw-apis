@@ -1,6 +1,62 @@
 
 \section{Location Service APIs}
+
+For the gateway we developed a set of Location APIs that we considered to be
+most relevant and that were achievable with the available tools. These
+consisted of the Location Retrieval, Location Verification and lastly
+Geafencing Subscriptions APIs.
+
 \subsection{Location Retrieval}
+
+This API has a the goal of getting the location of a device with a simple API.
+This location is as seen by network operators and will have varying degrees of
+certainty.
+
+The implementation uses 3GPP's Monitoring Event API with the monitoring type
+set to \Verb{LOCATION_REPORTING}  with a single report. This means that instead of
+sending a notification on the next location update the report is sent imediatly
+on the response from where we extract the most recent information device
+location information.
+
 \subsection{Location Verification}
+
+The Location Verification API, although it might seem similar to the previous
+one has a different purpose. This API tells the caller wether a device is
+within a certain area or not. This means that exact position of the device is
+not relevant but only if it is or is not within a specified region.
+
+Once again this API uses the Monitoring Event API on the NEF side to obtain the
+location of the device. Having done this the gateway then calculates wether the
+device is within or outside the specified region.
+
 \subsection{Geofencing Subscription}
 
+Finally in the Location Service collection of APIs we have the Geofencing
+Subscriptions. This one is responsible for sending notifications to a given
+sink. The notification is triggered everytime a device enters a given region or
+whenever the device exits it depending on the configuration of the
+subscription. Additionally, there are endpoints for managing the subscriptions,
+allowing listing, getting details and deleting existing subscriptions.
+
+As with the previous two APIs, this one also uses the Monitoring Event API
+provided by the NEF to obtain the device location, but unlike the other ones it
+actually creates a subscriptions. Internally the gateway has webhook listening
+for location updates. Upon the creation of the subscription the details are
+stored in a Redis instance for fast retrieval, each subscription will have a
+unique identifier and, as such, when the Monitoring Event subsctipription is
+created the webhook for the notification comes with that identifier. This way
+when the gateway receives a notification from NEF it can distinguish between
+the different subscriptions.
+
+Once the notification is received on the gateway the location reported is
+evaluated to know whether the device is or isn't inside the region and
+depending on the previous known state and the configuration of the subscription
+an according notification will be sent (if the conditions are met).
+
+Along side the notification sending there are two more aspects that need
+tracking which is the expire date of the subscription and the max number of
+notifications. Every time a notification is sent, if a max number of
+notifications is set, then a counter is incremented to stop notifications when
+the limit is reached. As for the expire time, there is a seperate thread that
+checks periodicly if the subscription has expired or not to flag it
+accordingly.
