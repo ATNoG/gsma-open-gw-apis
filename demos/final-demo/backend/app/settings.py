@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         toml_file="config.toml",
     )
 
+    webhook: str
     queue_geofencing: QueueGeofencingSettings
     gateway_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
 

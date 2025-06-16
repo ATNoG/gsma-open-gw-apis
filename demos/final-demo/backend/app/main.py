@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from socketio import ASGIApp
 
 from app import endpoints
@@ -13,7 +14,6 @@ from app.services.reachability import reachability_service
 from app.session import create_db_and_tables, get_session
 from app.settings import settings
 from app.socketio import sio
-from app.settings import settings
 
 logging.basicConfig(level="DEBUG")
 
@@ -77,3 +77,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(lifespan=lifespan)
 app.include_router(endpoints.router)
 app.mount("/", ASGIApp(sio))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

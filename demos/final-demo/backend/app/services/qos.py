@@ -1,4 +1,5 @@
 import logging
+
 import httpx
 
 from app.models.truck import Truck
@@ -16,13 +17,23 @@ class QosService:
             "device": {
                 "phoneNumber": truck.phoneNumber,
             },
-            "qosProfile": "fast",
         }
 
         doc = await self.httpx_client.post(
-            url="/qod-provisioning/v0.2/device-qos", json=data
+            url="/qod-provisioning/v0.2/retrieve-device-qos", json=data
         )
 
+        pid = doc.json().get("provisioningId")
+
+        if pid is not None:
+            await self.httpx_client.delete(
+                url=f"/qod-provisioning/v0.2/device-qos/{pid}"
+            )
+
+        data["qosProfile"] = "fast"
+        doc = await self.httpx_client.post(
+            url="/qod-provisioning/v0.2/device-qos", json=data
+        )
         if not doc.is_success:
             raise RuntimeError("Bandwidth could not be increased: ", doc.json())
 
@@ -34,14 +45,24 @@ class QosService:
             "device": {
                 "phoneNumber": truck.phoneNumber,
             },
-            "qosProfile": "slow",
         }
 
+        doc = await self.httpx_client.post(
+            url="/qod-provisioning/v0.2/retrieve-device-qos", json=data
+        )
+
+        pid = doc.json().get("provisioningId")
+
+        if pid is not None:
+            await self.httpx_client.delete(
+                url=f"/qod-provisioning/v0.2/device-qos/{pid}"
+            )
+        data["qosProfile"] = "slow"
         doc = await self.httpx_client.post(
             url="/qod-provisioning/v0.2/device-qos", json=data
         )
 
         if not doc.is_success:
-            raise RuntimeError("Bandwidth could not be increased: ", doc.json())
+            raise RuntimeError("Bandwidth could not be decreased: ", doc.json())
 
         return doc.json().get("provisioningId")

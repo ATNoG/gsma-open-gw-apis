@@ -1,4 +1,5 @@
 from datetime import datetime
+from threading import settrace_all_threads
 
 import httpx
 
@@ -70,7 +71,7 @@ class LocationService:
 
         data = {
             "protocol": "HTTP",
-            "sink": f"http://localhost:8069/notification/{truck.id}",
+            "sink": f"http://{settings.webhook}/notification/{truck.id}",
             "types": [GeofencingEventType.v0_area_entered],
             "config": {
                 "subscriptionDetail": {

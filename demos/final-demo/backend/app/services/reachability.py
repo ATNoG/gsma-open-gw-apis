@@ -36,7 +36,7 @@ class ReachabilityService:
 
         data = {
             "protocol": "HTTP",
-            "sink": f"http://localhost:8069/notification/{truck.id}",
+            "sink": f"http://{settings.webhook}/notification/{truck.id}",
             "types": [ReachabilityEventType.v0_reachability_data],
             "config": {
                 "subscriptionDetail": {

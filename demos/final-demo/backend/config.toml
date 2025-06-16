@@ -1,6 +1,7 @@
 gateway_url = "http://localhost:8000"
+webhook = "http://0.0.0.0"
 
 [queue_geofencing]
-latitude = 38.000392
-longitude = 23.818231
-radius = 65
+latitude = 40.642988
+longitude = -8.728402
+radius = 400

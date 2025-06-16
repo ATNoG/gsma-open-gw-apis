@@ -4,8 +4,8 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
+from app.endpoints.qos import decrease_bandwidth, increase_bandwidth
 from app.models.truck import Truck
-from app.endpoints.qos import increase_bandwidth
 from app.schemas.subscriptions import (
     CloudEvent,
     GeofencingEventType,
@@ -47,6 +47,7 @@ async def notification(
             await sio.emit("queue", json.dumps({"id": truck.id, "isQueued": True}))
         case GeofencingEventType.v0_area_left:
             truck.isQueued = False
+            await decrease_bandwidth(truck.id)
             await sio.emit("queue", json.dumps({"id": truck.id, "isQueued": False}))
         case _:
             return
