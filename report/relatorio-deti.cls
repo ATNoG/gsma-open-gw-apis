@@ -1,16 +1,32 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{relatorio-deti}[2024/09/06 v0.2 class for relatorio deti]
+\ProvidesClass{relatorio-deti}[2025/04/19 v0.3 class for relatorio deti]
 
-% Passes and class options to the capucho-report class
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{capucho-report}}
-\ProcessOptions
+\newif\if@relatoriodeti@draft
+\@relatoriodeti@drafttrue
+\newif\if@relatoriodeti@header
+% By default there is a header
+\@relatoriodeti@headertrue
+
+\DeclareKeys
+{
+	final.ifnot = @relatoriodeti@draft,
+	noheader.ifnot = @relatoriodeti@header
+}
+% Pass any unknow class options to the capucho-report class
+\DeclareUnknownKeyHandler{\PassOptionsToClass{\CurrentOption}{capucho-report}}
+\ProcessKeyOptions
 
 % Load capucho-report class
-\LoadClass[11pt,a4paper]{capucho-report}
+\LoadClass{capucho-report}
+
+\if@relatoriodeti@draft
+	\RequirePackage[firstpageonly]{draftwatermark}
+\fi
+
 
 % Define variables and commands to use in the title page
 \newcommand*{\cadeira}[1]{\gdef\@cadeira{#1}}
-\newcommand*{\relatorioAno}[1]{\gdef\@relatorioAno{#1}}
+\newcommand*{\relatorioData}[1]{\gdef\@relatorioData{#1}}
 
 % Required for lists
 \RequirePackage{etoolbox}
@@ -21,21 +37,24 @@
 }
 
 \newcommand*{\@cadeira}{\texttt{\string\cadeira} currently not set. Please fix this.}
-\newcommand*{\@relatorioAno}{\texttt{\string\relatorioAno} currently not set. Please fix this.}
+\newcommand*{\@relatorioData}{\texttt{\string\relatorioData} currently not set. Please fix this.}
 
 %%% START CUSTOM HEADER
 
-% Don't need the header
-% \RequirePackage{fancyhdr}
-% 
-% \pagestyle{fancy}
-% \fancyhead[L]{\includegraphics[width=0.25\textwidth]{figs/deti.png}}
-% \fancyhead[C]{%
-% 	\centering%
-% 	\parbox[b]{0.40\textwidth}{\centering\leftmark}%
-% }
-% \fancyhead[R]{\parbox[b]{0.25\textwidth}{\RaggedRight{\makeatletter\@cadeira\makeatother}}}
-% \fancypagestyle{plain}{}
+\if@relatoriodeti@header
+	\RequirePackage{fancyhdr}
+
+	\pagestyle{fancy}
+	\fancyheadwidth[L]{0.25\textwidth}
+	\fancyhead[L]{\includegraphics[width=0.25\textwidth]{figs/deti.png}}
+
+	\fancyheadwidth[C]{0.40\textwidth}
+	\fancyhead[C]{\centering\leftmark}
+
+	\fancyheadwidth[R]{0.25\headwidth}
+	\fancyhead[R]{\RaggedLeft{\makeatletter\@cadeira\makeatother}}
+	\fancypagestyle{plain}{}
+\fi
 
 %%%  END CUSTOM HEADER
 
@@ -65,7 +84,7 @@
 				\forlistloop{\showmember}{\@membros}
 			\end{tabular}
 			\vfill
-			{\Large \@relatorioAno}
+			{\Large \@relatorioData}
 		\end{center}
 
 	\end{titlepage}

@@ -1,0 +1,40 @@
+\chapter{Gateway Development}
+
+\section{Development Workflow}
+
+\begin{figure}[H]
+	\centerline{
+		\includegraphics[width=15cm]{figs/development_workflow_diagram.png}
+	}
+	\caption{Development Workflow Diagram}
+\end{figure}
+
+While the initial plan was to divide all the tasks into issues on the GitHub
+project and apply an AGILE methodology, however the quickly expanding scope of
+the project made us adapt it to suit the dynamic environment we were in, as the
+unchanged methodology would require a constant splitting of the issues into
+smaller subtasks, hindering the productivity of the team (we would be
+constantly creating more and more subtasks as the project grew, instead of
+actually working on the needed features). Furthermore, the environment on IT is
+highly dynamic, which means there are various experiments being conducted all
+the time, making it more difficult to plan, because we needed to book time
+slots to test our solution. As such, we employed a policy where to each person
+would be assigned a given API or set of closely related APIs, and for each
+piece of the gateway, the team member would be responsible for all the
+auxiliary work that would be required. Then, each week on a meeting with our
+advisors to talk about the progress made and roadblocks found, discussing what
+more needed to be done in order to achieve the implementation of the final
+goal. This way, issues on the repository became reserved for the description of
+workloads that spanned several APIs or had high complexity, such as the
+refactor of the location and simulation logic in the NEF Emulator project. In
+addition, it was also decided that, for a given feature to reach the main
+branch of the repository, the pull request would need to be accepted by another
+team member, and one of the acceptation criteria was that for each implemented
+API, it was required to develop a small demonstration, making it possible to
+explain to outsiders what was developed along the semester.
+
+\input{location-apis}
+\input{communication-apis}
+\input{device-apis}
+\input{auth-fraud-prevention}
+\input{camara-as-a-service}

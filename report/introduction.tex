@@ -2,71 +2,61 @@
 
 \section{Context}
 
-The development of 5G networks and beyond 5G have introduced
-advanced capabilities in the access, reconfiguration and
-flexibility of these networks. This attracts the interest of
-software developers in several industries, aiming to offer
-integrated solutions to their clients that leverage these
-capabilities of the network and their operators. However, the
-existing interfaces currently defined by the \emph{3rd Generation
-Partnership Project} (\emph{3GPP}) expose much of the complexity
-related to the networks and the operators. This complexity
-hinders the development of integrated solutions and requires
-extensive knowledge on the topic of networks and how to operate
-them, limiting the adoption.
+The development of 5G networks and beyond 5G have introduced advanced
+capabilities in the access, reconfiguration and flexibility of these networks.
+This attracts the interest of software developers in several industries, aiming
+to offer integrated solutions to their clients that leverage these capabilities
+of the network and their operators. However, the existing interfaces defined by
+the \emph{3rd Generation Partnership Program} (\emph{3GPP}) expose much of the
+complexity related to the networks and the operators. This complexity hinders
+the development of integrated solutions and requires extensive knowledge on the
+topic of networks and how to operate them, limiting the adoption.
 
-The \emph{GSMA Open Gateway} is an industry initiative to solve
-this problem. This is done by a set of Application Programming
-Interfaces (API) defined by the \emph{CAMARA} project, that
-exposes various simplified interfaces of the operator networks.
-These APIs can then be offered either through the MNOs directly
-or by aggregators, such as \emph{Hyperscalers}.
+The \emph{GSMA Open Gateway} is an industry initiative that aims to solve this
+problem. GSMA proposes a collection of Application Programming Interfaces
+(APIs) defined by the \emph{CAMARA} project, which exposes various simplified
+interfaces of the operator networks. These APIs can then be offered either
+through the MNOs directly or by aggregators, such as \emph{Hyperscalers}.
 
-However, most operatiors do not offer said interfaces, but it is
-to be expected that they will do so in the near future. Given the
-capabilities of \emph{Instituto de Telecomunicações} (IT) in
-Aveiro, with access to a 5G infrastructure
-\footnote{\url{https://5gainer.eu/}}\cite{ieee:5GAIner}, there is 
-interest in integrating \emph{GSMA Open Gateway} APIs in their
-offer.
+However, most operators do not offer said interfaces, but it is to be expected
+that they will do so in the near future. Given the capabilities of
+\emph{Instituto de Telecomunicações} (IT) in Aveiro, with access to a 5G
+infrastructure \cite{5GAIner}, there is interest in integrating \emph{GSMA Open
+	Gateway} APIs in their offer.
 
 \section{Goals}
 
 The objectives outlined for the project were as follows:
 
-\begin{enumerate} 
-  \item Implemetation of the following \emph{GSMA
-      Open Gateway} \emph{APIs} through integration with
-      \emph{IT's} 5G Core. 
-    \begin{itemize}
-      \item \emph{API} family to obtain \emph{Device Information}
-      \item \emph{API} family to obtain information on the
-        network's \emph{Quality-of-Service} (\emph{QoS}) and to
-        offer \emph{QoS-on-Demand} (\emph{QoD}).
-    \end{itemize}
+\begin{enumerate}
+	\item Implementation of the following \emph{GSMA
+		      Open Gateway} \emph{APIs} through integration with
+	      \emph{IT's} 5G Core.
+	      \begin{itemize}
+		      \item \emph{API} family to obtain \emph{Device Information}
+		      \item \emph{API} family to obtain information on the network's
+		            \emph{Quality-of-Service} (\emph{QoS}) and to offer
+		            \emph{Quality-on-Demand} (\emph{QoD}).
+	      \end{itemize}
 
-  \item Implementation of the \emph{GSMA
-    Open Gateway} \emph{API} to obtain and verify \emph{One Time
-    Passwords} (\emph{OTP}) through \emph{SMS}, utilizing an 
-    \emph{SMS Centre} (\emph{SMSC}) integrated in \emph{IT's} 5G
-    Network as a part of our project.
+	\item Implementation of the \emph{GSMA Open Gateway} \emph{API} to obtain and
+	      verify \emph{One Time Passwords} (\emph{OTPs}) through \emph{Short Message
+		      Services} (\emph{SMS}), utilizing an \emph{SMS Center} (\emph{SMSC})
+	      integrated in \emph{IT's} 5G Network as a part of our project.
 
-  \item Implementation of the \emph{GSMA Open Gateway APIs} to
-    offer location through the \emph{NEFSim} project, an emulator
-    of the \emph{Network Exposure Function} (\emph{NEF},
-    explained in more detail in section
-    \ref{sec:related_work_3gpp}) The utilization of this emulator
-    is required, since \emph{IT's} network currently does not have
-    such a service in its infrastructure.
+	\item Offering location services through the \emph{Network Exposure Function} interface
+	      (\emph{NEF}, explained in more detail in section
+	      \ref{sec:related_work_3gpp}) . Since
+	      \emph{IT's} network currently lacks a native \emph{NEF} implementation, we
+	      employed the \emph{NEF Emulator} project and enhanced it progressively
+	      until it closely resembled the behavior and functionality of a real
+	      \emph{NEF}.
 
-  \item Integration of our project with the 
-    \emph{OpenSlice}\footnote{\url{https://osl.etsi.org/}}, an
-    \emph{Operation Support System} (\emph{OSS}), allowing for
-    the usage of a \emph{CAMARA as a Service} (\emph{CAMARAaaS})
-    business model.
-
-  % \item Integration of the \emph{Common API Framework}
-  %   (\emph{CAPIF}) with our project, through \emph{OpenCAPIF}, to
-  %   control the exposure and consumption of our \emph{APIs}
-
+	\item Integration of our project with \emph{OpenSlice}
+	      (\emph{OSL})\cite{openslice}, an \emph{Operation Support System}
+	      (\emph{OSS}), which provides management of 5G Network services and the
+	      orchestration of cloud resources. This integration enables support for
+	      a \emph{CAMARA-as-a-Service} (\emph{CAMARAaaS}) business model by
+	      allowing efficient exposure, provisioning, and lifecycle management of
+	      network APIs, thereby simplifying integration with existing services.
 \end{enumerate}

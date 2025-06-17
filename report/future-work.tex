@@ -1,0 +1,53 @@
+\chapter{Future Work}
+
+There is a plethora of features and capabilities that can be
+developed on this project. Following the CAMARAaaS philosophy,
+the adoption of the 3GPP Common API Framework (CAPIF) is the next logical
+step. This allows for the controlled exposure and consumption of
+the APIs \cite{CAMARAaaS}. CAPIF defines a set of core components
+\cite{CAPIF}:
+
+\begin{itemize} \item \textbf{API Invoker}: A software module
+	      that is usually provided by 3rd party but is present in
+	      trusted operator Public Land
+
+	\item \textbf{CAPIF Core Function}: The module responsible
+	      for authenticating the API Invoker before the API services
+	      are reached. It also publishes and stores necessary API
+	      information, and interacts with other needed CAPIF Core
+	      Functions.
+
+	\item \textbf{API Exposing Function}: The entity which
+	      provides the service communication entry point for the
+	      service APIs.
+
+	\item \textbf{API Publishing Function}: The entity that
+	      enables the API provider to publish the Service APIs
+	      information in order to enable the discovery of APIs by the
+	      API invoker.
+
+	\item \textbf{API Management Function}: The entity which
+	      enables the API provider to perform administration of the
+	      service APIs.
+
+\end{itemize}
+
+It also defines a plethora of requirements that must be respected, namely in
+security, charging, logging, and policy configuration concerns.
+
+
+It is also of extreme importance to develop the remaining CAMARA APIs, in order
+to achieve full functionality of the gateway. This project consisted on the
+implementation of a subset of the CAMARA APIs, not the full suite, in part due
+to time constraints and network limitations. This would imply the development
+of an additional 26 APIs.
+
+Due to the research nature of IT's 5G deployment, it is not unreasonable to
+expect a lot of auxiliary work once again, in order to implement said APIs, so
+that is something that would also need to be performed.
+
+Lastly, due to the way our architecture is laid out, it would be necessary to
+develop more drivers to interact with different operators and 5G Cores.
+Currently, our only interaction is with Huawei's 5G Core present in the IT
+infrastructure, however, development effort would need to be performed to allow
+our gateway to interact, for example, with CumuCore's offerings.

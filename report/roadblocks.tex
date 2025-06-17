@@ -1,0 +1,117 @@
+\chapter{Roadblocks}
+
+When working on a project, it is natural to begin with a clear and straight
+path and carefully laid out plan. From the beginning, every stage seems clear,
+and every task looks achievable within the anticipated timeline. However, as we
+progress on the task at hand, expectations are often not met. Unforeseen
+complications, external factors can emerge, challenging initial assumptions and
+demanding adjustments along the way.
+
+Throughout the course of this project, we encountered some of these moments
+where things did not proceed as smoothly as originally planned. In some cases,
+technical limitations, resource constraints, or changing circumstances forced
+us to reevaluate our strategy. In others, new insights gained during
+implementation led us to recognize better alternatives that had not been
+considered initially.
+
+In this chapter, we will explore the various obstacles we encountered, the
+reasoning behind the adjustments we made, and how each decision shaped the
+final result. By reflecting on these experiences, we aim to provide a
+transparent account of the project’s evolution, highlighting not only the
+successes but also the valuable lessons learned from overcoming difficulties
+along the way.
+
+\section{NEF Emulator}
+
+During this phase of the project, one of the key components we relied on was
+the NEF Emulator. It essentially served as a stand-in for the core’s NEF,
+functioning in many ways as an actual NEF. This tool played a vital role,
+letting us integrate the solution with IT's 5G core network. However, when we
+first got access to it, its features were quite limited, especially for what we
+needed to accomplish. Its functionalities fell short of supporting our
+project’s objectives. This turned into a major technical hurdle and forced us
+to invest a great deal of time into expanding its capabilities to suit our
+needs.
+
+One of the first big problems were the response and request schemas it used.
+Many of them were either outdated or didn’t match the standards we were
+required to follow. This became a serious issue because these schemas dictate
+how systems communicate and share data. Since our work needed to comply
+strictly with the accepted standards, we had no choice but to ensure every
+request and response aligned with the most current specifications. Standards
+like those maintained by 3GPP and CAMARA set very detailed rules for the
+formats and structures that systems must use. Because of this, we had to spend
+significant time analyzing the gaps between the emulator’s schemas and the
+official standards, then carefully updating and correcting them to achieve full
+compliance, another tough challenge involved the emulator's simulated movement
+features. These were supposed to let us model the users' movement. But often,
+they didn’t work properly. The simulations failed frequently, delivered
+inconsistent results, or behaved unpredictably. This made it unreliable for
+mobility testing, which was a crucial part of our project because we needed to
+verify how APIs and the network responded to users moving around. To fix this,
+we dug deep to identify the root causes of these problems. In many cases, we
+had to completely rework the movement simulation functions. The new version
+delivered much more reliable and stable simulations, giving us confidence in
+the accuracy of our mobility scenario tests.
+
+The biggest and most time-consuming issue was the incomplete API
+implementations in the NEF Emulator. Many APIs existed only as placeholders
+with no real functionality, these were for example the \emph{AnalyticsExposure}
+endpoint. This posed a serious problem because these APIs were essential for
+communication between the gateway and NEF. To address this, we had to develop
+these APIs ourselves. We made sure they followed both the CAMARA specifications
+on the gateway side and the more detailed 3GPP specifications on the NEF side.
+This required a deep study of both sets of standards, careful mapping of API
+behaviors, and the development of solid backend logic to handle requests and
+responses as the standards required. This part of the work demanded a lot of
+skill and attention to detail but ultimately resulted in a much more complete
+NEF Emulator that supported all the scenarios we needed.
+
+\section{5G Core}
+
+The main goal of the project focused on building a smooth and dependable link
+between the gateway and IT's 5G Core. The 5G Core wasn’t just another piece of
+equipment. It sat right at the center of the project’s entire setup, shaping
+how things were designed and built. Because so much relied on it, having the
+core ready and steady played a big role in how the project moved forward. But
+this dependence also brought several problems and slowdowns that had to be
+handled as the work continued.
+
+One of the biggest and most ongoing problems was simply getting access to the
+5G Core in the first place. For nearly half of the project’s full timeline, the
+team worked without being able to connect to the core at all. This made things
+uncertain because the gateway’s features had to be developed and tested on
+their own without knowing if they would work properly when finally linked to
+the core. Since there wasn’t a fully connected testing setup during this early
+stage, the team had to build things bit by bit while hoping it would work on
+the core.
+
+When the team finally got access to the core, more issues showed up. IT’s 5G
+Core served as a shared platform, supporting many different projects from
+various teams. Because of this, access to the system was controlled and limited
+to avoid any problems for the other teams working on their own projects. This
+setup meant a lot of back-and-forth planning with others to schedule time for
+testing and integration. These coordination efforts often took careful planning
+because the core was frequently booked for other work. As a result, more delays
+followed before the solution could be fully tested and connected with the rest
+of the system.
+
+Another problem came from the way the system was built. The NEF was supposed to
+interact with a Slice Manager API, which acted as a go-between, connecting with
+Huawei’s 5G Core. But during the project, the IT staff member who created and
+ran the Slice Manager API left IT. This sudden exit left a big knowledge gap.
+The remaining documentation wasn’t much help, as it was incomplete and
+sometimes even wrong, mentioning fields and parameters that either didn’t exist
+or worked differently than described. Because of this, the team had to spend a
+lot of time figuring things out on their own to make the API work properly for
+integration. On top of that, documentation for the core itself arrived later
+than expected and often lacked enough detail to solve problems quickly, making
+the process even harder.
+
+Besides all the technical issues, the project ran into a completely unexpected
+outside problem, a countrywide blackout. The blackout only lasted a day, but
+its effects dragged on much longer. Power loss hit the normal business
+operations and directly impacted the 5G Core’s systems. Several of its parts
+needed to be checked, fixed, and restarted to safely bring them back online.
+This recovery effort led to more delays and added more time when the team
+couldn’t access the core for integration, testing, and validation work.

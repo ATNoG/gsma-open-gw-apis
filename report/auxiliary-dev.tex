@@ -1,0 +1,100 @@
+\chapter{Auxiliary Development}
+
+While not directly in the scope of our project, there was a lot
+of "background" work that had to be done, so as to achieve the
+goals we had laid out for our project. This auxiliary development
+was made across different open source projects, to the which we
+have been able to make contributions.
+
+\section{Kamaillio Project}
+
+The Kamaillio Project, previously known as OpenSER is a Session Initiation
+Protocol (SIP). It is of great importance to our project namely due to its
+telephony and IMS features. These capabilities are what allow for the
+development of the SMSC that we deployed to IT's infrastructure, which was
+nonexistent. To put it simply, one of the auxiliary developments that we had to
+do in our project was the implementation of SMS throughout IT's network.
+
+Our contribution can be visible in PR
+\href{https://github.com/kamailio/kamailio/pull/4165}{\#4165}.
+
+\section{The NEF Emulator Project}
+
+This project was always intended to be a part of the final deployed stack,
+mainly because of the location aspect that needs to be emulated, since IT does
+not have a Location Management Function (LMF) in the 5G Cores, meaning we do
+not have access to real location information. However, as soon as we started
+development of the location APIs in our gateway we quickly found out that a lot
+of issues needed to be addressed, and no collaborator from the project would
+fix them for us, thus our participation in the development efforts. Initially
+the whole location part of the NEF Emulator had to be updated to 5G Release 18,
+since it was following outdated standards that were not compatible with our
+needs. Then, a new endpoint was added to allow for the polling of a given
+device's location. It was also needed to completely redo the logic for the
+location subscriptions, since the existing codebase had a synchronous, blocking
+threaded approach for both the simulation of the movement of the UEs and the
+handling of the subscriptions. This meant that if either a subscription
+notification or a missed update on a movement simulation failed, the whole
+program would stop working. Another problem was that, due to the way it was
+implemented, only one subscription was possible per device, while the standards
+and our use case needed more than one subscription per device.
+
+All the development on location can be seen on PRs
+\href{https://github.com/ATNoG/NEF_emulator/pull/4}{\#4},
+\href{https://github.com/ATNoG/NEF_emulator/pull/5}{\#5},
+\href{https://github.com/ATNoG/NEF_emulator/pull/13}{\#13},
+\href{https://github.com/ATNoG/NEF_emulator/pull/14}{\#14} and
+\href{https://github.com/ATNoG/NEF_emulator/pull/15}{\#15}.
+
+Following the issues we had with the location side of the
+project, it was decided that the NEF Emulator would also be
+mandatory to implement the Communication Quality and Device
+Reachability APIs. To achieve this, it was also necessary to
+update these functions to 5G's Release 18, since once again
+these were following an outdated standard that was not compatible
+with our use case, as seen in PR
+\href{https://github.com/ATNoG/NEF_emulator/pull/8}{\#8}.
+
+In addition to updating the schemas, a small fix had to be made
+in an endpoint, in PR
+\href{https://github.com/ATNoG/NEF_emulator/pull/10}{\#10}
+and support for the \textbf{ROAMING\_STATUS} monitoring type,
+which added a visiting PLMN ID to a given device, which allowed
+for the recognition of whether the device was in roaming status
+or not. This is visible in PR
+\href{https://github.com/ATNoG/NEF_emulator/pull/16}{\#16}.
+
+
+\section{IT Infrastructure Integration}
+
+While it was needed to contribute to the different projects in order for them
+to support the features that we needed, it was even more important to integrate
+these with IT's infrastructure. Firstly, we had to configure, package, and
+deploy the IMS and SMSC. Then the 5G Network was configured to provide a Data
+Network Name (DNN) according to a GSMA Norm \cite{NG113}, and lastly the
+Session Management Function (SMF) was configured to announce the proper address
+\cite{TS23501} \cite{TS23228}. This implied not only connecting the SMSC and
+IMS to the network, but also configuring the network to announce the correct
+parameters for allowing the devices.
+
+Then, we had to integrate the newly developed QoS features from
+NEF to IT's 5G Huawei Core. This ended up proving to be a
+challenge, specially since the only interaction allowed with the
+core is through a Web UI. While IT has developed a custom API to
+interact with this Web UI, using Selenium, this proved to be very
+unreliable and caused several issues. The problem was exacerbated
+by the lack of documentation, which severely hindered the speed of
+implementation.
+
+Finally, to perform our final demo, we integrated our project with IT's CCAM
+Stack, using the developed features of digital twin in the NEF Emulator. IT's
+CCAM\footnote{\url{https://ccam.av.it.pt/about}} is a tool that enables
+vehicles to interact not only with each other but also with the surrounding
+infrastructure, this allows for a seamless exchange of data. In order to send
+Maneuver Coordination Messages \cite{MCM} and Collective Perception Messages
+(CPM), an MQTT Broker is used. These messages contain the location of the
+vehicle, which needs to be imported into NEF Emulator. Therefore, we have
+deployed a pod that consumes these messages from the MQTT broker and injects
+the relevant information into NEF Emulator. This way, we have access to the
+location of the vehicle through the NEF interface, just like we would have in a
+real 5G network deployment.
